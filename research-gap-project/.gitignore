@@ -1,0 +1,4 @@
+# Source PDFs and their full-text extractions are kept locally only (publisher copyright).
+papers/*.pdf
+papers/text/
+__pycache__/
