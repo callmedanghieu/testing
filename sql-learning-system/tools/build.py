@@ -348,7 +348,8 @@ def build_app_data(mods, exs, dbg, rev, concepts):
     engine = (ROOT / "app" / "engine.js").read_text()
     page = tpl.replace("/*__ENGINE__*/", engine).replace("/*__DATA__*/null", js.replace("</", "<\\/"))
     # artifact.html: body content only (the publishing host adds doctype/head); index.html: full document for local use
-    w(ROOT / "app" / "artifact.html", page)
+    cdn = '<script src="https://cdn.jsdelivr.net/npm/sql.js@1.10.3/dist/sql-asm-memory-growth.js"></script>'
+    w(ROOT / "app" / "artifact.html", page.replace('<script src="vendor/sql-asm.js"></script>', cdn))
     w(ROOT / "app" / "index.html", '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
       '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' + page + "\n</html>\n")
 
