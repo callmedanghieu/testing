@@ -1,0 +1,55 @@
+# Review deck M0. Types: quick (flashcard), concept (multiple choice), predict (multiple choice, answer verified by
+# executing `sql` in tests), debug / write (pointers to practice items). Output format for predict:
+# columns joined by " | ", rows joined by "; ", "(no rows)" when empty, "ERROR: <message start>" on error.
+- id: R0-01
+  type: quick
+  front: What does `LIMIT 5` do, and why use it on a big table?
+  back: It returns at most 5 rows. It lets you peek at the data without printing 400,000 rows (lecture5 L91-103).
+  source: {file: lecture5, lines: "93-103", quote: "I'm hearing LIMIT, so let's try that."}
+- id: R0-02
+  type: predict
+  db: mfa
+  sql: SELECT COUNT(*) FROM "collections" WHERE "acquired" = NULL;
+  choices: ["1", "0", "4", "ERROR: no such column"]
+  answer: 1
+  why: "`= NULL` is never true, so nothing is counted. Use IS NULL."
+  source: {file: lecture3, lines: "734-741", quote: "IS NULL semicolon"}
+- id: R0-03
+  type: concept
+  question: A subquery returns several rows. Which outer operator compares against *all* of them?
+  choices: ["=", "IN", "LIKE", "IS"]
+  answer: 1
+  why: "`= (subquery)` uses only the first row in SQLite. `IN (subquery)` tests membership in the whole list."
+  source: {file: lecture4, lines: "171-174", quote: "the ID is in that list of books Fernanda has written"}
+- id: R0-04
+  type: predict
+  db: votes
+  sql: SELECT COUNT(DISTINCT "title") > 4 FROM "votes";
+  choices: ["0", "1"]
+  answer: 1
+  why: GROUP BY / DISTINCT on text is exact and case-sensitive, so the typos and case variants form extra groups.
+  source: {file: lecture3, lines: "1250-1256", quote: "GROUP BY"}
+- id: R0-05
+  type: predict
+  db: longlist
+  sql: SELECT ROUND(AVG("rating"), 2) FROM "ratings" WHERE "book_id" = 1;
+  choices: ["3.67", "3.66", "3.6666", "4"]
+  answer: 0
+  why: Ratings 4, 3, 4 average 3.666…, and ROUND(…, 2) gives 3.67, the value on the lecture's slide.
+  source: {file: lecture4, lines: "383-384", quote: "3.67 book 1"}
+- id: R0-06
+  type: concept
+  question: "In `JOIN \"authored\" ON \"authors\".\"id\" = \"authored\".\"author_id\"`, which side is the primary key?"
+  choices: ['"authors"."id"', '"authored"."author_id"', "both", "neither"]
+  answer: 0
+  why: authors.id is the primary key, and authored.author_id is the foreign key that references it.
+  source: {file: lecture4, lines: "63-67", quote: "take the primary key in one table"}
+- id: R0-07
+  type: debug
+  ref: D0-02
+- id: R0-08
+  type: debug
+  ref: D0-05
+- id: R0-09
+  type: write
+  ref: M0-E08

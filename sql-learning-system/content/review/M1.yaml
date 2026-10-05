@@ -1,0 +1,82 @@
+- id: R1-01
+  type: quick
+  front: What does it mean to *normalize* a database?
+  back: Reduce redundancy by putting each entity (riders, stations, …) in its own table, so that every column of a table describes only that entity.
+  source: {file: lecture2, lines: "245-262", quote: "To normalize means to reduce redundancies"}
+- id: R1-02
+  type: concept
+  question: Riders visit many stations and stations have many riders. What implements this relationship?
+  choices: ["A rider_ids column in stations", "A junction table such as visits(rider_id, station_id)", "A UNIQUE constraint", "A composite primary key on riders"]
+  answer: 1
+  why: Many-to-many relationships need an associative (junction) table holding pairs of ids.
+  source: {file: lecture2, lines: "425-438", quote: "a junction table, an associative entity, a join table"}
+- id: R1-03
+  type: quick
+  front: Name SQLite's 5 storage classes and its 5 type affinities.
+  back: "Storage classes (values): NULL, INTEGER, REAL, TEXT, BLOB. Affinities (columns): TEXT, NUMERIC, INTEGER, REAL, BLOB."
+  source: {file: lecture2, lines: "599-611", quote: "type affinities are now associated with individual columns"}
+- id: R1-04
+  type: predict
+  db: null
+  setup: |
+    CREATE TABLE "t" ("amount" INTEGER);
+    INSERT INTO "t" VALUES ('25');
+  sql: SELECT typeof("amount") FROM "t";
+  choices: ["text", "integer", "real", "ERROR: datatype mismatch"]
+  answer: 1
+  why: The INTEGER affinity converts the text '25' to the integer 25.
+  source: {file: lecture2, lines: "632-634", quote: "Now I'll have 25 as an integer."}
+- id: R1-05
+  type: predict
+  db: null
+  setup: |
+    CREATE TABLE "t" ("amount" INTEGER);
+    INSERT INTO "t" VALUES ('red line');
+  sql: SELECT typeof("amount") FROM "t";
+  choices: ["text", "integer", "null", "ERROR: datatype mismatch"]
+  answer: 0
+  why: An affinity is a preference, not a rule. Text that can't be converted is stored as TEXT. (MySQL would reject it, lecture6 L844-852.)
+  source: {file: lecture6, lines: "844-852", quote: "But if it couldn't, it would actually just store text."}
+- id: R1-06
+  type: concept
+  question: Why did the class favour INTEGER (cents) over REAL for fares?
+  choices: ["REAL uses more disk", "Integers are represented exactly, so sums stay exact", "REAL can't be negative", "SQLite has no REAL"]
+  answer: 1
+  why: Floating-point values like 0.10 are stored approximately, and the errors add up over many fares.
+  source: {file: lecture2, lines: "563-571", quote: "you know you can precisely represent integers"}
+- id: R1-07
+  type: concept
+  question: Which constraints does `PRIMARY KEY("id")` already imply (for an INTEGER id)?
+  choices: ["UNIQUE only", "NOT NULL only", "UNIQUE and NOT NULL", "CHECK and DEFAULT"]
+  answer: 2
+  why: A primary key must be unique and present, so adding them again is redundant.
+  source: {file: lecture2, lines: "1016-1022", quote: "A primary key, for instance, must not be null, it must be unique"}
+- id: R1-08
+  type: predict
+  db: null
+  setup: |
+    CREATE TABLE "t" ("x");
+    INSERT INTO "t" VALUES ('10');
+  sql: SELECT typeof("x") FROM "t";
+  choices: ["integer", "text", "numeric", "blob"]
+  answer: 1
+  why: A column with no declared type has BLOB ("no") affinity, so nothing is converted. Lecture 2 says NUMERIC, which is errata #1.
+  source: {file: lecture2, lines: "1338-1347", quote: "the default type affinity is numeric in this case"}
+- id: R1-09
+  type: predict
+  db: null
+  setup: |
+    CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));
+    CREATE TABLE "swipes" ("card_id" INTEGER, FOREIGN KEY("card_id") REFERENCES "cards"("id"));
+    INSERT INTO "swipes" VALUES (NULL);
+  sql: SELECT COUNT(*) FROM "swipes";
+  choices: ["0", "1", "ERROR: FOREIGN KEY constraint failed", "ERROR: NOT NULL constraint failed"]
+  answer: 1
+  why: A NULL foreign key references nothing and is accepted. Add NOT NULL if the link is mandatory (errata #3).
+  source: {file: lecture2, lines: "968-978", quote: "This would be in this case, redundant."}
+- id: R1-10
+  type: debug
+  ref: D1-02
+- id: R1-11
+  type: write
+  ref: M1-E12

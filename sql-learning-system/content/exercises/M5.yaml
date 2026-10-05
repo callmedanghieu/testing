@@ -1,0 +1,410 @@
+# Module 5: Scaling (sources/lecture6.txt)
+# MySQL/PostgreSQL exercises are self-check in the trainer (SQLite cannot run them), but every reference
+# solution is EXECUTED by tests/test_servers.py on MariaDB 10.11 / PostgreSQL 16 (fields engine / verify_*).
+- id: M5-E01
+  title: The cards table in MySQL
+  origin: source-demo
+  concepts: [C5.1, C5.2]
+  difficulty: 1
+  skills: [MySQL, INT, AUTO_INCREMENT, backticks]
+  db: null
+  kind: selfcheck
+  engine: mysql
+  prompt: |
+    Translate the SQLite table `CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));` to MySQL.
+    Choose an integer type that comfortably fits one card per person on Earth, and make ids generate automatically.
+  hints:
+    - MySQL quotes identifiers with backticks, not double quotes.
+    - "INT holds about ±2.1 billion values, or about 4.2 billion if UNSIGNED."
+    - "SQLite generated keys for free. MySQL needs `AUTO_INCREMENT`."
+  solution: |
+    CREATE TABLE `cards` (
+        `id` INT AUTO_INCREMENT,
+        PRIMARY KEY(`id`)
+    );
+  verify_after: |
+    INSERT INTO `cards` () VALUES (), ();
+    SELECT `id` FROM `cards`;
+    DESCRIBE `cards`;
+  verify_expect: ["auto_increment", "PRI"]
+  explanation: |
+    `INT UNSIGNED` (0 to about 4.29 billion) is an even better fit, as the audience suggested (L295-305).
+    Check your table with `SHOW TABLES;` and `DESCRIBE cards;`.
+  source:
+    - {file: lecture6, lines: "274-292", quote: "But in MySQL, I have to actually say auto increment."}
+    - {file: lecture6, lines: "264-273", quote: "So it seems like that's a pretty safe bet"}
+
+- id: M5-E02
+  title: Stations with VARCHAR and ENUM
+  origin: source-question
+  concepts: [C5.2]
+  difficulty: 2
+  skills: [VARCHAR, ENUM, NOT NULL, UNIQUE]
+  db: null
+  kind: selfcheck
+  engine: mysql
+  prompt: |
+    Create the MySQL `stations` table: auto-increment `id`; `name` up to 32 characters, required and unique;
+    `line` limited to blue, green, orange or red, and required.
+  hints:
+    - Variable-length short text is VARCHAR(M). Use CHAR only for fixed lengths like 'MA'.
+    - A column with a fixed list of allowed values is an ENUM.
+    - "`` `line` ENUM('blue', 'green', 'orange', 'red') NOT NULL ``"
+  solution: |
+    CREATE TABLE `stations` (
+        `id` INT AUTO_INCREMENT,
+        `name` VARCHAR(32) NOT NULL UNIQUE,
+        `line` ENUM('blue', 'green', 'orange', 'red') NOT NULL,
+        PRIMARY KEY(`id`)
+    );
+  verify_after: |
+    INSERT INTO `stations` (`name`, `line`) VALUES ('Harvard', 'red');
+    DESCRIBE `stations`;
+  verify_expect: ["UNI", "enum('blue','green','orange','red')"]
+  verify_fail: |
+    INSERT INTO `stations` (`name`, `line`) VALUES ('Mystery', 'purple');
+  explanation: |
+    SET would allow a station to be on several lines at once. ENUM allows exactly one (L485-493).
+  source:
+    - {file: lecture6, lines: "442-456", quote: "So a varchar is good if we have some variable amount of characters"}
+    - {file: lecture6, lines: "499-521", quote: "So I'll say enum here."}
+
+- id: M5-E03
+  title: Swipes with DATETIME and DECIMAL
+  origin: source-demo
+  concepts: [C5.2]
+  difficulty: 3
+  skills: [ENUM, DATETIME, DEFAULT CURRENT_TIMESTAMP, DECIMAL, CHECK, FOREIGN KEY]
+  db: null
+  kind: selfcheck
+  engine: mysql
+  verify_setup: |
+    CREATE TABLE `cards` (`id` INT AUTO_INCREMENT, PRIMARY KEY(`id`));
+    CREATE TABLE `stations` (`id` INT AUTO_INCREMENT, `name` VARCHAR(32) NOT NULL UNIQUE,
+      `line` ENUM('blue', 'green', 'orange', 'red') NOT NULL, PRIMARY KEY(`id`));
+    INSERT INTO `cards` () VALUES ();
+    INSERT INTO `stations` (`name`, `line`) VALUES ('Harvard', 'red');
+  prompt: |
+    Create the MySQL `swipes` table: `id`, `card_id`, `station_id` (INT); `type` (enter/exit/deposit, required);
+    `datetime` (date and time, required, default now); `amount` (exact money with up to 5 digits, 2 after the point, required, never 0);
+    primary and foreign keys.
+  hints:
+    - Money must be exact, so avoid FLOAT and DOUBLE. Which type is *fixed precision*?
+    - "`DECIMAL(M, D)`: M total digits, D after the point. `DECIMAL(5,2)` stores −999.99 to 999.99."
+    - "`` `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `amount` DECIMAL(5,2) NOT NULL CHECK(`amount` != 0) ``"
+  solution: |
+    CREATE TABLE `swipes` (
+        `id` INT AUTO_INCREMENT,
+        `card_id` INT,
+        `station_id` INT,
+        `type` ENUM('enter', 'exit', 'deposit') NOT NULL,
+        `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        `amount` DECIMAL(5,2) NOT NULL CHECK(`amount` != 0),
+        PRIMARY KEY(`id`),
+        FOREIGN KEY(`card_id`) REFERENCES `cards`(`id`),
+        FOREIGN KEY(`station_id`) REFERENCES `stations`(`id`)
+    );
+  verify_after: |
+    INSERT INTO `swipes` (`card_id`, `station_id`, `type`, `amount`) VALUES (1, 1, 'enter', -2.40);
+    SELECT `amount`, `datetime` IS NOT NULL FROM `swipes`;
+    DESCRIBE `swipes`;
+  verify_expect: ["-2.40", "MUL", "decimal(5,2)"]
+  verify_fail: |
+    INSERT INTO `swipes` (`card_id`, `station_id`, `type`, `amount`) VALUES (1, 1, 'enter', 0);
+  explanation: |
+    In `DESCRIBE`, `MUL` marks a non-unique index. InnoDB creates one for each foreign key (errata #10).
+    The lecture's spoken example "decimal 5 comma 1 … ±999.99" is a slip: that range belongs to DECIMAL(5,2) (errata #7).
+  source:
+    - {file: lecture6, lines: "723-777", quote: "I'll say I want five decimal digits with two after the decimal point."}
+    - {file: lecture6, lines: "653-668", quote: "fixed precision means I can specify I want to always have two places"}
+
+- id: M5-E04
+  title: Add the silver line with MODIFY
+  origin: source-demo
+  concepts: [C5.3]
+  difficulty: 2
+  skills: [ALTER TABLE MODIFY]
+  db: null
+  kind: selfcheck
+  engine: mysql
+  verify_setup: |
+    CREATE TABLE `stations` (`id` INT AUTO_INCREMENT, `name` VARCHAR(32) NOT NULL UNIQUE,
+      `line` ENUM('blue', 'green', 'orange', 'red') NOT NULL, PRIMARY KEY(`id`));
+  prompt: The MBTA adds a **silver** line. Change `stations.line` so that `'silver'` is allowed, without losing NOT NULL.
+  hints:
+    - In MySQL, `ALTER TABLE ... MODIFY` replaces a column's whole definition.
+    - The new definition must repeat every old ENUM value and the NOT NULL.
+    - "`ALTER TABLE `stations` MODIFY `line` ENUM('blue', 'green', 'orange', 'red', 'silver') NOT NULL;`"
+  solution: |
+    ALTER TABLE `stations`
+    MODIFY `line` ENUM('blue', 'green', 'orange', 'red', 'silver') NOT NULL;
+  verify_after: |
+    INSERT INTO `stations` (`name`, `line`) VALUES ('South Station', 'silver');
+    DESCRIBE `stations`;
+  verify_expect: ["'silver'"]
+  explanation: |
+    SQLite's ALTER TABLE cannot change a column definition. In SQLite you would rebuild the table.
+    The same MODIFY can also widen a VARCHAR later (L577-580).
+  source:
+    - {file: lecture6, lines: "905-919", quote: "So this is one example of using alter table to adjust a column definition."}
+
+- id: M5-E05
+  title: A stored procedure for the current collection
+  origin: source-demo
+  concepts: [C5.4]
+  difficulty: 2
+  skills: [DELIMITER, CREATE PROCEDURE, CALL]
+  db: null
+  kind: selfcheck
+  engine: mysql
+  verify_setup: |
+    CREATE TABLE `collections` (`id` INT AUTO_INCREMENT, `title` VARCHAR(64) NOT NULL,
+      `accession_number` VARCHAR(16) NOT NULL UNIQUE, `acquired` DATE, PRIMARY KEY(`id`));
+    INSERT INTO `collections` (`title`, `accession_number`, `acquired`) VALUES
+      ('Farmers Working at Dawn', '11.6152', '1911-08-03'), ('Imaginative Landscape', '56.496', NULL),
+      ('Profusion of Flowers', '56.257', '1956-04-12'), ('Spring Outing', '14.76', '1914-01-08');
+    ALTER TABLE `collections` ADD COLUMN `deleted` TINYINT DEFAULT 0;
+    UPDATE `collections` SET `deleted` = 1 WHERE `title` = 'Farmers Working at Dawn';
+  prompt: |
+    `collections` has a `deleted` TINYINT flag. Create a procedure `current_collection()` that returns
+    `title`, `accession_number`, `acquired` for items not deleted, then call it.
+  hints:
+    - The body contains `;`, so first change the client's delimiter (e.g. to `//`).
+    - "`CREATE PROCEDURE name() BEGIN ...; END//`, then switch the delimiter back."
+    - "`DELIMITER //` … `SELECT ... FROM `collections` WHERE `deleted` = 0; END//` `DELIMITER ;` `CALL current_collection();`"
+  solution: |
+    DELIMITER //
+    CREATE PROCEDURE `current_collection`()
+    BEGIN
+        SELECT `title`, `accession_number`, `acquired` FROM `collections`
+        WHERE `deleted` = 0;
+    END//
+    DELIMITER ;
+    CALL `current_collection`();
+  verify_expect: ["Imaginative Landscape"]
+  verify_absent: ["Farmers Working at Dawn"]
+  explanation: |
+    `TINYINT` is the smallest integer type, which is enough for 0/1 (L1027-1031). Compare with the SQLite *view* `current_collections` (M3-E10).
+  source:
+    - {file: lecture6, lines: "1056-1090", quote: "So using call, can I then call this procedure I've made and stored?"}
+
+- id: M5-E06
+  title: "Assigned: a sell procedure that refuses double sales"
+  origin: source-assigned
+  concepts: [C5.4]
+  difficulty: 4
+  skills: [IN parameter, IF, procedures]
+  db: null
+  kind: selfcheck
+  engine: mysql
+  verify_setup: |
+    CREATE TABLE `collections` (`id` INT AUTO_INCREMENT, `title` VARCHAR(64) NOT NULL,
+      `accession_number` VARCHAR(16) NOT NULL UNIQUE, `acquired` DATE, `deleted` TINYINT DEFAULT 0, PRIMARY KEY(`id`));
+    INSERT INTO `collections` (`title`, `accession_number`, `acquired`) VALUES
+      ('Farmers Working at Dawn', '11.6152', '1911-08-03'), ('Imaginative Landscape', '56.496', NULL);
+    CREATE TABLE `transactions` (`id` INT AUTO_INCREMENT, `title` VARCHAR(64) NOT NULL,
+      `action` ENUM('bought', 'sold') NOT NULL, PRIMARY KEY(`id`));
+  prompt: |
+    The lecture builds `sell(IN sold_id INT)`: it marks the item deleted **and** logs `'sold'` in `transactions`.
+    It then warns: *"if I try to sell something that has already been sold, I might … mark something as being sold twice.
+    I'll actually leave this up to you as your own exercise."*
+    Write `sell` so that a second `CALL sell(2);` changes nothing.
+  hints:
+    - Stored procedures support `IF condition THEN ... END IF;`
+    - Only act when the item exists and `deleted = 0`.
+    - "`IF (SELECT `deleted` FROM `collections` WHERE `id` = sold_id) = 0 THEN UPDATE ...; INSERT ...; END IF;`"
+  solution: |
+    DELIMITER //
+    CREATE PROCEDURE `sell`(IN `sold_id` INT)
+    BEGIN
+        IF (SELECT `deleted` FROM `collections` WHERE `id` = `sold_id`) = 0 THEN
+            UPDATE `collections` SET `deleted` = 1 WHERE `id` = `sold_id`;
+            INSERT INTO `transactions` (`title`, `action`)
+            VALUES ((SELECT `title` FROM `collections` WHERE `id` = `sold_id`), 'sold');
+        END IF;
+    END//
+    DELIMITER ;
+    CALL `sell`(2);
+    CALL `sell`(2);
+  verify_after: |
+    SELECT COUNT(*) AS sold_rows FROM `transactions`;
+  verify_expect: ["sold_rows\n1"]
+  explanation: |
+    Without the IF, calling sell twice would log two sales of one painting.
+    A unique constraint or a transaction with a re-check are alternative guards.
+  source:
+    - {file: lecture6, lines: "1258-1277", quote: "I'll actually leave this up to you as your own exercise."}
+    - {file: lecture6, lines: "1169-1222", quote: "I'll say the input is something called sold ID"}
+
+- id: M5-E07
+  title: Swipes in PostgreSQL
+  origin: source-demo
+  concepts: [C5.5]
+  difficulty: 3
+  skills: [CREATE TYPE ENUM, SERIAL, TIMESTAMP, now(), NUMERIC]
+  db: null
+  kind: selfcheck
+  engine: postgres
+  verify_setup: |
+    CREATE TABLE "cards" ("id" SERIAL, PRIMARY KEY("id"));
+    CREATE TABLE "stations" ("id" SERIAL, "name" VARCHAR(32) NOT NULL UNIQUE, "line" VARCHAR(32) NOT NULL, PRIMARY KEY("id"));
+    INSERT INTO "cards" DEFAULT VALUES;
+    INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red');
+  prompt: |
+    Write the PostgreSQL version of `swipes`. Define the allowed swipe types as **their own type**;
+    use an auto-incrementing id, a timestamp defaulting to now, and `NUMERIC(5,2)` for the amount.
+  hints:
+    - "In Postgres an enum is declared once as a type: `CREATE TYPE name AS ENUM (...);`"
+    - "`SERIAL` is an auto-incrementing integer. The timestamp default is the function `now()`."
+    - "`\"type\" \"swipe_type\" NOT NULL, \"datetime\" TIMESTAMP NOT NULL DEFAULT now(), \"amount\" NUMERIC(5,2) NOT NULL CHECK(\"amount\" != 0)`"
+  solution: |
+    CREATE TYPE "swipe_type" AS ENUM('enter', 'exit', 'deposit');
+    CREATE TABLE "swipes" (
+        "id" SERIAL,
+        "card_id" INT,
+        "station_id" INT,
+        "type" "swipe_type" NOT NULL,
+        "datetime" TIMESTAMP NOT NULL DEFAULT now(),
+        "amount" NUMERIC(5,2) NOT NULL CHECK("amount" != 0),
+        PRIMARY KEY("id"),
+        FOREIGN KEY("card_id") REFERENCES "cards"("id"),
+        FOREIGN KEY("station_id") REFERENCES "stations"("id")
+    );
+  verify_after: |
+    INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'deposit', 20);
+    SELECT "type", "amount" FROM "swipes";
+  verify_expect: ["deposit", "20.00"]
+  verify_fail: |
+    INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'teleport', 20);
+  explanation: |
+    Postgres uses double quotes like SQLite, not backticks. Its CLI commands are `\l` (list databases), `\c` (connect), `\dt` (list tables), `\d table`, `\q` (quit).
+  source:
+    - {file: lecture6, lines: "1422-1476", quote: "Create a type and give it some name."}
+
+- id: M5-E08
+  title: Dump every account with SQL injection
+  origin: source-demo
+  concepts: [C5.8]
+  difficulty: 2
+  skills: [SQL injection, UNION]
+  db: bank
+  kind: injection
+  template: SELECT * FROM "accounts" WHERE "id" = {input};
+  prompt: |
+    A careless bank website pastes whatever you type into this query:
+
+    `SELECT * FROM "accounts" WHERE "id" = <your input>;`
+
+    You are Alice (id 1). Type an **input** (not a whole query) that makes the site show **every** account.
+  hints:
+    - Your text becomes part of the SQL. What could you append after the `1`?
+    - Either make the WHERE always true, or glue on a second query.
+    - "`1 UNION SELECT * FROM \"accounts\"` (or `1 OR 1 = 1`)"
+  solution: |
+    1 UNION SELECT * FROM "accounts"
+  explanation: |
+    The fix is a **prepared statement**: `PREPARE balance_check FROM 'SELECT * FROM accounts WHERE id = ?';` then `EXECUTE ... USING @id`.
+    The `?` value is bound as data and never parsed as SQL (see errata #8 for why MySQL still returned Alice).
+    `python3 tools/labs.py injection` shows the safe version in SQLite.
+  source:
+    - {file: lecture6, lines: "2020-2031", quote: "I see everyone's balances and their names too."}
+    - {file: lecture6, lines: "2050-2067", quote: "A prepared statement is a statement that we"}
+
+- id: M5-E09
+  title: Log in as Carter without the password
+  origin: source-question
+  concepts: [C5.8]
+  difficulty: 3
+  skills: [SQL injection, comments, OR]
+  db: null
+  kind: injection
+  setup: |
+    CREATE TABLE "users" ("id" INTEGER, "username" TEXT, "password" TEXT, PRIMARY KEY("id"));
+    INSERT INTO "users" VALUES (1, 'carter', 'correct horse'), (2, 'alice', 'battery staple');
+  template: SELECT "id" FROM "users" WHERE "username" = 'carter' AND "password" = '{input}';
+  prompt: |
+    A login form builds:
+
+    `SELECT "id" FROM "users" WHERE "username" = 'carter' AND "password" = '<your input>';`
+
+    and logs you in if any id comes back. You don't know the password. Type a password input that returns Carter's id **1**.
+  hints:
+    - Your input lands *inside* a quoted string. How do you get out of it?
+    - Close the quote, add a condition that is always true, and neutralize the leftover `'` (for example with `--`, which starts a comment).
+    - "`' OR 1 = 1 --` would match every user. To return only Carter, keep his username: `' OR \"username\" = 'carter' --`"
+  solution: |
+    ' OR "username" = 'carter' --
+  explanation: |
+    The lecture's `' OR 1=1` makes the condition always true. With AND binding tighter than OR, `1 = 1` alone would return **every** user.
+    Parameterized queries defeat all of these, because the input can never close the quote.
+  source:
+    - {file: lecture6, lines: "1958-1966", quote: "But then I type in a single quote followed by or 1 equals 1."}
+
+- id: M5-E10
+  title: Give an analyst read access to one view only
+  origin: source-demo
+  concepts: [C5.7, C3.7]
+  difficulty: 2
+  skills: [CREATE USER, GRANT, REVOKE]
+  db: null
+  kind: selfcheck
+  engine: mysql
+  verify_setup: |
+    CREATE TABLE `rides` (`id` INT AUTO_INCREMENT, `origin` VARCHAR(32), `destination` VARCHAR(32), `rider` VARCHAR(32), PRIMARY KEY(`id`));
+    INSERT INTO `rides` (`origin`, `destination`, `rider`) VALUES ('Good Egg Galaxy', 'Honeyhive Galaxy', 'Peach');
+    CREATE VIEW `analysis` AS SELECT `id`, `origin`, `destination`, 'anonymous' AS `rider` FROM `rides`;
+  prompt: |
+    As root, create the user `carter` (password `password`, for the demo only) and give it permission to **read the `analysis` view** and nothing else.
+    Then write the statement that would take that permission away again.
+  hints:
+    - "`CREATE USER 'name' IDENTIFIED BY '...';`"
+    - "`GRANT privilege ON database.object TO 'user';`"
+    - "`GRANT SELECT ON <db>.`analysis` TO 'carter';` … `REVOKE SELECT ON <db>.`analysis` FROM 'carter';`"
+  solution: |
+    CREATE USER 'carter' IDENTIFIED BY 'password';
+    GRANT SELECT ON `analysis` TO 'carter';
+    -- later, to remove it:
+    -- REVOKE SELECT ON `analysis` FROM 'carter';
+  verify_after: |
+    SHOW GRANTS FOR 'carter';
+  verify_expect: ["GRANT SELECT ON", "`analysis`"]
+  verify_cleanup: |
+    DROP USER 'carter';
+  explanation: |
+    The lecture writes `rideshare.analysis` (database.table). Inside the current database, the bare name works too.
+    Unlike SQLite (M3-E09), carter now cannot `SELECT * FROM rides`. Avoid `GRANT ALL ON *.*` in production.
+  source:
+    - {file: lecture6, lines: "1796-1804", quote: "create a user whose name is Carter in single quotes"}
+    - {file: lecture6, lines: "1878-1899", quote: "I can't see the ride data"}
+
+- id: M5-E11
+  title: Choose a scaling plan
+  origin: source-question
+  concepts: [C5.6]
+  difficulty: 4
+  skills: [replication, sharding, vertical vs horizontal scaling]
+  db: null
+  kind: selfcheck
+  prompt: |
+    Your app grows from 100 to 100,000 reads and from 50 to 50,000 writes per minute (the lecture's scenario), and it slows down.
+    For (a) a bank ledger and (b) a social network's profile photos, decide:
+    1. Vertical or horizontal scaling first, and why.
+    2. Which replication model and whether it should be synchronous or asynchronous. Where do reads go, and where do writes go?
+    3. If the data no longer fits on one server, how would you shard it, and what two risks must you design against?
+  hints:
+    - Start with the cheapest fix (optimize queries), then a bigger single server, then more servers.
+    - "Single-leader: writes go to the leader and reads can go to followers (read replicas). Then ask: can you afford to lose an acknowledged write?"
+    - "Sharding risks: hotspots (uneven load) and a single point of failure (a shard without replicas)."
+  solution: |
+    -- Model answer:
+    -- 1. Optimize queries, then scale vertically; when one machine is not enough, scale horizontally.
+    -- 2. Single-leader replication: all writes go to the leader, and reads are spread over read replicas.
+    --    (a) Bank: SYNCHRONOUS, because the client is told OK only once a follower also has the data (slower, but no lost money).
+    --    (b) Photos: ASYNCHRONOUS. It is faster, and losing a rare update is acceptable.
+    -- 3. Shard by a key that spreads load evenly (e.g. a hash of the user id rather than name ranges, which can create hotspots),
+    --    and replicate each shard so that no shard is a single point of failure.
+  explanation: There is no single right answer. The point is to state the trade-off (latency vs durability, evenness vs locality) explicitly.
+  source:
+    - {file: lecture6, lines: "1498-1545", quote: "So vertical scaling is about increasing your application's capacity"}
+    - {file: lecture6, lines: "1676-1738", quote: "But it's up to you to decide which one might"}
+    - {file: lecture6, lines: "1763-1784", quote: "The goal is to really to avoid what we call a hotspot"}

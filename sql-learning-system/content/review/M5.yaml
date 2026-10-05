@@ -1,0 +1,66 @@
+- id: R5-01
+  type: concept
+  question: How many values can a MySQL `TINYINT` (signed) hold at most, and why does it matter?
+  choices: ["127 (1 byte), so pick the smallest type that safely fits", "255 always", "2^31", "Unlimited"]
+  answer: 0
+  why: Signed TINYINT is −128…127. More bytes count higher, and fewer bytes save space.
+  source: {file: lecture6, lines: "227-233", quote: "You could see for a tiny int we can only count up to 127."}
+- id: R5-02
+  type: concept
+  question: A station has exactly one line, from a fixed list. Which MySQL type fits best?
+  choices: ["SET", "ENUM", "TEXT", "BLOB"]
+  answer: 1
+  why: ENUM allows exactly one value from the list, and SET allows several.
+  source: {file: lecture6, lines: "423-432", quote: "Now, set complements enum."}
+- id: R5-03
+  type: concept
+  question: What range does `DECIMAL(5,2)` store?
+  choices: ["−999.99 to 999.99", "−99999.99 to 99999.99", "−9999.9 to 9999.9", "0 to 5.2"]
+  answer: 0
+  why: 5 total digits, 2 of them after the point. (The lecture's spoken "5 comma 1" is a slip, errata #7.)
+  source: {file: lecture6, lines: "656-661", quote: "And one type for this will be the decimal type"}
+- id: R5-04
+  type: quick
+  front: Identifier quoting in SQLite vs MySQL vs PostgreSQL?
+  back: "SQLite: double quotes. MySQL: backticks. PostgreSQL: double quotes."
+  source: {file: lecture6, lines: "1320-1323", quote: "Well, in Postgres you have double quotes for your identifiers here."}
+- id: R5-05
+  type: quick
+  front: Why change the DELIMITER before CREATE PROCEDURE in MySQL?
+  back: The body contains `;`. The client would end the statement at the first one, so you switch the delimiter (e.g. to `//`) while defining the procedure.
+  source: {file: lecture6, lines: "1049-1058", quote: "temporarily declare a different delimiter"}
+- id: R5-06
+  type: concept
+  question: Synchronous vs asynchronous replication. Which is right for a bank's ledger?
+  choices: ["Asynchronous: faster", "Synchronous: the leader confirms only after the follower has the data", "Neither; use sharding", "Leaderless only"]
+  answer: 1
+  why: Synchronous is slower but guarantees the copy exists. Asynchronous risks losing acknowledged writes, which is acceptable for a lost tweet, not for money.
+  source: {file: lecture6, lines: "1700-1706", quote: "You might use this, though, if you're working in finance or healthcare"}
+- id: R5-07
+  type: concept
+  question: Names A-I, J-R, S-Z are sharded on three servers. What two risks does the lecture name?
+  choices: ["Hotspots (one shard overloaded) and a single point of failure without replication", "Slower writes and type errors", "Deadlocks and VACUUM", "None"]
+  answer: 0
+  why: Shard keys should spread load evenly, and each shard should be replicated.
+  source: {file: lecture6, lines: "1763-1784", quote: "The goal is to really to avoid what we call a hotspot"}
+- id: R5-08
+  type: concept
+  question: Which statement lets user carter read only the `analysis` view?
+  choices: ["GRANT ALL ON *.* TO 'carter';", "GRANT SELECT ON rideshare.analysis TO 'carter';", "CREATE VIEW carter AS …", "REVOKE SELECT ON rides FROM 'carter';"]
+  answer: 1
+  why: Grant the smallest privilege on the smallest object.
+  source: {file: lecture6, lines: "1883-1886", quote: "and in particular,"}
+- id: R5-09
+  type: predict
+  db: bank
+  sql: SELECT COUNT(*) FROM "accounts" WHERE "id" = 1 OR 1 = 1;
+  choices: ["1", "3", "0"]
+  answer: 1
+  why: An injected `OR 1 = 1` makes the WHERE true for every row.
+  source: {file: lecture6, lines: "1959-1966", quote: "notice that 1 equals 1, that condition will always be true"}
+- id: R5-10
+  type: debug
+  ref: D5-01
+- id: R5-11
+  type: write
+  ref: M5-E06

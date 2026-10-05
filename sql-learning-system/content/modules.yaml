@@ -1,0 +1,95 @@
+M0:
+  title: Query toolkit (prerequisite)
+  lesson: lessons/M0-query-toolkit.md
+  sources: "Used throughout lecture2-6; taught in CS50 SQL weeks 0-1 (not provided)"
+  prerequisites: [none]
+  objectives:
+    - Read data with SELECT / FROM / LIMIT and sort with ORDER BY
+    - Filter with =, <, IN, LIKE and IS NULL, and explain why `= NULL` never matches
+    - Summarize with COUNT / AVG / ROUND and GROUP BY at the right grain
+    - Answer multi-table questions with nested subqueries and with JOINs through a junction table
+  challenge: [M0-E08, M0-E09, M0-E10]
+  mastery:
+    - Solve M0-E08 and M0-E10 without opening any hint
+    - Explain why D0-02 returns a wrong title instead of an error
+    - Score ≥ 80% on review deck R0
+M1:
+  title: Designing
+  lesson: lessons/M1-designing.md
+  sources: lecture2 (whole file)
+  prerequisites: [M0]
+  objectives:
+    - Use the sqlite3 shell (.schema, .read) and keep the schema in a re-runnable schema.sql
+    - Normalize a messy table into entity tables and describe relationships with ER cardinalities
+    - Write CREATE TABLE with suitable type affinities, PRIMARY/FOREIGN KEYs and NOT NULL / UNIQUE / DEFAULT / CHECK
+    - Explain storage classes vs type affinities (including the fares-as-integer argument)
+    - Evolve a schema with ALTER TABLE (RENAME TO, ADD/RENAME/DROP COLUMN)
+  challenge: [M1-E12, M1-E08]
+  mastery:
+    - Write the complete mbta schema (M1-E12) from a blank file and pass every probe
+    - Predict typeof() results for values inserted into INTEGER, TEXT and untyped columns (R1-04, R1-05, R1-08)
+    - Explain when a composite primary key is wrong (M1-E04 / D1-04)
+M2:
+  title: Writing
+  lesson: lessons/M2-writing.md
+  sources: lecture3 (whole file)
+  prerequisites: [M0, M1]
+  objectives:
+    - Insert single and multiple rows and let SQLite generate primary keys
+    - Read constraint errors (UNIQUE, NOT NULL, FOREIGN KEY) as guardrails
+    - Import CSV data, including via a temporary table and INSERT … SELECT, and fix '' vs NULL
+    - Delete safely (WHERE, IS NULL, dates, subqueries) and choose ON DELETE actions
+    - Update rows with subqueries and clean text data with trim / upper / LIKE
+    - Automate side effects with BEFORE/AFTER triggers using OLD and NEW
+    - Implement soft deletion and discuss its ethics
+  challenge: [M2-E13, M2-E14, M2-E06]
+  mastery:
+    - Clean the votes table to four groups (M2-E13) in ≤ 6 statements
+    - Write the sell/buy triggers (M2-E14) from memory
+    - Spot the bug in D2-02, D2-03 and D2-06 within a minute each
+M3:
+  title: Viewing
+  lesson: lessons/M3-viewing.md
+  sources: lecture4 (whole file)
+  prerequisites: [M0, M2]
+  objectives:
+    - Create, query and drop views; explain why they cost almost no space and stay current
+    - Use views to simplify (hide joins), aggregate (and build views on views), partition and secure
+    - Choose between VIEW, TEMPORARY VIEW and CTE by lifetime
+    - Make a read-only view writable with INSTEAD OF triggers, including conditional (WHEN) triggers
+  challenge: [M3-E12, M3-E13, M3-E05]
+  mastery:
+    - Build current_collections with all three INSTEAD OF triggers (M3-E11 … M3-E13)
+    - Rewrite a view-on-view analysis as a single CTE (M3-E05)
+    - Explain why the rideshare view is not real security in SQLite
+M4:
+  title: Optimizing
+  lesson: lessons/M4-optimizing.md
+  sources: lecture5 (whole file)
+  prerequisites: [M0, M1, M2]
+  objectives:
+    - Measure queries (.timer) and read EXPLAIN QUERY PLAN (SCAN vs SEARCH)
+    - Create single-column, multi-column/covering and partial indexes for a given query
+    - Explain B-tree indexes and their space/write-time trade-offs; reclaim space with VACUUM
+    - Use BEGIN / COMMIT / ROLLBACK; explain ACID, race conditions and SQLite locks
+  challenge: [M4-E03, M4-E07, M4-E08]
+  mastery:
+    - Reach two covering indexes for the Tom Hanks query (M4-E03) and explain column order (D4-01)
+    - Recover from the failed transfer with ROLLBACK (M4-E07) and explain why ROLLBACK needs BEGIN
+    - Explain the double-transfer attack and its fix in your own words (M4-E08)
+M5:
+  title: Scaling
+  lesson: lessons/M5-scaling.md
+  sources: lecture6 (whole file)
+  prerequisites: [M1, M2, M3, M4]
+  objectives:
+    - Connect to and navigate MySQL and PostgreSQL; translate a SQLite schema with appropriate types
+    - Modify columns (MODIFY) and write stored procedures with parameters (MySQL)
+    - Compare vertical/horizontal scaling, replication models (sync/async, read replicas) and sharding
+    - Grant least-privilege access; demonstrate SQL injection and defend with prepared statements
+  challenge: [M5-E06, M5-E03, M5-E09]
+  mastery:
+    - Translate the mbta schema to MySQL and PostgreSQL and run it (database/scaling/*)
+    - Write the double-sale-proof sell procedure (M5-E06)
+    - Pick sync vs async replication for two scenarios and justify it (R5-06)
+    - Exploit M5-E08 / M5-E09, then explain exactly why a bound parameter stops it

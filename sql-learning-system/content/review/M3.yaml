@@ -1,0 +1,62 @@
+- id: R3-01
+  type: quick
+  front: Define a view, and give the four uses from the lecture.
+  back: |
+    A virtual table defined by a query. Uses: simplify, aggregate, partition, secure.
+  source: {file: lecture4, lines: "97-105", quote: "You could use it to simplify your data"}
+- id: R3-02
+  type: concept
+  question: Lifetimes. Which construct exists only for the duration of one query?
+  choices: ["VIEW", "TEMPORARY VIEW", "CTE (WITH …)", "INDEX"]
+  answer: 2
+  why: A view lasts until dropped, a temporary view lasts until the connection closes, and a CTE lasts for one statement.
+  source: {file: lecture4, lines: "636-638", quote: "But a CTE exists for a single query."}
+- id: R3-03
+  type: predict
+  db: longlist
+  setup: |
+    CREATE VIEW "v" AS SELECT COUNT(*) AS "n" FROM "ratings" WHERE "book_id" = 2;
+    INSERT INTO "ratings" ("book_id", "rating") VALUES (2, 5);
+  sql: SELECT "n" FROM "v";
+  choices: ["2", "3", "ERROR: view is stale"]
+  answer: 1
+  why: A view re-runs its query every time, so it always reflects the current data.
+  source: {file: lecture4, lines: "519-526", quote: "Every time I query this view"}
+- id: R3-04
+  type: predict
+  db: longlist
+  setup: |
+    CREATE VIEW "2021" AS SELECT "id", "title" FROM "books" WHERE "year" = 2021;
+  sql: DELETE FROM "2021" WHERE "id" = 34;
+  choices: ["(no rows)", "ERROR: cannot modify 2021 because it is a view"]
+  answer: 1
+  why: SQLite views are read-only unless an INSTEAD OF trigger handles the write.
+  source: {file: lecture4, lines: "837-838", quote: "cannot modify 2021 because it is"}
+- id: R3-05
+  type: concept
+  question: You give an analyst the rideshare.db file with an anonymizing view. What stops them reading rider names?
+  choices: ["The view hides the base table", "Nothing. SQLite has no per-user access control", "PRAGMA secure_delete", "Temporary views"]
+  answer: 1
+  why: In SQLite you give access to the whole file or nothing. Real access control needs MySQL/PostgreSQL GRANT.
+  source: {file: lecture4, lines: "962-968", quote: "I either give you"}
+- id: R3-06
+  type: quick
+  front: How does an INSTEAD OF INSERT trigger choose between "re-activate" and "insert new"?
+  back: "Two triggers with complementary WHEN conditions: `WHEN NEW.accession_number IN (SELECT …)` updates deleted = 0, and `WHEN … NOT IN (…)` inserts a new row."
+  source: {file: lecture4, lines: "1236-1242", quote: "one that runs when the item is already in our table"}
+- id: R3-07
+  type: predict
+  db: longlist
+  sql: |
+    WITH "a" AS (SELECT 1 AS "x"), "b" AS (SELECT "x" + 1 AS "y" FROM "a")
+    SELECT "y" FROM "b";
+  choices: ["1", "2", "ERROR: no such table: a"]
+  answer: 1
+  why: A later CTE can use an earlier one. Separate CTEs with commas, with no comma after the last.
+  source: {file: lecture4, lines: "642-646", quote: "I could then optionally follow it up with more CTEs"}
+- id: R3-08
+  type: debug
+  ref: D3-02
+- id: R3-09
+  type: write
+  ref: M3-E13

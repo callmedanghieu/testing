@@ -1,0 +1,783 @@
+# Debugging & error training (Phase 11).
+# Each item starts from a BROKEN query (prefilled in the trainer). Your job: diagnose, then fix.
+# The checker grades the fixed version exactly like a normal exercise.
+# tests/test_system.py proves every `broken` query really is wrong (it errors, or it fails the check).
+# Bug types: syntax, logic, join, duplicates, aggregation, null, design, subquery, trigger, performance, transaction, security
+# No window-function items: the source material never covers window functions (see curriculum/roadmap.md#gaps).
+
+- id: D0-01
+  module: M0
+  title: The NULL that never matches
+  bug_type: "null"
+  origin: generated
+  concepts: [C0.2]
+  difficulty: 1
+  db: mfa
+  kind: query
+  prompt: This should list artworks whose acquisition date is unknown. It returns nothing.
+  broken: |
+    SELECT "title" FROM "collections" WHERE "acquired" = NULL;
+  hints:
+    - What is the result of `NULL = NULL` in SQL? Is it true?
+    - Comparisons with NULL produce NULL (unknown), and WHERE keeps only rows where the condition is true.
+    - Use the operator built for NULL tests.
+  solution: |
+    SELECT "title" FROM "collections" WHERE "acquired" IS NULL;
+  diagnosis: "`= NULL` is never true. NULL means unknown, so use `IS NULL` / `IS NOT NULL`."
+  source:
+    - {file: lecture3, lines: "734-741", quote: "WHERE \"acquired\" IS NOT NULL"}
+
+- id: D0-02
+  module: M0
+  title: Joined on the wrong column
+  bug_type: join
+  origin: generated
+  concepts: [C0.6]
+  difficulty: 2
+  db: longlist
+  kind: query
+  prompt: This should return Fernanda Melchor's book titles, but the titles are wrong.
+  broken: |
+    SELECT "title" FROM "authors"
+    JOIN "authored" ON "authors"."id" = "authored"."book_id"
+    JOIN "books" ON "books"."id" = "authored"."book_id"
+    WHERE "name" = 'Fernanda Melchor';
+  hints:
+    - Read each ON clause aloud. Does it connect a primary key to the matching foreign key?
+    - "`authors.id` is an *author* id. Which column of `authored` holds author ids?"
+    - The first ON should use `authored.author_id`.
+  solution: |
+    SELECT "title" FROM "authors"
+    JOIN "authored" ON "authors"."id" = "authored"."author_id"
+    JOIN "books" ON "books"."id" = "authored"."book_id"
+    WHERE "name" = 'Fernanda Melchor';
+  diagnosis: |
+    The broken query matched author id 24 with **book** id 24, which is a coincidence of numbers, not a relationship.
+    Ids from different tables share values (lecture2 L310-326), so the database can't catch this. Only you can.
+  source:
+    - {file: lecture4, lines: "207-219", quote: "linking it up by looking at the authors dot ID column"}
+
+- id: D0-03
+  module: M0
+  title: Duplicate rows from a one-to-many join
+  bug_type: duplicates
+  origin: generated
+  concepts: [C0.6, C0.4]
+  difficulty: 2
+  db: longlist
+  kind: query
+  prompt: |
+    Goal: the titles of 2022 books that have at least one rating, each title **once**.
+    The query returns hundreds of rows.
+  broken: |
+    SELECT "title" FROM "books"
+    JOIN "ratings" ON "ratings"."book_id" = "books"."id"
+    WHERE "year" = 2022;
+  hints:
+    - How many rows of `ratings` match one book?
+    - A JOIN outputs one row per *matching pair*, so a book with 20 ratings appears 20 times.
+    - Collapse the duplicates with `DISTINCT` or `GROUP BY "books"."id"`, or use `WHERE "id" IN (SELECT "book_id" FROM "ratings")`.
+  solution: |
+    SELECT "title" FROM "books"
+    WHERE "year" = 2022
+    AND "id" IN (SELECT "book_id" FROM "ratings");
+  diagnosis: Joining to the "many" side of a one-to-many relationship multiplies rows.
+  source:
+    - {file: lecture4, lines: "344-351", quote: "books had individual ratings from individual people"}
+
+- id: D0-04
+  module: M0
+  title: One average instead of one per book
+  bug_type: aggregation
+  origin: generated
+  concepts: [C0.4]
+  difficulty: 1
+  db: longlist
+  kind: query
+  prompt: Should return each book_id with its average rating (rounded to 2). It returns a single row.
+  broken: |
+    SELECT "book_id", ROUND(AVG("rating"), 2) AS "rating" FROM "ratings";
+  hints:
+    - Without grouping, an aggregate collapses the *whole table* into one row.
+    - Which column defines "per book"?
+    - Add `GROUP BY "book_id"`.
+  solution: |
+    SELECT "book_id", ROUND(AVG("rating"), 2) AS "rating" FROM "ratings" GROUP BY "book_id";
+  diagnosis: |
+    SQLite even let you select the bare `book_id` next to the aggregate (it picks an arbitrary row's value). Most other DBMSs reject that query outright.
+  source:
+    - {file: lecture4, lines: "403-407", quote: "That means I'll calculate the average rating for each book ID."}
+
+- id: D0-05
+  module: M0
+  title: "`=` with a subquery that returns many rows"
+  bug_type: subquery
+  origin: generated
+  concepts: [C0.5]
+  difficulty: 2
+  db: movies
+  kind: query
+  prompt: Should list all of Tom Hanks's movies. It returns only one.
+  broken: |
+    SELECT "title" FROM "movies" WHERE "id" = (
+        SELECT "movie_id" FROM "stars" WHERE "person_id" = (
+            SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'
+        )
+    );
+  hints:
+    - How many rows does the middle subquery return?
+    - "`= (subquery)` in SQLite silently uses only the **first** row."
+    - Use the set-membership operator.
+  solution: |
+    SELECT "title" FROM "movies" WHERE "id" IN (
+        SELECT "movie_id" FROM "stars" WHERE "person_id" = (
+            SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'
+        )
+    );
+  diagnosis: Use `IN` when a subquery can return several rows. `=` is fine for the innermost one, since there is one Tom Hanks.
+  source:
+    - {file: lecture5, lines: "376-379", quote: "I'll say WHERE the \"id\" of that movie is IN some list of movie IDs"}
+
+- id: D0-06
+  module: M0
+  title: Grouped by the wrong column
+  bug_type: aggregation
+  origin: generated
+  concepts: [C0.4]
+  difficulty: 1
+  db: longlist
+  kind: query
+  prompt: Should return how many books were longlisted each year (year, count). It returns 75 rows of 1.
+  broken: |
+    SELECT "year", COUNT(*) FROM "books" GROUP BY "id";
+  hints:
+    - Each group becomes one output row. How many distinct ids are there?
+    - Group by what you want one row *per*.
+    - "`GROUP BY \"year\"`"
+  solution: |
+    SELECT "year", COUNT(*) FROM "books" GROUP BY "year";
+  diagnosis: GROUP BY decides the grain of the result.
+  source:
+    - {file: lecture4, lines: "577-583", quote: "Now, I'll say I want to group by the year column."}
+
+- id: D1-01
+  module: M1
+  title: A comma too many
+  bug_type: syntax
+  origin: source-question
+  concepts: [C1.4]
+  difficulty: 1
+  db: null
+  kind: modify
+  prompt: This CREATE TABLE fails with a syntax error. Fix it.
+  broken: |
+    CREATE TABLE "riders" (
+        "id" INTEGER,
+        "name" TEXT,
+        PRIMARY KEY("id"),
+    );
+  hints:
+    - Read the error position. What comes right before `)`?
+    - Commas *separate* items; they don't end them.
+    - Remove the comma after the last item.
+  solution: |
+    CREATE TABLE "riders" (
+        "id" INTEGER,
+        "name" TEXT,
+        PRIMARY KEY("id")
+    );
+  check:
+    - SELECT "name", upper("type"), "pk" FROM pragma_table_info('riders')
+  diagnosis: Every item except the last one ends with a comma.
+  source:
+    - {file: lecture2, lines: "883-895", quote: "So whatever is the last portion, I should not have a comma after"}
+
+- id: D1-02
+  module: M1
+  title: A CHECK that checks nothing
+  bug_type: logic
+  origin: generated
+  concepts: [C1.7]
+  difficulty: 3
+  db: null
+  kind: modify
+  setup: |
+    CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));
+    INSERT INTO "cards" VALUES (1);
+  prompt: This swipes table should accept exactly 'enter', 'exit' and 'deposit'. Valid 'exit' and 'deposit' swipes are rejected. Fix the CHECK.
+  broken: |
+    CREATE TABLE "swipes" (
+        "id" INTEGER,
+        "card_id" INTEGER,
+        "type" TEXT NOT NULL CHECK("type" = 'enter' OR 'exit' OR 'deposit'),
+        PRIMARY KEY("id"),
+        FOREIGN KEY("card_id") REFERENCES "cards"("id")
+    );
+  hints:
+    - "How does SQL read `\"type\" = 'enter' OR 'exit'`? What is the truth value of the string `'exit'` on its own?"
+    - "`OR` joins whole conditions, and `'exit'` alone is not a comparison. (A non-numeric string counts as 0, which is false.)"
+    - "Use `\"type\" IN ('enter', 'exit', 'deposit')`."
+  solution: |
+    CREATE TABLE "swipes" (
+        "id" INTEGER,
+        "card_id" INTEGER,
+        "type" TEXT NOT NULL CHECK("type" IN ('enter', 'exit', 'deposit')),
+        PRIMARY KEY("id"),
+        FOREIGN KEY("card_id") REFERENCES "cards"("id")
+    );
+  probes:
+    - INSERT INTO "swipes" ("card_id", "type") VALUES (1, 'enter')
+    - INSERT INTO "swipes" ("card_id", "type") VALUES (1, 'exit')
+    - INSERT INTO "swipes" ("card_id", "type") VALUES (1, 'teleport')
+  check:
+    - SELECT "type" FROM "swipes"
+  diagnosis: |
+    `a = 'x' OR 'y'` means `(a = 'x') OR ('y')`. The string `'y'` counts as 0 (false), so only 'enter' passes.
+    Logic bugs inside a CHECK are dangerous because they look like protection. IN states the intent exactly.
+  source:
+    - {file: lecture2, lines: "1280-1287", quote: "I could say check that type is in some list of values."}
+
+- id: D1-03
+  module: M1
+  title: A foreign key that allows "no card"
+  bug_type: design
+  origin: generated
+  concepts: [C1.6, C1.7]
+  difficulty: 3
+  db: null
+  kind: modify
+  setup: |
+    CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));
+    INSERT INTO "cards" VALUES (1);
+  prompt: |
+    Every swipe must belong to a real card. This table still accepts a swipe whose `card_id` is NULL. Fix the design.
+  broken: |
+    CREATE TABLE "swipes" (
+        "id" INTEGER,
+        "card_id" INTEGER,
+        "amount" NUMERIC NOT NULL,
+        PRIMARY KEY("id"),
+        FOREIGN KEY("card_id") REFERENCES "cards"("id")
+    );
+  hints:
+    - Insert `(NULL, -2.40)` and check whether the foreign key complains.
+    - A NULL foreign key references nothing, so it is never checked.
+    - Add `NOT NULL` to `card_id`.
+  solution: |
+    CREATE TABLE "swipes" (
+        "id" INTEGER,
+        "card_id" INTEGER NOT NULL,
+        "amount" NUMERIC NOT NULL,
+        PRIMARY KEY("id"),
+        FOREIGN KEY("card_id") REFERENCES "cards"("id")
+    );
+  probes:
+    - INSERT INTO "swipes" ("card_id", "amount") VALUES (1, -2.40)
+    - INSERT INTO "swipes" ("card_id", "amount") VALUES (NULL, -2.40)
+    - INSERT INTO "swipes" ("card_id", "amount") VALUES (9, -2.40)
+  check:
+    - SELECT "card_id" FROM "swipes"
+  diagnosis: |
+    Lecture 2 calls NOT NULL on foreign-key columns redundant. In SQLite it is not (errata #3).
+  source:
+    - {file: lecture2, lines: "968-978", quote: "This would be in this case, redundant."}
+
+- id: D1-04
+  module: M1
+  title: A primary key that forbids repeat visits
+  bug_type: design
+  origin: source-question
+  concepts: [C1.6]
+  difficulty: 2
+  db: null
+  kind: modify
+  prompt: Riders must be able to visit the same station many times, but the second visit is rejected. Fix the table.
+  broken: |
+    CREATE TABLE "visits" (
+        "rider_id" INTEGER,
+        "station_id" INTEGER,
+        PRIMARY KEY("rider_id", "station_id")
+    );
+  hints:
+    - What does a composite primary key promise about each (rider_id, station_id) pair?
+    - Each *visit* is the entity, so give it its own identity.
+    - Add an `"id" INTEGER` column and make it the primary key (or rely on rowid).
+  solution: |
+    CREATE TABLE "visits" (
+        "id" INTEGER,
+        "rider_id" INTEGER,
+        "station_id" INTEGER,
+        PRIMARY KEY("id")
+    );
+  probes:
+    - INSERT INTO "visits" ("rider_id", "station_id") VALUES (1, 1)
+    - INSERT INTO "visits" ("rider_id", "station_id") VALUES (1, 1)
+  check:
+    - SELECT "rider_id", "station_id" FROM "visits"
+  diagnosis: A key must match the real-world uniqueness rule. Here that rule is "each visit is distinct", not "each pair is distinct".
+  source:
+    - {file: lecture2, lines: "829-839", quote: "I want people to able to visit a station more than once."}
+
+- id: D2-01
+  module: M2
+  title: The DELETE that emptied the table
+  bug_type: logic
+  origin: source-question
+  concepts: [C2.5]
+  difficulty: 1
+  db: mfa
+  kind: modify
+  prompt: Meant to remove only *Spring Outing*. Don't run the broken version on real data.
+  broken: |
+    DELETE FROM "collections";
+  hints:
+    - Which rows does a DELETE affect when there's no condition?
+    - All of them.
+    - "Add `WHERE \"title\" = 'Spring Outing'`."
+  solution: |
+    DELETE FROM "collections" WHERE "title" = 'Spring Outing';
+  check:
+    - SELECT "title" FROM "collections"
+  diagnosis: Habit worth keeping. Run the SELECT with the same WHERE first, then turn it into a DELETE.
+  source:
+    - {file: lecture3, lines: "693-698", quote: "If I say DELETE FROM table with no WHERE"}
+
+- id: D2-02
+  module: M2
+  title: Deleting from the wrong table
+  bug_type: logic
+  origin: source-demo
+  concepts: [C2.5, C2.6]
+  difficulty: 2
+  db: mfa
+  kind: modify
+  setup: |
+    DROP TABLE "created";
+    CREATE TABLE "created" ("artist_id" INTEGER, "collection_id" INTEGER,
+      FOREIGN KEY("artist_id") REFERENCES "artists"("id"),
+      FOREIGN KEY("collection_id") REFERENCES "collections"("id"));
+    INSERT INTO "created" VALUES (1, 2), (3, 1), (2, 3), (2, 4);
+  prompt: |
+    Step 1 of removing Unidentified artist: delete their *affiliations*. The lecturer's first attempt (below) errors.
+  broken: |
+    DELETE FROM "artists" WHERE "artist_id" = (
+        SELECT "id" FROM "artists" WHERE "name" = 'Unidentified artist'
+    );
+  hints:
+    - Read the error. Which table actually has an `artist_id` column?
+    - Affiliations live in the junction table.
+    - "`DELETE FROM \"created\" WHERE \"artist_id\" = (...)`"
+  solution: |
+    DELETE FROM "created" WHERE "artist_id" = (
+        SELECT "id" FROM "artists" WHERE "name" = 'Unidentified artist'
+    );
+  check:
+    - SELECT * FROM "created"
+    - SELECT * FROM "artists"
+  diagnosis: |
+    The lecturer catches this live. The error `no such column: artist_id` points straight at the wrong table.
+  source:
+    - {file: lecture3, lines: "947-961", quote: "What I should do instead is delete from the created table."}
+
+- id: D2-03
+  module: M2
+  title: An UPDATE that re-attributed everything
+  bug_type: logic
+  origin: generated
+  concepts: [C2.7]
+  difficulty: 2
+  db: mfa
+  kind: modify
+  prompt: Meant to credit only *Farmers Working at Dawn* to Li Yin.
+  broken: |
+    UPDATE "created" SET "artist_id" = (
+        SELECT "id" FROM "artists" WHERE "name" = 'Li Yin'
+    );
+  hints:
+    - Same lesson as DELETE. What does an UPDATE without WHERE touch?
+    - Limit it to the painting's row in `created`.
+    - "`WHERE \"collection_id\" = (SELECT \"id\" FROM \"collections\" WHERE \"title\" = 'Farmers Working at Dawn')`"
+  solution: |
+    UPDATE "created" SET "artist_id" = (
+        SELECT "id" FROM "artists" WHERE "name" = 'Li Yin'
+    )
+    WHERE "collection_id" = (
+        SELECT "id" FROM "collections" WHERE "title" = 'Farmers Working at Dawn'
+    );
+  check:
+    - SELECT * FROM "created"
+  diagnosis: The lecturer pauses on this exact point before adding the WHERE.
+  source:
+    - {file: lecture3, lines: "1155-1162", quote: "but what I've forgotten"}
+
+- id: D2-04
+  module: M2
+  title: Missing dates that aren't NULL
+  bug_type: "null"
+  origin: source-question
+  concepts: [C2.4, C2.7]
+  difficulty: 2
+  db: mfa
+  kind: modify
+  setup: |
+    UPDATE "collections" SET "acquired" = '' WHERE "title" = 'Imaginative Landscape';
+  prompt: |
+    After a CSV import, `SELECT * FROM "collections" WHERE "acquired" IS NULL;` returns nothing, though one date is blank.
+    The "fix" below doesn't help. Write a correct fix.
+  broken: |
+    UPDATE "collections" SET "acquired" = NULL WHERE "acquired" IS NULL;
+  hints:
+    - What value did `.import` actually store for the blank CSV field?
+    - "`''` (empty text) is a real value, not NULL."
+    - "`... WHERE \"acquired\" = '';`"
+  solution: |
+    UPDATE "collections" SET "acquired" = NULL WHERE "acquired" = '';
+  check:
+    - SELECT "title" FROM "collections" WHERE "acquired" IS NULL
+  diagnosis: CSV imports turn blanks into empty strings. Convert them to NULL explicitly.
+  source:
+    - {file: lecture3, lines: "653-663", quote: "it won't be converted to"}
+
+- id: D2-05
+  module: M2
+  title: NEW in a DELETE trigger
+  bug_type: trigger
+  origin: generated
+  concepts: [C2.9]
+  difficulty: 2
+  db: mfa
+  kind: modify
+  setup: |
+    CREATE TABLE "transactions" ("id" INTEGER, "title" TEXT, "action" TEXT, PRIMARY KEY("id"));
+  prompt: This trigger is supposed to log sales. SQLite creates it without complaint, but now every DELETE on collections fails. Fix the trigger.
+  broken: |
+    CREATE TRIGGER "sell" BEFORE DELETE ON "collections"
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO "transactions" ("title", "action") VALUES (NEW."title", 'sold');
+    END;
+  hints:
+    - In a DELETE, is there a *new* row?
+    - "DELETE triggers see `OLD`, INSERT triggers see `NEW`, and UPDATE triggers see both."
+    - "Use `OLD.\"title\"`."
+  solution: |
+    CREATE TRIGGER "sell" BEFORE DELETE ON "collections"
+    FOR EACH ROW
+    BEGIN
+        INSERT INTO "transactions" ("title", "action") VALUES (OLD."title", 'sold');
+    END;
+  probes:
+    - DELETE FROM "collections" WHERE "title" = 'Spring Outing'
+  check:
+    - SELECT "title", "action" FROM "transactions"
+  diagnosis: |
+    `OLD` is the row being removed. `NEW` only exists for INSERT and UPDATE.
+    SQLite does not check this when you create the trigger. The error (`no such column: NEW.title`) appears only when the trigger fires.
+  source:
+    - {file: lecture3, lines: "1603-1608", quote: "you get access to this keyword called old"}
+
+- id: D2-06
+  module: M2
+  title: An over-eager LIKE
+  bug_type: logic
+  origin: source-question
+  concepts: [C2.8]
+  difficulty: 3
+  db: votes
+  kind: modify
+  setup: |
+    INSERT INTO "votes" VALUES ('Fan Painting with Birds'), ('Fan Painting with Birds');
+  prompt: |
+    The museum added *Fan Painting with Birds*. The lecture's cleanup pattern now corrupts its two votes. Fix the pattern so only the *Farmers* variants are rewritten.
+  broken: |
+    UPDATE "votes" SET "title" = 'Farmers Working at Dawn' WHERE "title" LIKE 'Fa%';
+  hints:
+    - What else starts with "Fa"?
+    - Look at the variants (Farmers, Famers, Farmesr, farmers). What do they share that "Fan" doesn't?
+    - "`LIKE 'Fa%' AND \"title\" NOT LIKE 'Fan %'`, or `LIKE 'Farm%' OR LIKE 'Fame%'`"
+  solution: |
+    UPDATE "votes" SET "title" = 'Farmers Working at Dawn'
+    WHERE "title" LIKE 'Farm%' OR "title" LIKE 'Fame%';
+  check:
+    - SELECT "title", COUNT(*) FROM "votes" WHERE "title" LIKE 'Fa%' GROUP BY "title"
+  diagnosis: The lecturer warns that `'Fa%'` only works on this tiny data set (lecture3 L1388-1394).
+  source:
+    - {file: lecture3, lines: "1388-1394", quote: "because you could match much more than Farmers Working At Dawn"}
+
+- id: D3-01
+  module: M3
+  title: A trailing comma after the CTE
+  bug_type: syntax
+  origin: generated
+  concepts: [C3.5]
+  difficulty: 1
+  db: longlist
+  kind: query
+  prompt: Syntax error near SELECT. Fix it.
+  broken: |
+    WITH "average_book_ratings" AS (
+        SELECT "book_id", "year", ROUND(AVG("rating"), 2) AS "rating"
+        FROM "ratings" JOIN "books" ON "ratings"."book_id" = "books"."id"
+        GROUP BY "book_id"
+    ),
+    SELECT "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "average_book_ratings" GROUP BY "year";
+  hints:
+    - What does a comma after a CTE announce?
+    - Another CTE follows. Here there is none.
+    - Remove the comma after `)`.
+  solution: |
+    WITH "average_book_ratings" AS (
+        SELECT "book_id", "year", ROUND(AVG("rating"), 2) AS "rating"
+        FROM "ratings" JOIN "books" ON "ratings"."book_id" = "books"."id"
+        GROUP BY "book_id"
+    )
+    SELECT "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "average_book_ratings" GROUP BY "year";
+  diagnosis: "Several CTEs are separated by commas. The last one is followed directly by the main query."
+  source:
+    - {file: lecture4, lines: "644-646", quote: "Or I could omit the comma"}
+
+- id: D3-02
+  module: M3
+  title: The soft-delete trigger that hid everything
+  bug_type: trigger
+  origin: source-question
+  concepts: [C3.8]
+  difficulty: 3
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired" FROM "collections" WHERE "deleted" = 0;
+  prompt: |
+    After creating this trigger, deleting one painting through the view makes **all** paintings disappear. Fix the trigger.
+  broken: |
+    CREATE TRIGGER "delete" INSTEAD OF DELETE ON "current_collections"
+    FOR EACH ROW
+    BEGIN
+        UPDATE "collections" SET "deleted" = 1;
+    END;
+  hints:
+    - Which rows does the UPDATE inside the trigger touch?
+    - The trigger runs once per deleted view row. Use that row's identity.
+    - "`WHERE \"id\" = OLD.\"id\"`"
+  solution: |
+    CREATE TRIGGER "delete" INSTEAD OF DELETE ON "current_collections"
+    FOR EACH ROW
+    BEGIN
+        UPDATE "collections" SET "deleted" = 1 WHERE "id" = OLD."id";
+    END;
+  probes:
+    - DELETE FROM "current_collections" WHERE "title" = 'Spring Outing'
+  check:
+    - SELECT "title", "deleted" FROM "collections"
+  diagnosis: A missing WHERE inside a trigger is just as dangerous as anywhere else, and harder to spot.
+  source:
+    - {file: lecture4, lines: "1147-1153", quote: "with no condition it'll update all the columns here"}
+
+- id: D3-03
+  module: M3
+  title: A view name made of digits
+  bug_type: syntax
+  origin: generated
+  concepts: [C3.6]
+  difficulty: 1
+  db: longlist
+  kind: modify
+  prompt: Creating the partition view fails with a syntax error.
+  broken: |
+    CREATE VIEW 2022 AS SELECT "id", "title" FROM "books" WHERE "year" = 2022;
+  hints:
+    - Is `2022` an identifier or a number to the parser?
+    - Names that aren't plain identifiers need quoting.
+    - "`CREATE VIEW \"2022\" AS ...`"
+  solution: |
+    CREATE VIEW "2022" AS SELECT "id", "title" FROM "books" WHERE "year" = 2022;
+  check:
+    - SELECT * FROM "2022"
+  diagnosis: Double quotes mark identifiers (table, column and view names). Single quotes mark text values.
+  source:
+    - {file: lecture4, lines: "751-756", quote: "I could say select star from 2022 quote and then semicolon"}
+
+- id: D4-01
+  module: M4
+  title: An index with the columns backwards
+  bug_type: performance
+  origin: generated
+  concepts: [C4.3]
+  difficulty: 3
+  db: movies
+  kind: modify
+  setup: |
+    CREATE INDEX "name_index" ON "people" ("name");
+  prompt: |
+    Meant to give the Tom Hanks query a covering index on `stars`, but EXPLAIN QUERY PLAN shows it can't **search** with it. Fix the index.
+  broken: |
+    CREATE INDEX "person_index" ON "stars" ("movie_id", "person_id");
+  hints:
+    - A multi-column index is sorted by its first column, then by the second.
+    - The query filters on `person_id`. Can a list sorted by movie_id be searched by person_id?
+    - Put the filter column first, `("person_id", "movie_id")`.
+  solution: |
+    CREATE INDEX "person_index" ON "stars" ("person_id", "movie_id");
+  check:
+    - plan: SELECT "title" FROM "movies" WHERE "id" IN (SELECT "movie_id" FROM "stars" WHERE "person_id" = (SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'))
+      contains: ["SEARCH stars USING COVERING INDEX person_index"]
+  diagnosis: Column order in an index matters. The leading column(s) must match the WHERE clause.
+  source:
+    - {file: lecture5, lines: "507-517", quote: "Let's also include in this case, the movie ID column like this."}
+
+- id: D4-02
+  module: M4
+  title: An index nobody uses
+  bug_type: performance
+  origin: generated
+  concepts: [C4.2]
+  difficulty: 2
+  db: movies
+  kind: modify
+  prompt: The 'Cars' lookup is still a SCAN after creating this index. Create the index that fixes it.
+  broken: |
+    CREATE INDEX "year_index" ON "movies" ("year");
+  hints:
+    - Run EXPLAIN QUERY PLAN on `SELECT * FROM "movies" WHERE "title" = 'Cars';`
+    - An index only helps queries that filter (or sort) on its columns.
+    - Index `title`.
+  solution: |
+    CREATE INDEX "title_index" ON "movies" ("title");
+  check:
+    - plan: SELECT * FROM "movies" WHERE "title" = 'Cars'
+      contains: ["USING INDEX title_index"]
+  diagnosis: Every index costs space and write time (lecture5 L548-561, L852-861), so build only the ones your queries use.
+  source:
+    - {file: lecture5, lines: "273-278", quote: "I should probably include the Title column in this index"}
+
+- id: D4-03
+  module: M4
+  title: A partial index that doesn't match the query
+  bug_type: performance
+  origin: generated
+  concepts: [C4.5]
+  difficulty: 3
+  db: movies
+  kind: modify
+  prompt: |
+    Searching this year's titles should use a partial index. The query is `SELECT "title" FROM "movies" WHERE "year" = 2023;`.
+    The index below isn't used. Write one that is (name it `recents`).
+  broken: |
+    CREATE INDEX "recents" ON "movies" ("title") WHERE "year" = 2022;
+  hints:
+    - SQLite can use a partial index only when the query's WHERE implies the index's WHERE.
+    - Does `year = 2023` imply `year = 2022`?
+    - Make the index condition match the query.
+  solution: |
+    CREATE INDEX "recents" ON "movies" ("title") WHERE "year" = 2023;
+  check:
+    - plan: SELECT "title" FROM "movies" WHERE "year" = 2023
+      contains: ["recents"]
+  diagnosis: A partial index is a bet on which rows people query. Make it match the real query.
+  source:
+    - {file: lecture5, lines: "917-924", quote: "because my WHERE clause included 2023"}
+
+- id: D4-04
+  module: M4
+  title: A transfer that created money
+  bug_type: transaction
+  origin: source-demo
+  concepts: [C4.7]
+  difficulty: 3
+  db: bank
+  kind: modify
+  continue_on_error: true
+  require: [BEGIN, ROLLBACK]
+  setup: |
+    UPDATE "accounts" SET "balance" = 0 WHERE "id" = 1;
+    UPDATE "accounts" SET "balance" = 30 WHERE "id" = 2;
+  prompt: |
+    Alice ($0) "pays" Bob $10. The debit fails its CHECK, but Bob keeps the $10, so the bank now holds $70 instead of $60.
+    Rewrite it so a failure leaves both balances untouched. (Statements keep running after an error here.)
+  broken: |
+    UPDATE "accounts" SET "balance" = "balance" + 10 WHERE "id" = 2;
+    UPDATE "accounts" SET "balance" = "balance" - 10 WHERE "id" = 1;
+  hints:
+    - Without a transaction, each statement commits on its own.
+    - Group the two updates into one unit of work.
+    - "`BEGIN TRANSACTION;` … both updates … then `ROLLBACK;` after the failure."
+  solution: |
+    BEGIN TRANSACTION;
+    UPDATE "accounts" SET "balance" = "balance" + 10 WHERE "id" = 2;
+    UPDATE "accounts" SET "balance" = "balance" - 10 WHERE "id" = 1;
+    ROLLBACK;
+  check:
+    - SELECT * FROM "accounts"
+  diagnosis: The lecturer hits this exact state without a transaction (lecture5 L1270-1305).
+  source:
+    - {file: lecture5, lines: "1285-1296", quote: "So I need to undo this but I don't have a transaction here."}
+
+- id: D5-01
+  module: M5
+  title: Query built by string formatting
+  bug_type: security
+  origin: source-question
+  concepts: [C5.8]
+  difficulty: 2
+  db: bank
+  kind: selfcheck
+  prompt: |
+    This Python code is vulnerable. What input exploits it, and what is the fix?
+    ```python
+    account = input("Account id: ")
+    rows = db.execute(f"SELECT * FROM accounts WHERE id = {account}").fetchall()
+    ```
+  broken: |
+    -- f"SELECT * FROM accounts WHERE id = {account}"
+  hints:
+    - What happens if `account` is `1 UNION SELECT * FROM accounts`?
+    - The input becomes SQL code. The fix is to keep code and data separate.
+    - Use a placeholder and pass the value separately.
+  solution: |
+    -- exploit input: 1 UNION SELECT * FROM accounts      (or: 1 OR 1=1)
+    -- fix (Python sqlite3):
+    --   rows = db.execute("SELECT * FROM accounts WHERE id = ?", (account,)).fetchall()
+    -- MySQL equivalent:
+    PREPARE balance_check FROM 'SELECT * FROM accounts WHERE id = ?';
+    SET @id = 1;
+    EXECUTE balance_check USING @id;
+  diagnosis: Formatting user input into SQL is the root cause. Placeholders (`?`) fix it. `python3 tools/labs.py injection` demonstrates both.
+  source:
+    - {file: lecture6, lines: "2138-2147", quote: "So is this the same reason why we"}
+
+- id: D5-02
+  module: M5
+  title: A procedure cut short by the delimiter
+  bug_type: syntax
+  origin: source-question
+  concepts: [C5.4]
+  difficulty: 2
+  db: null
+  kind: selfcheck
+  engine: mysql
+  verify_setup: |
+    CREATE TABLE `collections` (`id` INT AUTO_INCREMENT, `title` VARCHAR(64), `deleted` TINYINT DEFAULT 0, PRIMARY KEY(`id`));
+  prompt: In the `mysql` client this fails with a syntax error near the end of the SELECT line. Why, and how do you fix it?
+  broken: |
+    CREATE PROCEDURE `current_collection`()
+    BEGIN
+        SELECT `title` FROM `collections` WHERE `deleted` = 0;
+    END;
+  hints:
+    - Where does the client think your statement ends?
+    - At the first `;`, which is in the middle of the procedure body.
+    - Temporarily change the delimiter with `DELIMITER //`.
+  solution: |
+    DELIMITER //
+    CREATE PROCEDURE `current_collection`()
+    BEGIN
+        SELECT `title` FROM `collections` WHERE `deleted` = 0;
+    END//
+    DELIMITER ;
+  diagnosis: The client splits statements at the delimiter before the server sees them. SQLite's shell recognises trigger bodies automatically, but the MySQL client doesn't.
+  source:
+    - {file: lecture6, lines: "1049-1063", quote: "So a workaround is to temporarily declare a different delimiter."}

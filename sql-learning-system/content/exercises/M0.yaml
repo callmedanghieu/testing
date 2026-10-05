@@ -1,0 +1,241 @@
+# Module 0: Query toolkit (prerequisite).
+# The five lectures USE these queries but never teach them (weeks 0-1 are not in the material set).
+# Where the exact query is performed in a lecture, the exercise is SOURCE-DEMO; otherwise GENERATED.
+- id: M0-E01
+  title: Peek at the first five books
+  origin: source-demo
+  concepts: [C0.1, C0.3]
+  difficulty: 1
+  skills: [SELECT, LIMIT, ORDER BY]
+  db: longlist
+  kind: query
+  ordered: true
+  prompt: |
+    The lecture peeks at a table with `LIMIT 5` instead of printing every row.
+    Return the **title** and **year** of the first five books in `books`, ordered by `id`.
+  hints:
+    - You only want a few rows. Which clause caps the number of rows returned?
+    - "`SELECT ... FROM ... ORDER BY ... LIMIT n`. ORDER BY makes \"first\" well-defined."
+    - "`SELECT \"title\", \"year\" FROM \"books\" ORDER BY \"id\" LIMIT ...;`"
+  solution: |
+    SELECT "title", "year" FROM "books" ORDER BY "id" LIMIT 5;
+  explanation: |
+    `LIMIT` caps the rows. Without `ORDER BY`, "the first five" is whatever order SQLite happens to read the table in.
+    That is usually rowid order, but it is not guaranteed, so we make it explicit.
+  source:
+    - {file: lecture2, lines: "42-48", quote: "but limit now to the first five rows"}
+
+- id: M0-E02
+  title: Search for a movie by title
+  origin: source-demo
+  concepts: [C0.2]
+  difficulty: 1
+  skills: [WHERE, "="]
+  db: movies
+  kind: query
+  prompt: |
+    You are searching IMDb for your favourite movie, *Cars*. Return every column of every movie whose title is exactly `Cars`.
+  hints:
+    - Filter rows with a condition on the `title` column.
+    - Use `WHERE` with `=` and a quoted string.
+    - "`SELECT * FROM \"movies\" WHERE \"title\" = '...';`"
+  solution: |
+    SELECT * FROM "movies" WHERE "title" = 'Cars';
+  expected_known: [[317219, "Cars", 2006]]
+  explanation: |
+    `=` is an exact match, so *Cars 3* is not returned. The lecture's answer: id 317219, released 2006.
+  source:
+    - {file: lecture5, lines: "116-123", quote: "Came out in 2006 and the ID is 317219."}
+
+- id: M0-E03
+  title: Artworks with no acquisition date
+  origin: generated
+  concepts: [C0.2]
+  difficulty: 1
+  skills: [IS NULL]
+  db: mfa
+  kind: query
+  prompt: |
+    Return the **title** of every item in `collections` whose `acquired` date is unknown (NULL).
+  hints:
+    - NULL means "no value". Comparing anything to NULL with `=` never yields true.
+    - SQL has a special operator for testing NULL.
+    - "`... WHERE \"acquired\" IS NULL;`"
+  solution: |
+    SELECT "title" FROM "collections" WHERE "acquired" IS NULL;
+  expected_known: [["Imaginative Landscape"]]
+  explanation: |
+    Lecture 3 uses exactly this condition, but in a DELETE. Writing the SELECT first is a good habit before any DELETE.
+  source:
+    - {file: lecture3, lines: "734-741", quote: "IS NULL semicolon"}
+
+- id: M0-E04
+  title: 2023 longlist, alphabetically
+  origin: generated
+  concepts: [C0.2, C0.3]
+  difficulty: 1
+  skills: [WHERE, ORDER BY]
+  db: longlist
+  kind: query
+  ordered: true
+  prompt: |
+    Return the **titles** of the books longlisted in 2023, sorted A→Z.
+  hints:
+    - Two jobs, filtering and sorting. Which clauses do each?
+    - "`WHERE \"year\" = 2023` plus `ORDER BY \"title\"`."
+    - "`SELECT \"title\" FROM \"books\" WHERE ... ORDER BY ...;`"
+  solution: |
+    SELECT "title" FROM "books" WHERE "year" = 2023 ORDER BY "title";
+  explanation: |
+    Lecture 4 combines these two ideas: partitioning by year (L728) and ordering by title (L317-323).
+  source:
+    - {file: lecture4, lines: "726-732", quote: "where, in this case, the year is 2023"}
+    - {file: lecture4, lines: "317-323", quote: "And now let me try to ORDER BY the title column"}
+
+- id: M0-E05
+  title: Tally raw votes
+  origin: source-demo
+  concepts: [C0.4]
+  difficulty: 2
+  skills: [GROUP BY, COUNT]
+  db: votes
+  kind: query
+  prompt: |
+    Count the votes for each `title` in the raw `votes` table (no cleaning yet). Return the title and its count.
+    Look at the output. Why are there far more than four groups?
+  hints:
+    - You want one row per distinct title, with a count.
+    - "`GROUP BY \"title\"` with `COUNT(\"title\")`."
+    - "`SELECT \"title\", COUNT(\"title\") FROM \"votes\" GROUP BY \"title\";`"
+  solution: |
+    SELECT "title", COUNT("title") FROM "votes" GROUP BY "title";
+  explanation: |
+    GROUP BY compares text exactly. `'Farmers Working at Dawn'` and `'farmers working at dawn'` and `' Spring outing'` (leading space) are all different groups.
+    Fixing this is exercise M2-E13.
+  source:
+    - {file: lecture3, lines: "1229-1246", quote: "Why do I have so many?"}
+
+- id: M0-E06
+  title: Average rating per book
+  origin: source-demo
+  concepts: [C0.4]
+  difficulty: 2
+  skills: [AVG, ROUND, GROUP BY, AS]
+  db: longlist
+  kind: query
+  prompt: |
+    For each `book_id` in `ratings`, return the book id and its average rating rounded to 2 decimal places, as a column named `rating`.
+  hints:
+    - Many ratings per book become one row per book, so you need a grouping.
+    - "`AVG(...)` inside `ROUND(..., 2)`, then `AS \"rating\"`, then `GROUP BY \"book_id\"`."
+    - "`SELECT \"book_id\", ROUND(AVG(\"rating\"), 2) AS \"rating\" FROM \"ratings\" GROUP BY ...;`"
+  solution: |
+    SELECT "book_id", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "ratings"
+    GROUP BY "book_id";
+  explanation: |
+    Book 1 has ratings 4, 3, 4, so its average is 3.67. Book 2 has 2 and 3, so 2.5. These are the two values on the lecture's slide.
+  source:
+    - {file: lecture4, lines: "423-433", quote: "I should see I have rounded ratings now"}
+    - {file: lecture4, lines: "374-386", quote: "3.67 book 1 and 2.5 for book 2"}
+
+- id: M0-E07
+  title: Look up an author's id
+  origin: source-demo
+  concepts: [C0.2]
+  difficulty: 1
+  skills: [WHERE]
+  db: longlist
+  kind: query
+  prompt: |
+    Return the `id` of the author named **Fernanda Melchor**.
+  hints:
+    - Authors live in the `authors` table.
+    - Filter by `name`.
+    - "`SELECT \"id\" FROM \"authors\" WHERE \"name\" = '...';`"
+  solution: |
+    SELECT "id" FROM "authors" WHERE "name" = 'Fernanda Melchor';
+  expected_known: [[24]]
+  explanation: The lecture finds id 24. This value is the input to the next two exercises.
+  source:
+    - {file: lecture4, lines: "131-136", quote: "So it seems Fernanda's ID is 24."}
+
+- id: M0-E08
+  title: Fernanda Melchor's books, with nested subqueries
+  origin: source-demo
+  concepts: [C0.5]
+  difficulty: 2
+  skills: [subquery, IN]
+  db: longlist
+  kind: query
+  prompt: |
+    Return the **titles** of every book written by Fernanda Melchor.
+    Use **nested subqueries** only (no JOIN) and do not hard-code her id.
+  hints:
+    - Work inside-out. First her id (authors), then her book ids (authored), then their titles (books).
+    - The middle step can return several rows, so the outer filter needs `IN (...)`.
+    - "`SELECT \"title\" FROM \"books\" WHERE \"id\" IN (SELECT \"book_id\" FROM \"authored\" WHERE \"author_id\" = (SELECT \"id\" FROM \"authors\" WHERE ...));`"
+  solution: |
+    SELECT "title" FROM "books"
+    WHERE "id" IN (
+        SELECT "book_id" FROM "authored"
+        WHERE "author_id" = (
+            SELECT "id" FROM "authors"
+            WHERE "name" = 'Fernanda Melchor'
+        )
+    );
+  expected_known: [["Hurricane Season"], ["Paradais"]]
+  explanation: |
+    Three tables are needed because books and authors are linked through the junction table `authored`.
+    Lecture 4 then shows how a view collapses this to one line (M3-E02).
+  source:
+    - {file: lecture4, lines: "168-192", quote: "then find the titles associated with those book IDs themselves"}
+    - {file: lecture4, lines: "296-297", quote: "Fernanda has written Paradais and Hurricane Season"}
+
+- id: M0-E09
+  title: Author names next to book titles, with JOIN
+  origin: source-demo
+  concepts: [C0.6]
+  difficulty: 2
+  skills: [JOIN]
+  db: longlist
+  kind: query
+  prompt: |
+    Return every author's **name** next to the **title** of each book they wrote (two columns, one row per authorship).
+  hints:
+    - "`authors` has names and `books` has titles. They connect through `authored`."
+    - Two JOINs, each matching a primary key with a foreign key.
+    - "`FROM \"authors\" JOIN \"authored\" ON \"authors\".\"id\" = \"authored\".\"author_id\" JOIN \"books\" ON ...`"
+  solution: |
+    SELECT "name", "title" FROM "authors"
+    JOIN "authored" ON "authors"."id" = "authored"."author_id"
+    JOIN "books" ON "books"."id" = "authored"."book_id";
+  explanation: |
+    This is the query behind the `longlist` view in Lecture 4. Each JOIN lines up a primary key with the matching foreign key ("touching your fingertips together", L68).
+  source:
+    - {file: lecture4, lines: "203-240", quote: "JOIN books ON books dot id equals, in this case, authored dot book_id"}
+
+- id: M0-E10
+  title: Tom Hanks's movies
+  origin: source-demo
+  concepts: [C0.5]
+  difficulty: 2
+  skills: [subquery, IN]
+  db: movies
+  kind: query
+  prompt: |
+    Return the **titles** of all movies Tom Hanks starred in, using nested subqueries (people → stars → movies).
+  hints:
+    - People and movies are many-to-many through `stars`.
+    - Find his `id` in people, then his `movie_id`s in stars, then their titles.
+    - "`SELECT \"title\" FROM \"movies\" WHERE \"id\" IN (SELECT \"movie_id\" FROM \"stars\" WHERE \"person_id\" = (SELECT ...));`"
+  solution: |
+    SELECT "title" FROM "movies" WHERE "id" IN (
+        SELECT "movie_id" FROM "stars" WHERE "person_id" = (
+            SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'
+        )
+    );
+  explanation: |
+    This exact query is the one Lecture 5 later speeds up with indexes (M4-E02, M4-E03).
+  source:
+    - {file: lecture5, lines: "364-394", quote: "I get back all of Tom Hanks's movies"}

@@ -1,0 +1,410 @@
+# Module 3: Viewing (sources/lecture4.txt)
+- id: M3-E01
+  title: A view that hides the joins
+  origin: source-demo
+  concepts: [C3.1, C3.2]
+  difficulty: 2
+  skills: [CREATE VIEW, JOIN]
+  db: longlist
+  kind: modify
+  prompt: |
+    Create a view named `longlist` with two columns, `name` (author) and `title` (book), one row per authorship.
+  hints:
+    - A view is `CREATE VIEW name AS <any SELECT>;`
+    - Reuse the three-table JOIN from M0-E09.
+    - "`CREATE VIEW \"longlist\" AS SELECT \"name\", \"title\" FROM \"authors\" JOIN \"authored\" ON ... JOIN \"books\" ON ...;`"
+  solution: |
+    CREATE VIEW "longlist" AS
+    SELECT "name", "title" FROM "authors"
+    JOIN "authored" ON "authors"."id" = "authored"."author_id"
+    JOIN "books" ON "books"."id" = "authored"."book_id";
+  check:
+    - SELECT "name", "title" FROM "longlist"
+    - SELECT "type" FROM sqlite_master WHERE "name" = 'longlist'
+  explanation: |
+    The view stores the *query*, not a copy of the rows, so it costs almost no disk space and is always up to date.
+  source:
+    - {file: lecture4, lines: "255-278", quote: "I'll say create a view and call it longlist"}
+    - {file: lecture4, lines: "77-80", quote: "a virtual table"}
+
+- id: M3-E02
+  title: Fernanda's books, now in one line
+  origin: source-question
+  concepts: [C3.2]
+  difficulty: 1
+  skills: [querying a view]
+  db: longlist
+  kind: query
+  setup: |
+    CREATE VIEW "longlist" AS
+    SELECT "name", "title" FROM "authors"
+    JOIN "authored" ON "authors"."id" = "authored"."author_id"
+    JOIN "books" ON "books"."id" = "authored"."book_id";
+  prompt: |
+    The `longlist` view exists. Using **only the view**, return the titles Fernanda Melchor wrote.
+    Compare this with your three-level subquery from M0-E08.
+  hints:
+    - You can query a view exactly like a table.
+    - It already has a `name` and a `title` column.
+    - "`SELECT \"title\" FROM \"longlist\" WHERE \"name\" = 'Fernanda Melchor';`"
+  solution: |
+    SELECT "title" FROM "longlist" WHERE "name" = 'Fernanda Melchor';
+  expected_known: [["Hurricane Season"], ["Paradais"]]
+  explanation: The view did the simplifying. The complexity is written once, inside the view definition.
+  source:
+    - {file: lecture4, lines: "280-304", quote: "SELECT title FROM longlist WHERE the name equals Fernanda."}
+
+- id: M3-E03
+  title: The average_book_ratings view
+  origin: source-demo
+  concepts: [C3.3, C0.4, C0.6]
+  difficulty: 3
+  skills: [CREATE VIEW, AVG, ROUND, JOIN, GROUP BY]
+  db: longlist
+  kind: modify
+  prompt: |
+    Create a view `average_book_ratings` with columns `book_id`, `title`, `year`, `rating`.
+    `rating` is the book's average rating rounded to 2 decimals.
+  hints:
+    - Ratings live in `ratings`, but title and year live in `books`, so you need a JOIN.
+    - Group by the book so each book becomes one row.
+    - "`SELECT \"book_id\", \"title\", \"year\", ROUND(AVG(\"rating\"), 2) AS \"rating\" FROM \"ratings\" JOIN \"books\" ON \"ratings\".\"book_id\" = \"books\".\"id\" GROUP BY \"book_id\"`"
+  solution: |
+    CREATE VIEW "average_book_ratings" AS
+    SELECT "book_id", "title", "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "ratings"
+    JOIN "books" ON "ratings"."book_id" = "books"."id"
+    GROUP BY "book_id";
+  probes:
+    - INSERT INTO "ratings" ("book_id", "rating") VALUES (1, 5), (1, 5)
+  check:
+    - SELECT * FROM "average_book_ratings"
+  explanation: |
+    The probe adds two new 5-star ratings to book 1 after the view exists. The view shows the new average immediately, with no refresh.
+  source:
+    - {file: lecture4, lines: "471-495", quote: "create a view called maybe average book ratings"}
+    - {file: lecture4, lines: "514-526", quote: "Every time I query this view, I'll rerun essentially that query from before."}
+
+- id: M3-E04
+  title: A temporary view built on a view
+  origin: source-demo
+  concepts: [C3.3, C3.4]
+  difficulty: 2
+  skills: [CREATE TEMPORARY VIEW, view on view]
+  db: longlist
+  kind: modify
+  setup: |
+    CREATE VIEW "average_book_ratings" AS
+    SELECT "book_id", "title", "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "ratings" JOIN "books" ON "ratings"."book_id" = "books"."id"
+    GROUP BY "book_id";
+  prompt: |
+    Using `average_book_ratings`, create a **temporary** view `average_ratings_by_year` with columns
+    `year` and `rating` (the average of the books' averages for that year, rounded to 2 decimals).
+  hints:
+    - A view can be built on top of another view.
+    - "`CREATE TEMPORARY VIEW name AS <query>;` The query aggregates per year with AVG and ROUND."
+    - "`SELECT \"year\", ROUND(AVG(\"rating\"), 2) AS \"rating\" FROM \"average_book_ratings\" GROUP BY \"year\"`, wrapped in the CREATE TEMPORARY VIEW."
+  solution: |
+    CREATE TEMPORARY VIEW "average_ratings_by_year" AS
+    SELECT "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "average_book_ratings"
+    GROUP BY "year";
+  check:
+    - SELECT * FROM "average_ratings_by_year"
+    - SELECT COUNT(*) FROM sqlite_temp_master WHERE "name" = 'average_ratings_by_year'
+  explanation: |
+    A TEMPORARY view lives in the `temp` schema and disappears when the connection closes (`.quit`), which suits a one-day analysis.
+    Your numbers differ from the lecture's (2022 = 3.87, …) because the ratings here are synthetic.
+  source:
+    - {file: lecture4, lines: "588-612", quote: "I'll say create a temporary view."}
+
+- id: M3-E05
+  title: The same analysis with a CTE
+  origin: source-demo
+  concepts: [C3.5]
+  difficulty: 3
+  skills: [WITH (CTE)]
+  db: longlist
+  kind: query
+  prompt: |
+    Without creating any view, return `year` and the rounded average of the per-book average ratings (`rating`), one row per year.
+    Use a common table expression named `average_book_ratings` for the per-book step.
+  hints:
+    - "`WITH name AS ( query ) SELECT ... FROM name ...;`"
+    - The CTE body is the per-book average query from M3-E03, without CREATE VIEW.
+    - "`WITH \"average_book_ratings\" AS (SELECT ... GROUP BY \"book_id\") SELECT \"year\", ROUND(AVG(\"rating\"), 2) AS \"rating\" FROM \"average_book_ratings\" GROUP BY \"year\";`"
+  solution: |
+    WITH "average_book_ratings" AS (
+        SELECT "book_id", "title", "year", ROUND(AVG("rating"), 2) AS "rating"
+        FROM "ratings"
+        JOIN "books" ON "ratings"."book_id" = "books"."id"
+        GROUP BY "book_id"
+    )
+    SELECT "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "average_book_ratings"
+    GROUP BY "year";
+  explanation: |
+    Lifetimes: a view lasts forever, a temporary view lasts for one connection, and a CTE lasts for one query.
+  source:
+    - {file: lecture4, lines: "633-648", quote: "a CTE exists for a single query"}
+    - {file: lecture4, lines: "664-696", quote: "I'll use a CTE."}
+
+- id: M3-E06
+  title: Partition the books by year
+  origin: source-demo
+  concepts: [C3.6]
+  difficulty: 1
+  skills: [CREATE VIEW, WHERE, quoted identifiers]
+  db: longlist
+  kind: modify
+  prompt: |
+    Create two views, `"2022"` and `"2021"`, each with the `id` and `title` of the books longlisted in that year.
+  hints:
+    - A partition is a filtered SELECT saved as a view.
+    - A name that is just digits must be quoted, as `"2022"`.
+    - "`CREATE VIEW \"2022\" AS SELECT \"id\", \"title\" FROM \"books\" WHERE \"year\" = 2022;`"
+  solution: |
+    CREATE VIEW "2022" AS SELECT "id", "title" FROM "books" WHERE "year" = 2022;
+    CREATE VIEW "2021" AS SELECT "id", "title" FROM "books" WHERE "year" = 2021;
+  check:
+    - SELECT * FROM "2022"
+    - SELECT * FROM "2021"
+  explanation: |
+    Naming trade-off from the lecture: `"2021"` is short but ambiguous, and `books_nominated_in_2021` is clear but long.
+  source:
+    - {file: lecture4, lines: "749-790", quote: "I'll say create view 2021 as select ID, title from books."}
+
+- id: M3-E07
+  title: Try to update a view
+  origin: source-demo
+  concepts: [C3.1, C3.6]
+  difficulty: 1
+  skills: [read-only views]
+  db: longlist
+  kind: error
+  expect_error: is a view
+  setup: |
+    CREATE VIEW "2021" AS SELECT "id", "title" FROM "books" WHERE "year" = 2021;
+  prompt: |
+    Through the `"2021"` view, try to rename *Minor Detail* to *The Minor Detail* with an UPDATE. Read the error.
+  hints:
+    - Write the UPDATE against the view's name.
+    - "`UPDATE \"2021\" SET ... WHERE ...;`"
+    - "`UPDATE \"2021\" SET \"title\" = 'The Minor Detail' WHERE \"title\" = 'Minor Detail';`"
+  solution: |
+    UPDATE "2021" SET "title" = 'The Minor Detail' WHERE "title" = 'Minor Detail';
+  explanation: |
+    In SQLite a view holds no data of its own, so it cannot be modified directly (MySQL and PostgreSQL allow it for simple views, errata #11).
+  source:
+    - {file: lecture4, lines: "827-838", quote: "cannot modify 2021 because it is"}
+
+- id: M3-E08
+  title: Fix the typo where the data lives
+  origin: source-question
+  concepts: [C3.1, C2.7]
+  difficulty: 1
+  skills: [UPDATE]
+  db: longlist
+  kind: modify
+  setup: |
+    CREATE VIEW "2021" AS SELECT "id", "title" FROM "books" WHERE "year" = 2021;
+  prompt: Make the `"2021"` view show *The Minor Detail* instead of *Minor Detail*.
+  hints:
+    - The view only *reads* from another table.
+    - Change the underlying `books` row.
+    - "`UPDATE \"books\" SET \"title\" = 'The Minor Detail' WHERE \"title\" = 'Minor Detail';`"
+  solution: |
+    UPDATE "books" SET "title" = 'The Minor Detail' WHERE "title" = 'Minor Detail';
+  check:
+    - SELECT * FROM "2021"
+  explanation: Update the base table, and every view built on it reflects the change.
+  source:
+    - {file: lecture4, lines: "839-848", quote: "What I should instead do is try to update"}
+
+- id: M3-E09
+  title: An anonymized view for analysts
+  origin: source-demo
+  concepts: [C3.7]
+  difficulty: 2
+  skills: [CREATE VIEW, constant column, AS]
+  db: rideshare
+  kind: modify
+  prompt: |
+    Create a view `analysis` with `id`, `origin`, `destination`, and a `rider` column that always contains the text `anonymous`.
+  hints:
+    - Leave out the real `rider` column, which is personally identifiable information (PII).
+    - "A literal in the SELECT list produces that value on every row: `'anonymous' AS \"rider\"`."
+    - "`CREATE VIEW \"analysis\" AS SELECT \"id\", \"origin\", \"destination\", 'anonymous' AS \"rider\" FROM \"rides\";`"
+  solution: |
+    CREATE VIEW "analysis" AS
+    SELECT "id", "origin", "destination", 'anonymous' AS "rider"
+    FROM "rides";
+  check:
+    - SELECT * FROM "analysis"
+  explanation: |
+    In SQLite anyone who can open the file can still run `SELECT * FROM "rides"`. There are no per-user permissions.
+    MySQL/PostgreSQL fix this with GRANT (M5-E10).
+  source:
+    - {file: lecture4, lines: "916-942", quote: "I'll say quote unquote \"anonymous\" as this column name called rider."}
+    - {file: lecture4, lines: "962-968", quote: "In SQLite we can't set access controls"}
+
+- id: M3-E10
+  title: current_collections, a view over soft deletes
+  origin: source-demo
+  concepts: [C3.1, C2.10]
+  difficulty: 2
+  skills: [CREATE VIEW, soft delete]
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Farmers Working at Dawn';
+  prompt: |
+    `collections` now has a `deleted` flag. Create a view `current_collections` with `id`, `title`, `accession_number` and `acquired`
+    (no `deleted` column) that contains only items **not** marked deleted.
+  hints:
+    - Filter on the flag, and don't expose it.
+    - "`WHERE \"deleted\" = 0`"
+    - "`CREATE VIEW \"current_collections\" AS SELECT \"id\", \"title\", \"accession_number\", \"acquired\" FROM \"collections\" WHERE \"deleted\" = 0;`"
+  solution: |
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired"
+    FROM "collections"
+    WHERE "deleted" = 0;
+  probes:
+    - UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Spring Outing'
+  check:
+    - SELECT * FROM "current_collections"
+  explanation: Soft-deleting another item (the probe) removes it from the view at once.
+  source:
+    - {file: lecture4, lines: "1065-1077", quote: "And now I'll see only those items that have not been deleted."}
+
+- id: M3-E11
+  title: INSTEAD OF DELETE, turning a delete into a soft delete
+  origin: source-demo
+  concepts: [C3.8]
+  difficulty: 3
+  skills: [INSTEAD OF trigger, OLD]
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired" FROM "collections" WHERE "deleted" = 0;
+  prompt: |
+    Make `DELETE FROM "current_collections" WHERE ...` work: instead of deleting, set `deleted = 1` on the matching base row.
+    Name the trigger `"delete"` (quoted, because it is a keyword).
+  hints:
+    - "`CREATE TRIGGER \"delete\" INSTEAD OF DELETE ON \"current_collections\" FOR EACH ROW BEGIN ... END;`"
+    - "`OLD.\"id\"` is the id of the view row being deleted."
+    - "Body: `UPDATE \"collections\" SET \"deleted\" = 1 WHERE \"id\" = OLD.\"id\";` Don't forget the WHERE."
+  solution: |
+    CREATE TRIGGER "delete"
+    INSTEAD OF DELETE ON "current_collections"
+    FOR EACH ROW
+    BEGIN
+        UPDATE "collections" SET "deleted" = 1
+        WHERE "id" = OLD."id";
+    END;
+  probes:
+    - DELETE FROM "current_collections" WHERE "title" = 'Imaginative Landscape'
+  check:
+    - SELECT "title", "deleted" FROM "collections"
+    - SELECT "title" FROM "current_collections"
+  explanation: |
+    Without `WHERE "id" = OLD."id"` the UPDATE would soft-delete every artwork (L1148-1153, debugging D3-02).
+  source:
+    - {file: lecture4, lines: "1133-1170", quote: "where, in this case, the ID column is equal to the old ID"}
+    - {file: lecture4, lines: "1178-1194", quote: "So a good way of trying to use triggers here"}
+
+- id: M3-E12
+  title: INSTEAD OF INSERT ... WHEN, re-acquiring a deleted item
+  origin: source-demo
+  concepts: [C3.8]
+  difficulty: 4
+  skills: [INSTEAD OF trigger, WHEN, NEW, subquery]
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Imaginative Landscape';
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired" FROM "collections" WHERE "deleted" = 0;
+  prompt: |
+    *Imaginative Landscape* (accession `56.496`) was soft-deleted. When someone inserts into `current_collections`
+    an item whose **accession number already exists** in `collections`, flip its `deleted` back to 0 instead of adding a row.
+    Name the trigger `"insert_when_exists"`.
+  hints:
+    - "Triggers can be conditional: `FOR EACH ROW WHEN <condition> BEGIN ... END;`"
+    - "The condition: `NEW.\"accession_number\" IN (SELECT \"accession_number\" FROM \"collections\")`."
+    - "Body: `UPDATE \"collections\" SET \"deleted\" = 0 WHERE \"accession_number\" = NEW.\"accession_number\";`"
+  solution: |
+    CREATE TRIGGER "insert_when_exists"
+    INSTEAD OF INSERT ON "current_collections"
+    FOR EACH ROW
+    WHEN NEW."accession_number" IN (
+        SELECT "accession_number" FROM "collections"
+    )
+    BEGIN
+        UPDATE "collections" SET "deleted" = 0
+        WHERE "accession_number" = NEW."accession_number";
+    END;
+  probes:
+    - INSERT INTO "current_collections" ("title", "accession_number", "acquired") VALUES ('Imaginative Landscape', '56.496', NULL)
+  check:
+    - SELECT "id", "title", "deleted" FROM "collections"
+  explanation: |
+    The accession number is the museum's own unique id, which makes it the right thing to match on (not `id`, which an INSERT doesn't supply).
+  source:
+    - {file: lecture4, lines: "1246-1278", quote: "I'll say create trigger insert when exists."}
+    - {file: lecture4, lines: "1311-1330", quote: "I only flipped that deleted value from a 1 back down to a 0."}
+
+- id: M3-E13
+  title: "Assigned: INSTEAD OF INSERT for genuinely new items"
+  origin: source-assigned
+  concepts: [C3.8]
+  difficulty: 4
+  skills: [INSTEAD OF trigger, WHEN NOT IN]
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Imaginative Landscape';
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired" FROM "collections" WHERE "deleted" = 0;
+    CREATE TRIGGER "insert_when_exists" INSTEAD OF INSERT ON "current_collections" FOR EACH ROW
+    WHEN NEW."accession_number" IN (SELECT "accession_number" FROM "collections")
+    BEGIN
+        UPDATE "collections" SET "deleted" = 0 WHERE "accession_number" = NEW."accession_number";
+    END;
+  prompt: |
+    The lecture ends: *"I could write a trigger to actually add a brand new row to this table here … we leave all that up to you."*
+    Write `"insert_when_new"`: when the inserted accession number does **not** exist yet, insert a real new row into `collections`.
+    The checker inserts one brand-new artwork and one re-acquired artwork.
+  hints:
+    - Same shape as `insert_when_exists`, with the opposite condition.
+    - "`WHEN NEW.\"accession_number\" NOT IN (SELECT \"accession_number\" FROM \"collections\")`"
+    - "Body: `INSERT INTO \"collections\" (\"title\", \"accession_number\", \"acquired\") VALUES (NEW.\"title\", NEW.\"accession_number\", NEW.\"acquired\");`"
+  solution: |
+    CREATE TRIGGER "insert_when_new"
+    INSTEAD OF INSERT ON "current_collections"
+    FOR EACH ROW
+    WHEN NEW."accession_number" NOT IN (
+        SELECT "accession_number" FROM "collections"
+    )
+    BEGIN
+        INSERT INTO "collections" ("title", "accession_number", "acquired")
+        VALUES (NEW."title", NEW."accession_number", NEW."acquired");
+    END;
+  probes:
+    - INSERT INTO "current_collections" ("title", "accession_number", "acquired") VALUES ('Peonies and Butterfly', '06.1899', '1906-01-01')
+    - INSERT INTO "current_collections" ("title", "accession_number", "acquired") VALUES ('Imaginative Landscape', '56.496', NULL)
+  check:
+    - SELECT "title", "accession_number", "deleted" FROM "collections"
+  explanation: |
+    Two complementary conditional triggers cover both cases. The lecture also suggests a follow-up you can try on your own:
+    an INSTEAD OF UPDATE trigger, for example to fill in the unknown acquired date (L1333-1334).
+  source:
+    - {file: lecture4, lines: "1331-1336", quote: "For now though, we leave all that up to you."}
+    - {file: lecture4, lines: "1236-1242", quote: "In that case, actually inserting a brand new row"}
