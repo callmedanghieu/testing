@@ -13,8 +13,17 @@ TEXT = {
     "P3": "5fd254be-uffile-upload-no-title32076.txt",
     "P4": "8922477b-IJRPR20495.txt",
     "P5": "8a8e6b0c-The_impact_of_corporate_social_responsibility_on_t.txt",
+    # Batch 2
+    "P6": "c9acc018-thuy2022.txt",
+    "P7": "1b16cfff-12231-42481-1-SM.txt",
+    "P8": "f57fe841-srivastava2019.txt",
+    "P9": "a7eaed52-6_Zulfiqar_Shah2.txt",
 }
-OFFSET = {"P1": 58, "P2": 1255, "P3": 137, "P4": 3084, "P5": 85}  # printed = PDF + offset
+OFFSET = {"P1": 58, "P2": 1255, "P3": 137, "P4": 3084, "P5": 85,
+          "P6": 1383, "P7": 63, "P8": None, "P9": 138}  # printed = PDF + offset; None = no printed pages
+
+# Duplicate-file check (Batch 2): file is verified to be text-identical to the paper it duplicates.
+DUPLICATES = [("0f2c53f6-IMFI_2019_03_Le.txt", "P5")]
 
 # (id, paper, pdf_page, location, claim, anchor_or_None, used_in)
 CLAIMS = [
@@ -107,4 +116,73 @@ CLAIMS = [
     ("P5-13", "P5", 9, "Table 7", "SOE +43.31***", "43.31329***", "C3"),
     ("P5-14", "P5", 10, "Conclusion", "Limitation: small sample", "First, the sample size is small", "limitations A"),
     ("P5-15", "P5", 10, "Conclusion", "Future: Circular-155-based index", "environmental disclosure index based on Circular 155", "G1"),
+
+    # ================= Batch 2 =================
+    # ---------------- P6 ----------------
+    ("P6-01", "P6", 1, "Abstract", "Abstract: state ownership STRENGTHENS the negative CSR-COE effect", "state ownership strengthens the negative impact of CSR disclosure on COE", "C3; C10; audit"),
+    ("P6-02", "P6", 1, "Abstract", "Sample of 225 listed Vietnamese firms", "research sample comprises 225 listed firms in Vietnam", "inventory"),
+    ("P6-03", "P6", 2, "Sec.1", "Circular 155/2015 named as the key CSR regulation", "Ministry of Finance Circular 155/2015", "G1; Idea 1"),
+    ("P6-04", "P6", 3, "Sec.2.3", "H3 states moderation direction (stronger with more state ownership)", "State ownership moderates the relationship between", "C10"),
+    ("P6-05", "P6", 4, "Sec.2.3", "H3 wording: negative relation stronger when state holds more", "their negative relationship is stronger when the state holds", "C10; audit"),
+    ("P6-06", "P6", 4, "Sec.3.1", "225 firms with CSR disclosure data from 2014 (1,340 obs)", "225 firms that have CSR disclosure information between 2014", "G1 feasibility"),
+    ("P6-07", "P6", 4, "Sec.3.2.1", "Implied COE via Easton (2004)", "we apply the Easton (2004) to estimate implied cost of", "G2"),
+    ("P6-08", "P6", 4, "Sec.3.2.1", "Refinitiv reports 1-2-year earnings forecasts for Vietnamese firms", "normally reports 1- and 2-year ahead forecasts of earnings", "C12; G2"),
+    ("P6-09", "P6", 5, "Sec.3.2.3", "CSRD = 33 GRI-2016 criteria", "33 criteria, including 6 economic criteria", "inventory"),
+    ("P6-10", "P6", 5, "Sec.3.2.2", "Crash risk measured by DUVOL", "metric to gauge the risk of a stock price crash", "G3"),
+    ("P6-11", "P6", 6, "Sec.3.3", "GMM used to address endogeneity", "regression analysis to address this issue", "comparison 4.4"),
+    ("P6-12", "P6", 7, "Table 2", "CSRD -0.065*** on implied COE (t=-5.27), N=816, 100 instruments", None, "C1; findings"),
+    ("P6-13", "P6", 7, "Table 2", "100 instruments in the main GMM model", "No. of instrument 100", "audit"),
+    ("P6-14", "P6", 8, "Table 3", "CSRD -> CRASH -0.204***; CRASH -> COE +0.142***; direct -0.067*** with mediator", None, "C11; G3"),
+    ("P6-15", "P6", 8, "Table 4", "Sobel: indirect/total = 0.006/0.033 = 0.185", "(Indirect effect/total effect) (0.006/0.033) = 0.185", "C11"),
+    ("P6-16", "P6", 9, "Table 5", "INTERACTION +0.000*** (t=3.20); CSRD -0.057***; SOE -0.000***", "INTERACTION 0.000***", "C3; C10"),
+    ("P6-17", "P6", 9, "Sec.5.1", "Conclusion: state ownership 'attenuates' the effect", "and state ownership mediate and attenuate the impact of CSR disclo", "C10; audit"),
+    ("P6-18", "P6", 9, "Sec.5", "Conclusion: 'mixed moderating role'", "ship plays a mixed moderating role", "C10"),
+    ("P6-19", "P6", 10, "Sec.5.3", "Limitation: one developing market, non-financial firms", "The use of a sample of non-financial listed companies from a developing", "limitations A"),
+    ("P6-20", "P6", 10, "Sec.5.3", "Future: SOEs in high-polluting industries", "using a sample of state-owned firms in high-polluting industries", "G4; Idea 4"),
+    ("P6-21", "P6", 10, "Sec.5.2", "CSR not yet fully mandated in Vietnam", "not yet mandated full implementation of CSR activities", "G6; Idea 2"),
+    # ---------------- P7 ----------------
+    ("P7-01", "P7", 1, "Abstract", "Botosan score + residual-income implied COE", "We use the Botosan (1997) scoring methodology and the residual income valuation model", "inventory"),
+    ("P7-02", "P7", 2, "Sec.2", "Estimation-risk channel theorised", "Estimation risk: Barry and Brown (1985)", "G3"),
+    ("P7-03", "P7", 3, "Sec.3.2", "CAPM cannot test a disclosure effect", "if the model’s factors contain no information risk, there’s no reason to link expected returns", "G2; C6"),
+    ("P7-04", "P7", 3, "Sec.3.2", "Analyst forecasts unavailable in Vietnam (2017)", "systematic service of providing earnings forecasts by financial analysts is still unavailable in Vietnam", "C12"),
+    ("P7-05", "P7", 4, "Sec.4", "Cross-sectional design", "we use cross-section data to analyze the impact of", "limitations B"),
+    ("P7-06", "P7", 4, "Sec.4", "Final sample 225 firms", "The final sample consists of 225 firms", "inventory"),
+    ("P7-07", "P7", 4, "Table 1", "Implied COE mean 14.84%, range 5.12-45.00", "IMPLIED (%) 225 14.84 6.05 5.12 45.00", "G2"),
+    ("P7-08", "P7", 5, "Table 2", "Beta-implied COE correlation -0.0266", "Beta -0.0266 -0.0091 1", "G2; C6"),
+    ("P7-09", "P7", 5, "Table 3", "DSCORE -0.0016*** (t=-4.33)", "DSCORE -0.0016*** -4.33 0.000", "C1; findings"),
+    ("P7-10", "P7", 5, "Table 3", "Beta insignificant for implied COE", "Beta -0.0045 -0.42 0.672", "G2; C6"),
+    ("P7-11", "P7", 6, "Table 4", "Rank regression confirms", "rankDSCORE -0.2641***", "robustness"),
+    ("P7-12", "P7", 6, "Sec.5.2", "Positive size effect attributed to mispricing", "phenomenon of mispricing that is relatively", "C6"),
+    # ---------------- P8 ----------------
+    ("P8-01", "P8", 2, "Abstract", "43 attributes in 7 equally weighted sub-indices", "comprises seven equally weighted sub-indices, comprising a total of 43", "inventory"),
+    ("P8-02", "P8", 2, "Abstract", "Claims a causal relationship", "The causal relationship tested using this method is the ﬁrst one done in India", "audit"),
+    ("P8-03", "P8", 7, "Hypothesis", "H1: governance lowers COE", "H1. Corporate governance has a negative impact on the cost of equity.", "inventory"),
+    ("P8-04", "P8", 8, "Sample", "Missing data interpolated or extrapolated", "For the missing data, we have interpolated or extrapolated them", "audit"),
+    ("P8-05", "P8", 9, "Index", "Items scored 1 only if above the mandatory level", "if they are above that", "G6; G13; Idea 2"),
+    ("P8-06", "P8", 11, "Model", "COE regression on CGI", "COE% ¼ a þ b 1 CGI", "inventory"),
+    ("P8-07", "P8", 11, "Results", "Only market-to-book significant among controls", "of which only market", "inventory"),
+    ("P8-08", "P8", 15, "Table III", "CGI -0.089 (p=0.021); board comp. -0.068; audit -0.061; ownership -0.130", None, "C8; C9"),
+    ("P8-09", "P8", 15, "Table III", "CGI p-value 0.021", "0.089 (0.021)", "C8"),
+    ("P8-10", "P8", 15, "Table III", "Ownership structure p=0.049", "0.130 (0.049)", "audit"),
+    ("P8-11", "P8", 15, "Robustness", "Hausman p=0.0695", "Chi2 = 15.87, Prob> Chi2 = 0.0695", "inventory"),
+    ("P8-12", "P8", 16, "Discussion", "Text credits fixed-effects models", "Using panel data and the ﬁxed effects regression models justiﬁes", "audit"),
+    ("P8-13", "P8", 18, "Implications", "Future research: other valuation measures", "paves the way to analyze the relationship between various other", "limitations A"),
+    # ---------------- P9 ----------------
+    ("P9-01", "P9", 1, "Abstract", "CAPM-based expected cost of equity", "expected cost of equity calculated using the capital asset", "inventory"),
+    ("P9-02", "P9", 1, "Abstract", "Results attributed to post-Code 'transition phase'", "transition phase through which Pakistani", "G14"),
+    ("P9-03", "P9", 6, "Sec.2.2", "Klapper & Love: governance valued more where protection is poor", "firms with relatively good", "G7; G15"),
+    ("P9-04", "P9", 8, "Sec.2.4", "Chen et al. (2004): disclosure effect only where investors protected", "this effect is observed only in countries that protect investors", "G7"),
+    ("P9-05", "P9", 8, "Sec.2.4", "Chen et al. (2004): governance effect only where protection is poor", "significant only in countries that provide relatively", "G7"),
+    ("P9-06", "P9", 9, "Sec.3.1", "114 KSE firms", "The sample comprised 114 listed companies", "inventory"),
+    ("P9-07", "P9", 11, "Sec.3.4", "Beta from 2 years of monthly returns", "Beta (β) has been calculated on the basis of 2 years’ monthly returns", "inventory"),
+    ("P9-08", "P9", 11, "Table 2", "Descriptive rows swapped (Maximum -0.93)", "Maximum -0.93", "audit"),
+    ("P9-09", "P9", 13, "Table 4", "OLS R-squared 0.034", "R Square 0.033687901", "inventory"),
+    ("P9-10", "P9", 17, "Table 6", "Board size -0.017 (p=0.088)", "BS -0.017244 0.010096 -1.708038 0.0882", "findings"),
+    ("P9-11", "P9", 17, "Table 6", "2007 year dummy -0.287", "D18 -0.287148", "G8; limitations E"),
+    ("P9-12", "P9", 20, "Table 9", "CGS +0.0018 (p=0.913)", "CGS 0.001754 0.016120 0.108786 0.9134", "C8"),
+    ("P9-13", "P9", 22, "Table 10", "CGS +0.0028 (p=0.855)", "CGS 0.002789 0.015236 0.183075 0.8548", "C8"),
+    ("P9-14", "P9", 23, "Sec.5", "Independence labels uninformative in Pakistan", "Pakistani companies thus invariably", "C9; G13"),
+    ("P9-15", "P9", 23, "Sec.5", "Self-contradictory managerial-ownership interpretation", "higher number of shares (as a percentage of the", "audit"),
+    ("P9-16", "P9", 25, "Conclusion", "Concludes governance reduces COE (unsupported)", "We conclude that good corporate governance reduces a company’s", "audit"),
+    ("P9-17", "P9", 25, "Conclusion", "Future: other Ke models", "calculating Ke using other available models", "limitations A"),
 ]

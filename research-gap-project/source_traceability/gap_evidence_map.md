@@ -53,3 +53,57 @@ For each top gap: which papers **establish what is known**, and which papers **s
 | CAPM construction | P1 1-year Rf and constant MRP; P3 Damodaran Rf | P1-08, P1-09, P3-03 |
 | Implausible distributions | P2, P4, P5 | P2-12, P4-05, P5-08 |
 | Alternatives requested / constrained | P3 DGM; expected EPS unavailable (P4); P5 forward E/P after release | P3-15, P4-04, P5-05, P5-06 |
+
+---
+---
+
+# Batch 2 Evidence (added; Batch 1 map above unchanged)
+
+## G1 (strengthened)
+| Role | Evidence | Claim IDs |
+|---|---|---|
+| Another paper straddling Circular 155 without exploiting it | P6 names Circular 155 as the key CSR regulation; window 2014–2019 | P6-03, P6-06 |
+| Feasibility upgrade | 225 firms with CSR data from 2014 | P6-06 |
+| Reform "transition" claimed but untested (governance analogue) | P9 | P9-02 |
+| Exogeneity still absent | P6 relies on GMM | P6-11 |
+
+## G2 (strengthened)
+| Role | Evidence | Claim IDs |
+|---|---|---|
+| Theory: CAPM cannot test disclosure | P7 | P7-03 |
+| Divergence: beta does not explain implied COE | P7 | P7-08, P7-10 |
+| Feasibility: implied COE used in Vietnam; forecasts available | P6, P7 | P6-07, P6-08, P7-01, P7-07 |
+| Data-availability contradiction (C12) | P7 (2017) vs P6 (2022) | P7-04, P6-08 |
+| Proxy-dependent control signs | P7 size/mispricing | P7-12 |
+
+## G3 (re-scoped)
+| Role | Evidence | Claim IDs |
+|---|---|---|
+| Crash-risk mechanism tested | P6 | P6-10, P6-14, P6-15 |
+| Arithmetic inconsistency (C11) | P6 | P6-14, P6-15 |
+| Untested channels theorised | P7 | P7-02 |
+
+## G4 (sharper)
+| Role | Evidence | Claim IDs |
+|---|---|---|
+| Two more negative estimates, P3 isolated | P6, P7 | P6-12, P7-09 |
+| Future research pointing to polluting SOEs | P6 | P6-20 |
+
+## G6 / G13 (beyond-compliance)
+| Role | Evidence | Claim IDs |
+|---|---|---|
+| Above-mandatory scoring precedent | P8 | P8-05 |
+| CSR not yet fully mandated in Vietnam | P6 | P6-21 |
+| Compliance labels uninformative | P9 | P9-14 |
+| Composite governance contradiction (C8) | P8 vs P9 | P8-09, P9-12, P9-13 |
+
+## G7 (re-framed)
+| Role | Evidence | Claim IDs |
+|---|---|---|
+| Conditional theory (substitution / complementarity) | Chen et al. (2004), Klapper & Love, as cited in P9 | P9-03, P9-04, P9-05 |
+
+## G9 (downgraded)
+| Role | Evidence | Claim IDs |
+|---|---|---|
+| Moderation tested | P6 interaction | P6-16 |
+| Direction conflict (C10) | P6 abstract/H3 vs conclusion | P6-01, P6-04, P6-05, P6-17, P6-18 |

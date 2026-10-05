@@ -60,3 +60,64 @@
 
 ## Cross-paper observation
 P2 and P3 both use 77 binary GRI items and both report a maximum disclosure score of exactly 0.571 (P2 Table 2; P3 Table 1, year 2023). This is consistent with a shared or equivalent scoring instrument, and possibly the same top-scoring firm-year [INFERENCE; not verifiable from the PDFs]. **Consequence:** the sign contradiction between P2 and P3 (C1) cannot be blamed on different disclosure instruments.
+
+---
+---
+
+# Batch 2 Audit (added; Batch 1 audit above unchanged)
+
+## Summary grade: Batch 2
+
+| Paper | Grade | Why |
+|---|---|---|
+| P6 (CSR&EM 2022) | **Moderate** | Implied COE, system GMM with diagnostics, formal mediation and moderation, larger sample. But the abstract contradicts the table on the moderation direction, mediation arithmetic is inconsistent, key coefficients are printed as 0.000, and no year effects are reported |
+| P7 (IJFR 2017) | **Low–moderate** | Coherent theory and design for a cross-section; implied COE; robust SE and rank regression. Single year, no endogeneity treatment, self-generated forecasts |
+| P8 (MAJ 2019) | **Low–moderate** | Large panel, careful index with reliability (Cronbach α). But the **dependent variable is never defined**, missing data are interpolated, it claims causality from pooled OLS, and it mislabels FE |
+| P9 (LJE 2009) | **Low** | Conclusions contradict its own estimates; text contradictions; swapped descriptive rows; negative CAPM COE; "FE" = industry dummies |
+
+**Updated implication (v2).**
+- *Batch 1:* the only moderately supported finding was "disclosure ↔ lower COE/COD among large Vietnamese firms 2021–2023" (P2).
+- **After Batch 2,** the direction of the **disclosure → COE** relation in Vietnam is supported by two moderate-grade papers using different proxies, P2 (CAPM, FE) and P6 (implied, GMM), plus the coherent P7 cross-section.
+- It is still **associational**.
+- **Governance → COE** has no moderate-grade support in any country in the corpus.
+
+## P6: Thuy et al. (2022)
+1. **Direction conflict on the moderation.** The abstract says state ownership "strengthens the negative impact" [PDF p.1 / p.1384], and H3 says the negative relation is "stronger when the state holds higher ownership" [PDF p.3–4 / p.1386–1387]. Table 5 shows CSRD −0.057*** with INTERACTION **+0.000*** (t=3.20)** [PDF p.9 / p.1392], i.e. attenuation. The conclusion says "attenuate" and "mixed moderating role" [PDF p.9 / p.1392]. *Signs verified on the rendered page.*
+2. **Unscaled coefficients.** SOE −0.000*** and INTERACTION 0.000*** [Table 5], so economic magnitude cannot be evaluated.
+3. **Mediation arithmetic** [Tables 3–4, PDF p.8 / p.1391]. The direct effect *grows* in magnitude when the mediator enters (−0.065 → −0.067). The path product (−0.204 × 0.142 ≈ −0.029) ≠ the Sobel indirect effect (−0.006). Table 4's "total 0.033 / direct 0.027" do not match Table 3.
+4. **No year effects reported**, in a window (2014–2019) that straddles Circular 155, a law P6 calls "the most essential document for regulating CSR in Vietnam" [PDF p.2 / p.1385].
+5. **Selection.** Industry leaders only (≥90% of industry assets) [PDF p.4 / p.1387]. Firms with negative earnings are excluded from the Easton estimation [Appendix A, PDF p.12 / p.1395].
+6. [INFERENCE] 100–120 instruments for 225 groups; the Hansen p-values (0.10–0.60) should be read with instrument-proliferation caution.
+7. **The text says "OLS regression, GMM and stability tests through surrogate variables"** [PDF p.9 / p.1392], but no OLS or surrogate-variable results are shown.
+
+## P7: Nguyen & Nguyen (2017)
+1. Single-year cross-section (FY2015) [PDF p.4 / p.67]; disclosure policy assumed stable without evidence.
+2. [INFERENCE] Forecasts are generated as growth = ROE × plowback [PDF p.3 / p.66], which links implied COE to profitability and payout. If disclosure correlates with these, the disclosure coefficient may partly reflect the forecast model.
+3. Only three controls (beta, P/B, size); no industry controls.
+4. **Strength:** the clearest theory section in the corpus. It explicitly explains why CAPM cannot test disclosure effects [PDF p.3 / p.66]. Reports a rank-regression robustness check [Table 4, PDF p.6 / p.69].
+
+## P8: Srivastava, Das & Pattanayak (2019)
+1. **Dependent variable undefined.** No description of how COE is estimated anywhere in the paper; verified by full-text search for CAPM, beta, implied, Easton, Ohlson, risk premium and risk-free.
+2. **Missing data interpolated or extrapolated;** index-replacement firms filled with prior constituents' data [PDF p.8], producing a "balanced" panel of 5,104 firm-years.
+3. **Claims causality** ("The causal relationship tested using this method is the first one done in India" [PDF p.2]) from pooled OLS.
+4. Text says "Using panel data and the fixed effects regression models justifies the consideration of unobserved factors" [PDF p.16], but the reported model is pooled OLS (Hausman → RE; BP-LM → pooled) [PDF p.15].
+5. The ownership-structure sub-index (−0.130, p=0.049) is significant in Table III [PDF p.15] but omitted from the abstract and discussion.
+6. "Robustness" regresses CGI on ROA and P/E, which does not test the COE result.
+7. **Strength:** transparent index items with means and Cronbach's α [Table I, PDF p.12–13]; above-mandatory scoring [PDF p.9].
+
+## P9: Shah & Butt (2009)
+1. **Conclusion contradicts the estimates.** "We conclude that good corporate governance reduces a company's cost of equity" [PDF p.25 / p.163], while CGS is positive and insignificant (p=0.913, 0.855) [Tables 9–10] and only board size is marginal (p≈0.09) [Tables 5–6].
+2. **Abstract overstates.** It reports directional relationships for MO, BI, ACI and CG [PDF p.1 / p.139] that are all insignificant in every table.
+3. **Self-contradiction.** "Managerial ownership has a negative impact ... i.e., a higher number of shares ... held by board members leads to a higher cost of equity" [PDF p.23 / p.161].
+4. **Table 2 rows swapped** (Maximum −0.93; Minimum 1.91) [PDF p.11 / p.149]. Ke ranges from −0.93 to 1.91 (negative CAPM COE). Log total assets has a minimum of 3.59, implausible next to a mean of 18.57.
+5. **"Fixed effects" are industry dummies** [PDF p.14 / p.152], not firm effects.
+6. **Strength:** an explicit, testable measurement-validity argument about director-independence labels [PDF p.23–24 / p.161–162]. Reports full regression output including year dummies, which reveal strong time variation in CAPM-COE [Table 6].
+
+## Cross-paper observations (Batch 2)
+- **Two Vietnamese disclosure papers now use implied COE** (P6, P7), and both find a negative disclosure effect. Together with P2's within-firm CAPM result, the *direction* is robust to the COE proxy. The *magnitude* is not comparable across papers.
+- **Duplicate file:** `0f2c53f6-IMFI_2019_03_Le.pdf` = P5. It was audited once and not double-counted.
+- **Citation network inside the corpus:**
+  - P4 and P8 cite P9 (Shah & Butt 2009).
+  - P3 cites P7 (Nguyen & Nguyen 2017 = P3's ref. [13]).
+  - P3 cites a different, Vietnamese-language Cao Thị Miên Thùy et al. (2022) paper (ref. [3]), not P6.
+  - The corpus is partly self-referential, so "consistent findings" are not fully independent evidence [INFERENCE].

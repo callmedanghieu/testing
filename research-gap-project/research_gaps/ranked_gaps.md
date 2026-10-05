@@ -153,3 +153,93 @@ Questions: (1) already answered? (2) mere replication? (3) too narrow? (4) merel
 5. **G5:** creditor channel with a valid COD measure
 
 Moderators embedded across ideas: **G9** (state ownership), **G8** (stress periods). Design standard for all: **G2**.
+
+---
+---
+
+# Batch 2 Re-scoring and Adversarial Review (v2)
+
+The Batch 1 table and review above are preserved as the v1 record. Scores below reflect all 9 papers. Changes from v1 are shown as Δ.
+
+## Phase 10 (v2): Scores
+
+| Rank v2 | Gap | Nov | Imp | Th | Emp | Data | Feas | Id | Pub | Sum | Δ vs v1 | Reason for change |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | **G1** Mandated disclosure as quasi-experiment | 4 | 5 | 3 | 5 | **4** | 4 | 4 | 5 | **34** | +1 | Data 3→4: P6 shows CSR data for 225 firms from 2014. A third paper (P6) straddles Circular 155 unused |
+| 2 | **G6** Mandated vs voluntary disclosure | 4 | 4 | 5 | 4 | 4 | 5 | 3 | 4 | **33** | 0 | P8 gives a scoring precedent (governance); disclosure split still absent |
+| 3 | **G3** Mechanism (re-scoped: liquidity / investor base vs crash risk) | **3** | 4 | 4 | 4 | 4 | 4 | 3 | 4 | **30** | −1 | Novelty 4→3: P6 tests crash risk; remaining channels untested |
+| 4 | **G4** Sensitive industries: legitimacy vs signalling, hard vs soft | 3 | 4 | 4 | 4 | 4 | 4 | 2 | 4 | **29** | 0 | C1 sharper (P3 isolated), still untested |
+| 5 | **G7** (re-framed) Governance as credibility moderator of CSR disclosure | 3 | 4 | 5 | 4 | **4** | **4** | 2 | 3 | **29** | +1 | Feasible with governance moderators; theory from P9 (Chen et al. 2004); novelty capped by the same cited work |
+| 6 | **G5** Cost of debt, valid measure | 4 | 4 | 3 | 4 | 3 | 4 | 2 | 4 | **28** | 0 | Untouched by Batch 2 |
+| 7 | **G14** (new) Governance/disclosure reforms as quasi-experiments | 3 | 4 | 3 | 4 | 3 | 3 | 4 | 4 | **28** | new | P8/P9 name reforms, never test them |
+| 8 | **G2** COE construct validity / proxy sensitivity | 3 | 4 | 3 | 4 | **3** | **4** | 3 | 3 | **27** | +2 | P7 beta ≠ implied COE; size sign by proxy; implied COE feasible (P6, P7, C12) |
+| 9 | **G13** (new) Governance measurement validity | 3 | 3 | 4 | 3 | 4 | 4 | 2 | 3 | **26** | new | P9 label-vs-substance; P8 above-mandatory; C8, C9 |
+| 10 | **G8** Time variation | 3 | 3 | 3 | 3 | 4 | 4 | 2 | 3 | **25** | 0 | P9 year effects reinforce the design standard |
+| 11 | **G9** SOE moderator (now a resolution question) | **2** | 3 | 3 | 3 | 5 | 5 | 2 | **2** | **25** | −4 | Tested by P6 |
+| 12 | G15 (new) Cross-country institutional moderation | 3 | 4 | 4 | 3 | 2 | 2 | 2 | 4 | 24 | new | Low feasibility; cited cross-country work exists |
+| 13 | G10 E/S/Ec decomposition | 2 | 3 | 3 | 3 | 4 | 4 | 2 | 2 | 23 | 0 | |
+| — | G11 Non-linearity | | | | | | | | | 22 | 0 | Rejected |
+| — | G12 Governance → COE re-run | | | | | | | | | 17 | 0 | Rejected (now also covered by G13) |
+
+## Phase 13 (v2): Adversarial review, changed gaps only
+
+(Unchanged gaps keep their v1 review above.)
+
+### G1, re-reviewed
+1. *Already answered?* Still no DiD/event study in 9 papers. P6, the strongest Vietnamese design, uses GMM and leaves Circular 155 unexploited. The novelty search outside the corpus remains mandatory.
+5. *Data?* **Upgraded.** P6 built a 225-firm CSR panel starting 2014 [PDF p.4 / p.1387], which contradicts the P5-based pessimism (48 firms in 2014).
+6. *Identification?* Unchanged. Batch 2 adds a design idea: **P8's above-mandatory scoring** lets one measure each firm's pre-mandate compliance gap precisely.
+10. *Stronger question?* Generalise to "**beyond-compliance signals under mandates**". Combine with G6 (disclosure) and G13 (governance): when regulation makes item X compulsory, does the price of X fall while the price of beyond-compliance items rises?
+
+**Verdict: keep, rank 1.**
+
+### G3, re-reviewed
+1. *Already answered?* **Partly.** P6 tests crash risk. Its evidence is internally inconsistent (C11) and identified by GMM + Sobel only.
+2. *Replication?* A new crash-risk test alone would be near-replication. **Re-scope** to an explicit **horse race** of channels: liquidity / adverse selection (P7 theory [p.64–65]), investor base, and crash risk (P6).
+7. *Novel to a reviewer?* Yes, if the paper shows *which* channel carries the effect and builds on P6 rather than ignoring it.
+
+**Verdict: keep, rank 3, re-scoped.**
+
+### G7, re-framed and reviewed
+1. *Already answered?* In cross-country form, yes: Chen et al. (2004), as cited by P9, examine disclosure and governance jointly across emerging markets [PDF p.8 / p.146]. Within Vietnam, with CSR disclosure, no.
+4. *Merely geographic?* **Risk.** Novelty comes only from (a) CSR rather than financial disclosure and (b) a within-country moderator design. P9 also shows independence labels may be invalid, so the moderator must be measured substantively (G13).
+5. *Data?* Feasible: board data from annual reports (P4, P3 precedent).
+10. *Stronger question?* It merges naturally with G13 and G6: **"beyond-compliance governance as the credibility channel for beyond-compliance disclosure."**
+
+**Verdict: rank 5 on score, but not in the final top 5.** It overlaps G6/G13 and is capped by cited prior work. Embedded as a moderator in Ideas 1 and 2.
+
+### G14, new, reviewed
+1. *Already answered?* Not in the corpus. India's Clause 49 event study (Black & Khanna 2007) is cited in P8 [PDF p.16], so India-specific novelty is low.
+4. *Merely geographic?* For India or Pakistan, largely yes. For Vietnam, it depends on whether comparable governance reforms exist (external, verify).
+10. *Stronger question?* It is the governance arm of G1.
+
+**Verdict: fold into Idea 1 as an extension; not standalone.**
+
+### G13, new, reviewed
+1. *Already answered?* No.
+3. *Too narrow?* Somewhat, on its own. It is valuable as the governance half of the "beyond-compliance" theory.
+9. *Obvious?* Not obviously; substantive governance could also be priced at zero in a retail-dominated market.
+
+**Verdict: moderator / extension inside Idea 2.**
+
+### G2, re-reviewed
+- Still not a standalone flagship. Batch 2 makes it **evidence-backed** (P7, C6) and **feasible** (P6, P7, C12).
+- **Upgrade the design standard from "should" to "must":** every top idea must report CAPM *and* at least one implied COE, and explain divergence.
+
+### G9, re-reviewed
+- **Downgraded.** P6 is the answer a reviewer will cite. Remaining value: re-test with economically scaled coefficients and a credible design.
+- Kept only as a moderator inside Ideas 1 and 3.
+
+## Final ordering v2 (after adversarial review)
+
+1. **G1 (flagship):** mandated disclosure (Circular 155 / 96) as a quasi-experiment. *Feasibility upgraded.* Extension: governance-reform arm (G14).
+2. **G6:** signal vs boilerplate. *Now framed within a "beyond-compliance" theory spanning disclosure (G6) and governance (G13, P8 precedent).*
+3. **G3 (re-scoped):** channel horse race (liquidity / adverse selection / investor base vs crash risk, P6).
+4. **G4 (+ feasible part of G7):** hard vs soft environmental disclosure in sensitive industries (resolves C1; P3 now the sole outlier).
+5. **G5:** creditor channel with a valid COD measure.
+
+Moderators embedded across ideas: G9 (state ownership; P6 baseline), **G7 (governance credibility)**, G8 (stress periods).
+
+**Design standard (G2, strengthened):** CAPM + implied COE side by side; release-dated disclosure; firm + year FE; control for **general disclosure (P7 construct)** when estimating CSR effects.
+
+**Changes vs v1 final ordering:** none in the identity of the top 5. G1 feasibility ↑; G3 re-scoped around P6; G6 gains a governance parallel; the design standard is tightened.

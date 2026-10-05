@@ -110,3 +110,82 @@ Yet the context-dependence hypothesis (environmentally sensitive firms vs others
 | C5 | CEO duality | No (coding error) | Reporting | Rejected |
 | C6 | Leverage / ROA | As measurement | Noisy CAPM COE | G2 |
 | C7 | E/S/Ec dimensions | Weak | Single study | Folded into G4/G6 |
+
+---
+---
+
+# Batch 2 Update (added; Batch 1 analysis above unchanged)
+
+## Updates to existing contradictions
+
+### C1 update: disclosure → COE sign is now 5 negative vs 1 positive among Vietnamese papers
+- **New evidence:** P6 (GMM, implied COE: −0.065*** [Table 2, PDF p.7 / p.1390]) and P7 (cross-section, implied COE: −0.0016*** [Table 3, PDF p.5 / p.68]) are both negative. Both use **non-CAPM** COE, so the negative sign is not an artefact of CAPM beta.
+- **Effect on C1:** P3's positive sign is now more isolated. The two explanations from Batch 1 (missing year effects / between-firm variation, vs industry context) still apply.
+- Batch 2 adds a third explanation: **COE proxy.** P3 uses CAPM, so the positive coefficient means disclosure goes with *higher beta* in energy firms. That could be a systematic-risk story specific to energy (e.g., commodity exposure correlated with both disclosure pressure and beta) rather than an information-risk story [INFERENCE].
+- **Still unresolved:** no paper tests a disclosure × environmentally-sensitive-industry interaction. P6 includes energy firms but only as an industry dummy, and itself proposes "state-owned firms in high-polluting industries" as future research [PDF p.10 / p.1393]. **G4 stands, with a sharper target.**
+
+### C3 update: state ownership; now a moderator test exists, and it conflicts with its own abstract
+- **Main effect:** P6 SOE −0.000*** [Table 5] joins P2 (negative) against P5 (positive): 2 negative vs 1 positive.
+- **Moderation (new):** P6 tests CSRD × SOE. The interaction is **positive** (+0.000***, t=3.20) while CSRD is negative, which means state ownership **attenuates** the disclosure benefit [Table 5, PDF p.9 / p.1392].
+  - P6's conclusion agrees: "state ownership mediate and attenuate" [PDF p.9 / p.1392].
+  - P6's abstract says the opposite: "state ownership strengthens the negative impact" [PDF p.1 / p.1384]. So does H3 ("negative relationship is stronger when the state holds higher ownership") [PDF p.3–4 / p.1386–1387].
+- **Cited China evidence still conflicts** (Li & Liu 2018: stronger in SOEs; Xu et al. 2015: weaker), restated by P6 [PDF p.3 / p.1386].
+- **Verdict:** C3 is **partly addressed but not resolved**. The only Vietnamese test reports an unscaled coefficient (0.000) and contradicts itself on direction. **G9 is downgraded** (no longer untested) but survives as a *resolution* question.
+
+### C6 update: control-variable signs line up partly with the COE proxy
+- **Size.** Positive with implied COE (P6 +0.013***; P7 +0.0067**) and with P8's undefined COE (+0.082, p=0.067). Negative with CAPM in P1, P4 and P9 (−0.0078, p=0.018); positive with CAPM only in P3's OLS.
+- **Beta.** Does not explain implied COE (P7: p=0.672; r=−0.027) [Tables 2–3, PDF p.5 / p.68].
+- **ROA.** Positive in P6 and P4; negative or n.s. in P3, P9 and P2.
+- **Interpretation [INFERENCE].** CAPM-COE (≈ beta) and implied COE are not measuring the same thing in these markets. P7 argues this from theory: CAPM excludes information risk, so it cannot test a disclosure effect [PDF p.3 / p.66]. **This turns G2 from a design note into evidence-backed measurement sensitivity.**
+
+## New contradictions introduced by Batch 2
+
+### C8: Composite governance index → COE (P8 India negative vs P9 Pakistan null/positive)
+| Question | Answer |
+|---|---|
+| Who | **P8:** CGI −0.089 (p=0.021) [Table III, PDF p.15]. **P9:** CGS +0.0018 / +0.0028 (p=0.91 / 0.85) [Tables 9–10, PDF p.20, 22 / p.158, 160] |
+| Samples / periods | India BSE 500, 319 firms, 2001–2016 vs Pakistan KSE, 114 firms (57 textile), 2003–2007 |
+| Measurement | **Index:** 43 binary items scored only when above the mandatory minimum, 7 sub-indices (P8) vs a 4-attribute banded score weighted 55/45 (P9). **COE:** undefined (P8) vs CAPM (P9) |
+| Methods | Pooled OLS (P8) vs industry/year LSDV (P9) |
+| Theory | Both agency. P9 adds investor-protection conditionality [PDF p.6, 8 / p.144, 146] |
+| Context-dependent? | Plausible. P9 attributes its null to (i) offsetting components, (ii) family-dominated textile firms where investors ignore governance, (iii) the post-2002 Code "transition phase" [PDF p.1, 24 / p.139, 162] |
+| Resolved? | No. The papers do not cite each other's findings (P8 cites P9 only for R² magnitude [PDF p.17]) |
+
+**Verdict.** Mostly **measurement-driven**: different index logic and an undefined or CAPM DV. The cross-country comparison is not interpretable as-is. For a Vietnam-focused programme it motivates **G13 (governance measurement validity)**, not a cross-country replication.
+
+### C9: Board independence → COE (P8 negative vs P9 positive n.s. vs P4 n.s.)
+- **P8:** board composition sub-index (16 items, including the independent share) −0.068 (p=0.036) [Table III].
+- **P9:** board independence +0.001 (p=0.939) [Table 6]. **P4:** BOARDP n.s. [Table 8].
+- **P9's own explanation:** Pakistani law does not distinguish independent from non-executive directors, so firms label all NEDs as independent and the variable carries no information [PDF p.23 / p.161].
+- **Verdict.** A **measurement-validity contradiction.** The P9 mechanism (label vs substance) is testable for Vietnam, where P4's mean independent share is 0.156 [Table 2, PDF p.5 / p.3089]. → **G13.**
+
+### C10: State-ownership moderation direction (P6 internal; P6 vs cited China studies)
+See the C3 update. This is listed separately because it is a **new relationship (a moderation)** with an **internal** contradiction (abstract/H3 vs table/conclusion) and an **external** one (Li & Liu 2018 vs Xu et al. 2015, both restated by P6 [PDF p.3 / p.1386]). → **G9 (resolution).**
+
+### C11: Mediation evidence internally inconsistent (P6)
+- Adding the mediator **increases** the direct effect's magnitude (−0.065 → −0.067) [Table 3, PDF p.8 / p.1391]. With a negative indirect path (−0.204 × +0.142 < 0), the direct effect should *shrink*.
+- The Sobel table reports indirect −0.006, total 0.033 and direct 0.027 [Table 4]. These match neither the Table 3 path product (≈ −0.029) nor the Table 3 coefficients (0.065 / 0.067).
+- **Verdict.** The *existence* of a crash-risk channel is suggested, not established. Mechanism evidence remains thin → **G3** keeps value, re-scoped to (a) the liquidity and investor-base channels and (b) a credible re-test of crash risk.
+
+### C12: Are analyst earnings forecasts available for Vietnamese firms? (data-availability contradiction)
+| Paper | Claim |
+|---|---|
+| P7 (2017) | "a systematic service of providing earnings forecasts by financial analysts is still unavailable in Vietnam" [PDF p.3 / p.66] |
+| P4 (2023) | "expected earnings are not available in the Vietnamese market", so PEG is rejected [PDF p.3 / p.3087] |
+| **P6 (2022)** | "Refinitiv Eikon normally reports 1- and 2-year ahead forecasts of earnings ... for Vietnam listed firms", though 3-year forecasts are scarce [PDF p.4 / p.1387] |
+
+- **Explanation:** most likely **temporal and source-specific** (coverage grew between 2015 and the 2020s, and differs between Vietnamese databases and Refinitiv) [INFERENCE].
+- **Why it matters:** implied-COE measures **are feasible** for Vietnamese research. Two papers already use model-based forecasts that need no analyst data (P6 Harris–Wang; P7 residual income), and analyst-based forecasts exist for covered firms. **This removes the main feasibility objection to G2's design standard.**
+
+## Batch 2 summary
+
+| ID | Relationship | Substantive? | Most likely source | Becomes |
+|---|---|---|---|---|
+| C1 (upd.) | Disclosure → COE sign | Yes, narrower | P3 isolated; year FE / industry / CAPM-beta explanations | G4, G2 |
+| C3 (upd.) | State ownership | Yes | Moderation now tested but self-contradictory | G9 (downgraded to resolution) |
+| C6 (upd.) | Control signs by COE proxy | Yes, as measurement | CAPM ≠ implied COE | G2 (strengthened) |
+| C8 | Composite governance → COE (India vs Pakistan) | Weak as a substantive conflict | Index logic + DV definition | G13 |
+| C9 | Board independence | Yes, as measurement | Label vs substance (P9) | G13 |
+| C10 | SOE moderation direction | Yes | Internal reporting conflict; China conflict | G9 |
+| C11 | Crash-risk mediation arithmetic | Reporting | Inconsistent tables | G3 (re-scoped) |
+| C12 | Analyst-forecast availability | Data / temporal | Coverage growth; database differences | G2 feasibility ↑ |

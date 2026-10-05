@@ -4,6 +4,7 @@ Run:  python3 build_database.py
 Writes literature_database.json and literature_matrix.csv next to this file.
 
 Page convention: "PDF p.X / p.Y" = page X of the PDF file / printed journal page Y.
+Batch 2 records (P6-P9) live in papers_batch2.py.
 Page maps:  P1 printed = PDF+58 | P2 printed = PDF+1255 | P3 printed = PDF+137
             P4 printed = PDF+3084 | P5 printed = PDF+85 (PDF p.1 is a cover sheet)
 Every field was extracted from the PDFs in ../papers/. Items marked
@@ -13,11 +14,14 @@ import csv
 import json
 import os
 
+from papers_batch2 import BATCH2, DUPLICATES
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 PAPERS = [
     {
         "id": "P1",
+        "batch": 1,
         "short_cite": "Le Thi Nhung (2024)",
         "file": "206fdb74-187-b5pdf-1711106205.pdf",
         "title": "Cong bo thong tin trach nhiem xa hoi va chi phi von co phan: bang chung thuc nghiem tu cac doanh nghiep Viet Nam "
@@ -70,6 +74,7 @@ PAPERS = [
     },
     {
         "id": "P2",
+        "batch": 1,
         "short_cite": "Nguyen & Duong (2026)",
         "file": "ef2e1594-The-impact-of-sustainability-reporting-on-the-cost-of-capital-evidence-from-Vietnam-s-listed.pdf",
         "title": "The impact of sustainability reporting on the cost of capital: evidence from Vietnam's listed companies",
@@ -130,6 +135,7 @@ PAPERS = [
     },
     {
         "id": "P3",
+        "batch": 1,
         "short_cite": "Bui et al. (2025)",
         "file": "5fd254be-uffile-upload-no-title32076.pdf",
         "title": "Tac dong cua cong bo thong tin phat trien ben vung toi chi phi su dung von chu so huu cua cac doanh nghiep cong nghiep nang luong tren TTCK Viet Nam "
@@ -178,6 +184,7 @@ PAPERS = [
     },
     {
         "id": "P4",
+        "batch": 1,
         "short_cite": "Vu & Pham (2023)",
         "file": "8922477b-IJRPR20495.pdf",
         "title": "Research on the Impact of Governance Structure on the Cost of Equity Capital of Food Businesses Listed on the Vietnam Stock Market",
@@ -226,6 +233,7 @@ PAPERS = [
     },
     {
         "id": "P5",
+        "batch": 1,
         "short_cite": "Le, Nguyen & Le (2019)",
         "file": "8a8e6b0c-The_impact_of_corporate_social_responsibility_on_t.pdf",
         "title": "The impact of corporate social responsibility on the cost of equity: an analysis of Vietnamese listed companies",
@@ -276,8 +284,10 @@ PAPERS = [
     },
 ]
 
+PAPERS = PAPERS + BATCH2  # Batch 2 appended; Batch 1 records above are unchanged
+
 CSV_COLUMNS = [
-    ("id", "Paper"), ("short_cite", "Citation"), ("year", "Year"), ("source", "Journal"), ("doi", "DOI"),
+    ("id", "Paper"), ("batch", "Batch"), ("short_cite", "Citation"), ("year", "Year"), ("source", "Journal"), ("doi", "DOI"),
     ("research_question", "Research Question"), ("theory", "Theory"), ("data_source", "Data"), ("sample", "Sample"),
     ("industry", "Industry"), ("period", "Period"), ("independent_vars", "IV"), ("dependent_vars", "DV"),
     ("controls", "Controls"), ("method", "Method"), ("main_findings", "Main Finding"),
@@ -292,13 +302,13 @@ def flat(v):
 
 def main():
     with open(os.path.join(HERE, "literature_database.json"), "w", encoding="utf-8") as f:
-        json.dump({"schema_note": __doc__.strip(), "papers": PAPERS}, f, ensure_ascii=False, indent=2)
+        json.dump({"schema_note": __doc__.strip(), "papers": PAPERS, "duplicate_files": DUPLICATES}, f, ensure_ascii=False, indent=2)
     with open(os.path.join(HERE, "literature_matrix.csv"), "w", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         w.writerow([h for _, h in CSV_COLUMNS])
         for p in PAPERS:
             w.writerow([flat(p[k]) for k, _ in CSV_COLUMNS])
-    print(f"Wrote {len(PAPERS)} papers")
+    print(f"Wrote {len(PAPERS)} papers; {len(DUPLICATES)} duplicate file(s) logged")
 
 
 if __name__ == "__main__":

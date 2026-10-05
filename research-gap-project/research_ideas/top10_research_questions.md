@@ -161,3 +161,86 @@ Items marked **(external, verify)** are institutional or method facts not contai
 - **Gap.** Asked for by P1 [p.71]; already done by P2 [Table 6].
 - **RQ.** Does the dimension ranking (environment > social > economic) found by P2 hold with firm + year FE and non-CAPM COE?
 - **Contribution.** Replication only. **Recommended only as a robustness section** inside RQ2 or RQ4.
+
+---
+---
+
+# Batch 2 Revision (v2): Top-10 Research Questions
+
+**v2 top 10 by score:** G1 (34), G6 (33), G3 (30), G4 (29), G7 re-framed (29), G5 (28), G14 (28), G2 (27), G13 (26), G8 (25).
+
+**Dropped from the top 10 since v1:** G9 (now a resolution question, since P6 tested it) and G10 (replication). Their v1 write-ups above are preserved for the record.
+
+**Common design standard (v2, tightened).** Everything in v1, plus:
+- (vi) report **CAPM and at least one implied COE** side by side. Precedents: P6 uses Easton + Harris–Wang [PDF p.4 / p.1387]; P7 uses residual income [PDF p.3 / p.66]. P7 finds that beta does not explain implied COE [Tables 2–3].
+- (vii) **control for general disclosure** (P7's Botosan-type construct) when estimating CSR-disclosure effects.
+- (viii) report **economically scaled** interaction coefficients (P6 prints 0.000).
+
+## Revisions to existing RQs
+
+### 1. G1: Causal effect of mandated disclosure (revised)
+- **Gap evidence (added):** P6 (2014–2019) also straddles Circular 155, which it calls "the most essential document for regulating CSR in Vietnam" [PDF p.2 / p.1385], and uses GMM rather than the shock. That makes three Vietnamese papers (P1, P5, P6) with the shock unused.
+- **Data (revised):** P6 assembled CSR disclosure for 225 firms from 2014 [PDF p.4 / p.1387], so a pre-mandate window is feasible at scale. P5's 48-firm figure was specific to its sampling.
+- **Measurement (added):** borrow **P8's above-mandatory scoring** [PDF p.9] to separate each firm's pre-mandate compliance gap (items later required) from beyond-compliance disclosure.
+- **Extension (G14):** a governance arm, if comparable Vietnamese governance reforms exist (external, verify). P8 and P9 show such reforms exist elsewhere and were never used for identification [P8 PDF p.4–6; P9 PDF p.1 / p.139].
+
+### 2. G6: Mandated vs voluntary disclosure (revised)
+- **Theory (added):** a unified "beyond-compliance" hypothesis. Investors price what firms do *beyond* what is required, both for disclosure (G6) and for governance (G13; P8 precedent).
+- **H2b (new):** the voluntary-disclosure discount on COE is larger where beyond-compliance governance is stronger (credibility complementarity; G7).
+- **Control (added):** general disclosure (P7 construct), so "voluntary CSR disclosure" is not just general transparency.
+
+### 3. G3: Mechanism (re-scoped)
+- **Gap (revised):** crash risk has been tested once (P6: CSRD → CRASH −0.204***, CRASH → COE +0.142***, Sobel indirect −0.006 [Tables 3–4, PDF p.8 / p.1391]), with inconsistent arithmetic (C11). The liquidity / adverse-selection, estimation-risk and investor-base channels theorised in P7 [PDF p.1–2 / p.64–65] and P1 [p.63] remain untested.
+- **RQ (revised):** which channel carries the disclosure → COE effect in Vietnam: liquidity / adverse selection, investor base, or crash risk?
+- **Method (revised):** simultaneous multi-mediator model (not sequential Baron–Kenny), with bootstrap indirect effects. Mediators are measured *after* report release. Report path coefficients consistently, fixing the C11 problem.
+- **Contribution (revised):** builds directly on P6. A reviewer will compare against it, so the paper must show where crash risk ranks among competing channels.
+
+### 4. G4: Sensitive industries (sharper target)
+- **Gap (added):** P3 is now the only positive estimate among six Vietnamese papers. P6 proposes SOEs in high-polluting industries as future research [PDF p.10 / p.1393].
+- **H4c (new):** the soft-disclosure penalty in sensitive industries is larger for state-owned firms (SOE multitask theory predicts stronger legitimacy-seeking; P6 [PDF p.3 / p.1386]).
+
+### 8. G2: COE construct validity (strengthened)
+- **Gap evidence (added):**
+  - P7: CAPM cannot test disclosure effects [PDF p.3 / p.66]; beta does not explain implied COE (r=−0.027; p=0.672) [Tables 2–3, PDF p.5 / p.68].
+  - The size sign aligns partly with the COE proxy (C6).
+  - Implied COE is feasible: P6, P7, and Refinitiv forecasts (C12).
+- **RQ (revised):** in the same Vietnamese panel, how strongly do CAPM-COE and implied-COE agree, and which disclosure findings survive each?
+
+## New RQs (Batch 2)
+
+### 5 (v2). G7 re-framed: Governance as the credibility channel for CSR disclosure
+- **Gap.** CSR disclosure and governance are studied in separate silos in Vietnam (P1–P3, P5–P6 vs P4). The cross-country logic exists: Chen et al. (2004), as cited in P9 [PDF p.8 / p.146], find disclosure effects only under strong investor protection and governance effects only under weak protection. P9 shows governance labels may be invalid [PDF p.23 / p.161].
+- **RQ.** Is the cost-of-equity benefit of CSR disclosure larger in Vietnamese firms with *substantive* governance (beyond-compliance board and audit-committee practices)?
+- **Theory.** Agency theory: governance monitors reporting. Credibility / discretionary disclosure: verified information is priced.
+- **Mechanism.** Strong boards and audit committees lower the probability that CSR disclosure is cheap talk, so investors update more on it.
+- **H7.** β(CSR disclosure × substantive governance) < 0. The competing **substitution** hypothesis is > 0.
+- **Variables.**
+  - IV: CSR disclosure (P6 / P2 frame).
+  - Moderator: beyond-compliance governance index (P8 logic) vs compliance index (P4 logic).
+  - DV: implied + CAPM COE.
+  - Controls: general disclosure (P7), size, leverage, state share, firm + year FE.
+- **Data.** Annual-report governance sections; Refinitiv / FiinPro.
+- **Identification.** Governance is endogenous. Use lagged governance and mandate timing (Idea 1) as a shifter of disclosure, holding governance fixed.
+- **Contribution.** Links two siloed streams in the Vietnamese literature and tests complementarity vs substitution within one country. **Novelty is capped** by the cross-country work cited in P9.
+
+### 7 (v2). G14 (new): Governance- and disclosure-code reforms as quasi-experiments
+- **Gap.** India (Clause 49, Companies Act 2013) and Pakistan (Code 2002) reforms fall in or before the windows of P8 and P9, which use pooled OLS / LSDV. P9 attributes its null to a reform "transition phase" [PDF p.1 / p.139] without testing it.
+- **RQ.** Do governance-code reforms lower the cost of equity, and more for firms with larger pre-reform compliance gaps?
+- **Theory.** Mandatory governance as commitment; compliance-cost / boilerplate counter-view.
+- **H14.** The post-reform COE decline increases with the pre-reform governance gap.
+- **Data.** Pre/post governance scores (P8-style index); reform dates (external, verify).
+- **Method.** Intensity DiD / event study.
+- **Identification.** Concurrent shocks; anticipation. P8 cites an India Clause 49 event study (Black & Khanna 2007) [PDF p.16], so **India-specific novelty is low**.
+- **Contribution.** For a Vietnam programme, this is best as the governance arm of Idea 1. It is not recommended standalone.
+
+### 9 (v2). G13 (new): Compliance labels vs substantive governance
+- **Gap.** Governance → COE is null or weak with compliance-type measures (P4 [Table 8]; P9 [Tables 6, 10]) and negative with an above-mandatory index (P8 [Table III]). P9: independence labels are uninformative [PDF p.23 / p.161].
+- **RQ.** Does governance measured as beyond-compliance practice predict COE in Vietnam where compliance-label measures do not?
+- **Theory.** Beyond-compliance signalling. Label vs substance (P9).
+- **H13.** A beyond-compliance index predicts lower implied COE; a compliance-label index does not.
+- **Variables.**
+  - Two governance indices built from the same annual reports: compliance (P4 variables) and beyond-compliance (P8 logic, adapted to Vietnamese rules; external, verify).
+  - Substantive independence proxies: tenure, affiliations.
+- **Method.** FE panel; horse race of the two indices; implied + CAPM COE.
+- **Identification.** Associational; strengthen with governance-rule changes if available.
+- **Contribution.** Explains null governance findings (C8, C9). Forms the governance half of the beyond-compliance theory (with G6).

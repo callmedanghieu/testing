@@ -67,3 +67,73 @@
 | Lender risk assessment | P2 [p.1261] | — |
 
 Every mechanism row has an empty "Measured in" cell. This is the clearest **mechanism gap** in the corpus (G3).
+
+---
+---
+
+# Batch 2 Update to the White-Space Maps (v1 matrices above preserved)
+
+## Matrix 1 (v2): Theory × Context, cells filled by Batch 2
+
+| Theory | Broad panel | Sensitive industries | SOE vs private | Pre/post mandate | Stress period |
+|---|---|---|---|---|---|
+| Information asymmetry (−) | ✓ P1, P2, **P6, P7** | ◐ P3 | **✓ P6 (as moderation baseline)** | **?** | ? |
+| Signalling (− for discretionary) | ✓ P2 (asserted) | ? | ? | **?** | ? |
+| Legitimacy | ◐ P2 | ◐ P3 | ? | ? | X |
+| CSR as risk management / crash risk **[B2]** | **✓ P6** | ? | ? | ? | ? (insurance view: P1 cites Godfrey) |
+| SOE multitask vs inefficiency **[B2]** | — | ? (P6 future research: SOEs in polluting industries) | **✓ P6 (direction disputed)** | ? | ? |
+| Investor-protection substitution/complementarity **[B2]** | ◐ P9 (cited only) | ? | ? | ? | ? |
+
+**Change in white space.**
+- The **SOE × disclosure** cell is no longer empty (P6), so it is **not white space any more**, only contested.
+- **Signalling × pre/post mandate** remains the most meaningful empty cell. Three Vietnamese papers (P1, P5, P6) have the data window for it.
+- **New meaningful empty cell: SOE × sensitive industries** (P6's own future-research suggestion). It is theoretically sharp because SOE multitask theory predicts stronger legitimacy pressure on state-owned polluters.
+
+## Matrix 2 (v2): Outcome × Identification design
+
+| Outcome | Pooled / RE | FE | FGLS / SE | **Dynamic GMM [B2]** | DiD / event | IV | Mechanism |
+|---|---|---|---|---|---|---|---|
+| COE: CAPM | ✓ P1–P4, **P9** | ✓ P2, P3, P4 | ✓ P1, P2 | ? | **?** | ? | ? |
+| COE: implied **[B2]** | **✓ P7 (cross-section)** | ? | ? | **✓ P6** | **?** | ? | **✓ P6 (crash risk)** |
+| COE: forward E/P | ✓ P5 | ✓ P5 | ✓ P5 | ? | ? | ? | ? |
+| COE: undefined | **✓ P8** | — | — | — | — | — | — |
+| COE: CAPM vs implied, same sample | **?** | **?** | ? | ? | ? | ? | ? |
+| COD (interest / interest-bearing debt) | ? | ? | ? | ? | **?** | ? | ? |
+| Liquidity / info asymmetry as outcome | ? | ? | ? | ? | **?** | ? | **?** |
+
+**Change in white space.**
+- The **DiD column is still entirely empty after 9 papers.** GMM (P6) fills a "dynamic panel" column but not the exogenous-variation column.
+- **New meaningful empty row: "CAPM vs implied COE in the same sample."** P7's finding that beta does not explain implied COE makes this a substantive question, not housekeeping. If the two proxies diverge, which disclosure results survive?
+
+## Matrix 3 (v2): Disclosure / governance construct × Pricing evidence
+
+| Construct | COE | COD |
+|---|---|---|
+| Aggregate CSR breadth | ✓ P1, P2, P5, **P6** (−); P3 (+) | ✓ P2 |
+| **General (financial) disclosure [B2]** | **✓ P7 (−)** | ? |
+| **CSR disclosure net of general disclosure** | **?** | ? |
+| Mandated items only | ✓ P1 (−) | ? |
+| Voluntary / beyond-mandate disclosure | **?** | **?** |
+| **Beyond-mandate governance [B2]** | **✓ P8 (India; DV undefined)** | ? |
+| Compliance-label governance | ✓ P4 (weak), **P9 (null)** | ? |
+| Hard vs soft environmental disclosure | **?** | **?** |
+| Assured / verified | ? (probably infeasible) | ? |
+
+**Change in white space.**
+- **New meaningful empty cell: CSR disclosure net of general disclosure.** P7 shows general disclosure lowers implied COE. No CSR paper controls for it, so the CSR "effect" may partly be general transparency. This is a cheap, sharp test to embed in Ideas 2 and 4 (and the G2 design standard).
+- **Beyond-mandate governance has India evidence (P8)** but none for Vietnam. Together with the empty "voluntary disclosure" row, it defines a coherent "beyond-compliance" white space (G6 + G13).
+
+## Matrix 4 (v2): Mechanism × Evidence
+
+| Mechanism | Theorised in | Measured in |
+|---|---|---|
+| Liquidity / adverse selection | P1 [p.63], P3 [p.139], **P7 [p.64–65]** | — |
+| Estimation risk | P1 [p.63], **P7 [p.65]** | — |
+| Public/private information structure **[B2]** | **P7 [p.65]** | — |
+| Investor base | P1 (Dhaliwal et al. 2011, cited [p.62]); **P6 (socially conscious investors) [p.1386]** | — |
+| Systematic risk | P1 (Albuquerque, cited [p.62]) | indirectly via CAPM beta |
+| **Crash risk [B2]** | **P6 [p.1386]** | **✓ P6 (DUVOL; mediation, arithmetic inconsistent)** |
+| Compliance cost / risk revelation | P3 [p.144] | — |
+| Lender risk assessment | P2 [p.1261] | — |
+
+**Change.** One mechanism row now has a "measured" entry. The others, including the three channels P7 theorises most explicitly, remain empty.

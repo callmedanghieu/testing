@@ -114,3 +114,97 @@ The machine-readable versions are `literature_database.json` and `literature_mat
 | Main finding | FEM −45.17 (t=−1.16) becomes −45.17*** (t=−6.93) under XTSCC [Tables 6–7] |
 | Limitations (explicit) | Small sample, non-financial only, GRI not suited to Vietnam [PDF p.10 / p.95] |
 | Future research | Circular-155-based index [PDF p.10 / p.95] (P1 later builds one) |
+
+---
+---
+
+# Batch 2 Inventory (added; Batch 1 entries above unchanged)
+
+Five files were received in Batch 2. **Four are new papers (P6–P9). One is a duplicate of P5:** `0f2c53f6-IMFI_2019_03_Le.pdf` has identical whitespace-normalised text except one added Web of Science link on the cover sheet. It is logged in `literature_database.json → duplicate_files` and not counted.
+
+Page maps:
+- P6: printed = PDF + 1383.
+- P7: printed = PDF + 63.
+- P8: no printed pages (online-first), cite PDF pages.
+- P9: printed = PDF + 138.
+
+Minus signs were lost in the text extraction of P6 and P8 tables, so their coefficient signs were **verified on the rendered pages**.
+
+## P6: Thuy, Khuong, Canh & Liem (2022)
+
+| Field | Content |
+|---|---|
+| File | `c9acc018-thuy2022.pdf` (12 pp.) |
+| Title | The mediating effect of stock price crash risk on the relationship between CSR and cost of equity moderated by state ownership: Moderated-mediation analysis |
+| Authors | Cao Thi Mien Thuy, Nguyen Vinh Khuong, Nguyen Thi Canh, Nguyen Thanh Liem (UEL, VNU-HCM) |
+| Year / Source | 2022; *Corporate Social Responsibility and Environmental Management* 29(5), 1384–1395 |
+| DOI | 10.1002/csr.2276 |
+| Research question | Does crash risk mediate, and does state ownership moderate, CSR disclosure → COE? [PDF p.2 / p.1385] |
+| Theory | Information asymmetry; CSR as risk management (idiosyncratic and crash risk); investor base; SOE multitask vs inefficiency [PDF p.2–3 / p.1385–1386] |
+| Hypotheses | H1 CSRD → COE (−); H2 crash risk mediates; H3 the negative effect is stronger with higher state ownership [PDF p.3–4 / p.1386–1387] |
+| Data / sample | 225 non-financial firms with CSR data 2014–2019, 1,340 firm-years (GMM N=816); Refinitiv Eikon [PDF p.4 / p.1387] |
+| DV | **Implied COE**: Easton (2004) with Harris & Wang (2013) cross-sectional earnings forecasts [PDF p.4 / p.1387; App. A] |
+| IV | CSRD: 33 GRI-2016 criteria (6 Ec / 8 E / 19 S) [PDF p.5 / p.1388] |
+| Mediator / moderator | CRASH (DUVOL) / SOE % (mean-centred interaction) |
+| Controls | SIZE, LEV, TANG, ROA, GROW, AGE, industry dummies (no year effects reported) |
+| Method | **System GMM**; Baron–Kenny; Sobel / delta / Monte Carlo [PDF p.5–8 / p.1388–1391] |
+| Main findings | CSRD −0.065*** [Table 2]; CSRD → CRASH −0.204***; CRASH → COE +0.142***; Sobel indirect −0.006 (p=0.029) [Tables 3–4]; SOE × CSRD +0.000*** [Table 5] |
+| Limitations (explicit) | One developing market, non-financial only [PDF p.10 / p.1393] |
+| Future research | Other developing countries; SOEs in high-polluting industries; cross-national [PDF p.10 / p.1393] |
+| Reviewer flags | Abstract says SOE "strengthens" the effect, but the table shows attenuation; mediation arithmetic inconsistent; coefficients printed as 0.000 (see `limitations/evidence_quality_audit.md`) |
+
+## P7: Nguyen & Nguyen (2017)
+
+| Field | Content |
+|---|---|
+| File | `1b16cfff-12231-42481-1-SM.pdf` (7 pp.) |
+| Title | Impact of Corporate Disclosure on Cost of Equity Capital in Vietnam |
+| Authors | Dung Viet Nguyen; Lan Thi Ngoc Nguyen (Foreign Trade University) |
+| Year / Source | 2017; *International Journal of Financial Research* 8(4), 64–70 |
+| DOI | 10.5430/ijfr.v8n4p64 |
+| Theory | Three disclosure–CoC channels: adverse selection, estimation risk, public/private information [PDF p.1–2 / p.64–65] |
+| Sample | 225 non-financial HOSE firms, FY2015 cross-section; FiinPro [PDF p.4 / p.67] |
+| DV | **Implied COE**: residual-income model, 2-year horizon, self-generated forecasts [PDF p.3–4 / p.66–67] |
+| IV | Botosan (1997) annual-report disclosure score (105 points) — **general, not CSR, disclosure** |
+| Controls | Beta, P/B, ln market cap |
+| Method | Cross-sectional OLS, White SE; stepwise and rank regressions [PDF p.5–6 / p.68–69] |
+| Main findings | DSCORE −0.0016*** (t=−4.33); beta n.s.; size + [Table 3]; rank regression confirms [Table 4] |
+| Key argument | CAPM cannot test a disclosure effect: if the model's factors exclude information risk, there is no reason to link its expected returns to disclosure [PDF p.3 / p.66] |
+| Limitations / future research | None stated |
+
+## P8: Srivastava, Das & Pattanayak (2019)
+
+| Field | Content |
+|---|---|
+| File | `f57fe841-srivastava2019.pdf` (21 pp.) |
+| Title | Impact of corporate governance attributes on cost of equity: Evidence from an emerging economy |
+| Authors | Varnita Srivastava; Niladri Das; Jamini Kanta Pattanayak |
+| Year / Source | 2019; *Managerial Auditing Journal* (online-first) |
+| DOI | 10.1108/MAJ-01-2018-1770 |
+| Country | **India** (first non-Vietnamese paper in the corpus) |
+| Theory | Agency; law and finance [PDF p.2–3, 7] |
+| Hypothesis | H1: governance → COE (−) [PDF p.7] |
+| Sample | 319 non-financial S&P BSE 500 firms, 2001–2016, 5,104 firm-years; ProwessIQ; interpolation of missing data [PDF p.8] |
+| DV | COE (%), **construction never described** |
+| IV | CGI: 43 binary items scored 1 only when **above the mandatory minimum**; 7 sub-indices [PDF p.9, 11–13] |
+| Method | Pooled OLS (after Hausman and BP-LM) [PDF p.15] |
+| Main findings | CGI −0.089 (p=0.021); board composition −0.068; audit committee −0.061; ownership structure −0.130 [Table III, PDF p.15] |
+| Limitations | None stated. Future research: other valuation measures [PDF p.18] |
+
+## P9: Shah & Butt (2009)
+
+| Field | Content |
+|---|---|
+| File | `a7eaed52-6_Zulfiqar_Shah2.pdf` (33 pp.; PDF metadata title is wrong) |
+| Title | The Impact of Corporate Governance on the Cost of Equity: Empirical Evidence from Pakistani Listed Companies |
+| Authors | Syed Zulfiqar Ali Shah; Safdar Ali Butt |
+| Year / Source | 2009; *Lahore Journal of Economics* 14(1), 139–171 (cited by P4 and P8) |
+| Country | **Pakistan** |
+| Theory | Agency; signalling of investor protection; investor-protection substitution/complementarity (Klapper & Love; Chen et al. 2004) [PDF p.4–8 / p.142–146] |
+| Sample | 114 non-financial KSE firms, 2003–2007 (57 textile) [PDF p.9 / p.147] |
+| DV | CAPM COE, 2-year monthly beta [PDF p.11 / p.149] |
+| IV | Ownership concentration, managerial ownership, board independence, audit committee independence, board size; weighted CGS [App. B] |
+| Method | OLS; industry-dummy and industry+year-dummy LSDV [PDF p.12–22 / p.150–160] |
+| Main findings | Only size robustly negative; board size −0.017 (p≈0.09); **CGS positive, n.s.** (p=0.85–0.91) [Tables 4–10] |
+| Limitations (explicit) | Governance score limited by data [PDF p.25 / p.163] |
+| Future research | More governance variables; other Ke models [PDF p.25 / p.163] |

@@ -188,3 +188,72 @@ Design standard G2 (multi-proxy COE, correct timing, firm+year FE) applies to al
 ```
 
 A realistic programme: Idea 2 first (cheapest data, reuses the P2/P3 GRI frame), then Idea 1 (the flagship, needing pre-mandate hand-collection), with Ideas 3 and 4 as sections or companion papers.
+
+---
+---
+
+# Batch 2 Revision (v2): Top-5 Research Opportunities
+
+**The identity and order of the top 5 are unchanged after Batch 2.** Each idea is revised below with new literature support, design changes, risk updates and re-scored values. The v1 write-ups above remain the base text.
+
+## Idea 1 (flagship) v2: Disclosure mandates as a quasi-experiment
+- **New literature support:**
+  - P6 (2014–2019, 225 firms) straddles Circular 155, calls it "the most essential document for regulating CSR in Vietnam" [PDF p.2 / p.1385], and still estimates GMM without exploiting it.
+  - That makes 0 quasi-experiments in 9 papers.
+  - P9 attributes its null to a post-reform "transition phase" [PDF p.1 / p.139], the kind of claim only a pre/post design can test.
+- **Data risk downgraded.** P6 shows CSR disclosure data for 225 firms from 2014 [PDF p.4 / p.1387]. The main v1 risk (P5's 48 firms in 2014) is substantially reduced.
+- **Design upgrades:**
+  - (a) Measure each firm's pre-mandate **compliance gap** with P8-style above-mandatory scoring [PDF p.9].
+  - (b) Outcomes: CAPM **and** implied COE (P6 Easton + Harris–Wang; P7 residual income), since they can diverge (P7 [Tables 2–3]).
+  - (c) Control for general disclosure (P7).
+  - (d) Use P6's GMM estimate as the benchmark the DiD estimate is compared against.
+- **Extension:** governance-reform arm (G14), if Vietnamese reform dates qualify (external, verify).
+- **Scores:** Novelty 4/5 (unchanged) · Feasibility **4/5** (↑ from 3.5) · Overall **4.3/5** (↑ from 4.1).
+
+## Idea 2 v2: Signal or boilerplate, within a "beyond-compliance" theory
+- **New literature support:**
+  - P8 operationalises beyond-compliance *governance* by scoring 1 only above the mandatory minimum [PDF p.9], and finds governance lowers COE in India [Table III].
+  - P6 stresses that Vietnam's framework "has not yet mandated full implementation of CSR activities" and urges firms to supplement required disclosures [PDF p.10 / p.1393].
+  - P9 shows compliance labels (independence) carry no price signal [PDF p.23 / p.161].
+- **Reframed RQ:** do investors price beyond-compliance disclosure (and beyond-compliance governance) while ignoring compliance-level disclosure and governance?
+- **Added hypothesis H2b:** voluntary disclosure is priced more where beyond-compliance governance is stronger (credibility complementarity; G7/G13).
+- **Added control:** general disclosure (P7). Otherwise, "voluntary CSR disclosure" may just be general transparency (white-space Matrix 3, v2).
+- **Scores:** Novelty 4/5 · Feasibility 4.5/5 · Overall **4.2/5** (↑ from 4.1, for stronger theory framing).
+
+## Idea 3 v2: Channel horse race (re-scoped)
+- **What changed:** P6 tests crash risk as a mediator (Sobel indirect −0.006, 18.5% of the total effect [Table 4, PDF p.8 / p.1391]). Its path arithmetic is inconsistent (C11). Idea 3 can no longer claim "first mechanism test" in Vietnam.
+- **Revised RQ:** which channel carries the disclosure → COE effect: liquidity / adverse selection, estimation risk, investor base (foreign / institutional), or crash risk?
+- **Theory (added):** P7 gives the explicit three-channel framework (adverse selection, estimation risk, public/private information) [PDF p.1–2 / p.64–65].
+- **Method (revised):** simultaneous multi-mediator model with bootstrap CIs; crash risk (DUVOL, as in P6 [App. B]) included as a competing mediator; consistent reporting of path products.
+- **Main risk (added):** reviewers will expect explicit engagement with P6.
+- **Scores:** Novelty **3.5/5** (↓ from 4) · Feasibility 4/5 · Overall **3.7/5** (↓ from 3.9).
+
+## Idea 4 v2: Hard vs soft environmental disclosure in sensitive industries
+- **What changed:** P6 and P7 add two more negative estimates (implied COE), so P3's positive sign is now the only exception among six Vietnamese papers. That makes the industry-context explanation a sharper, falsifiable target. P6 suggests studying SOEs in high-polluting industries [PDF p.10 / p.1393].
+- **Added hypothesis H4c:** the soft-disclosure penalty in sensitive industries is larger for SOEs (SOE multitask theory, P6 [PDF p.3 / p.1386]).
+- **Added replication arm:** re-estimate P3's energy sample with implied COE and year FE. If the positive sign disappears, C1 is a CAPM/specification artefact; if it persists with hard/soft separation, it is substantive.
+- **Scores:** Novelty 3.5/5 · Feasibility 4/5 · Overall **3.8/5** (↑ from 3.7, for a sharper falsification target).
+
+## Idea 5 v2: Creditor channel
+- **No Batch 2 paper studies the cost of debt.** The gap is unchanged; Batch 2 adds no new support or competition.
+- **Minor addition:** P9 frames high WACC as the core deterrent for family firms [PDF p.3 / p.141], which supports a WACC/COD extension conceptually, but provides no evidence.
+- **Scores:** unchanged (Novelty 4/5 · Feasibility 3.5/5 · Overall 3.5/5).
+
+## Runners-up after Batch 2 (not in the top 5, with reasons)
+| Gap | Score | Why not top 5 |
+|---|---|---|
+| G7 (governance as credibility moderator) | 29 | Overlaps G6/G13; novelty capped by Chen et al. (2004) cited in P9 [PDF p.8 / p.146]. **Embedded as H2b in Idea 2** |
+| G14 (reforms as quasi-experiments) | 28 | Governance arm of Idea 1. India-specific novelty low (P8 cites Black & Khanna 2007 [PDF p.16]) |
+| G13 (governance measurement validity) | 26 | Strong as the governance half of Idea 2's beyond-compliance theory; narrow alone |
+| G9 (SOE moderation) | 25 | Tested by P6; remains a moderator inside Ideas 1, 3, 4 |
+
+## How the five ideas fit together (v2)
+```
+Idea 1 (mandate shock, compliance-gap intensity) ── exogenous disclosure variation ──► Ideas 2, 3, 4, 5
+Idea 2 (beyond-compliance: disclosure + governance) ── key heterogeneity test inside Idea 1
+Idea 3 (channel horse race incl. P6's crash risk) ── explains WHY
+Idea 4 (hard vs soft, ESI, SOE) ── resolves C1 (P3 now sole outlier)
+Idea 5 (creditor channel) ── extends to debt
+Design standard G2 v2: CAPM + implied COE, release-dated disclosure, firm+year FE, control for general disclosure (P7),
+                       economically scaled interactions (unlike P6's 0.000)
+```

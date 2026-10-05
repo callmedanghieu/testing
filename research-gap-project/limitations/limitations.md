@@ -56,3 +56,56 @@
 | Industries | Energy (P3) and food (P4) single-industry results do not generalise. Multi-industry papers do not test heterogeneity |
 | Firms | Large caps dominate (P1, P2). Small UPCOM firms appear only in P3 |
 | Economic conditions | 2014–2023 includes COVID (P2 dummy). No test of whether the disclosure effect changes with market stress, though P3's literature review notes that crisis-period effects may weaken [PDF p.3 / p.140] |
+
+---
+---
+
+# Batch 2 Additions (Batch 1 sections A–E above unchanged)
+
+## A. Explicit limitations: Batch 2 papers
+
+| Paper | Limitation | Source |
+|---|---|---|
+| P6 | Non-financial firms from one developing market; may not generalise to other institutional settings | [PDF p.10 / p.1393] |
+| P6 | Future work: other developing countries; SOEs in high-polluting industries; cross-national samples | [PDF p.10 / p.1393] |
+| P7 | No limitations section. Concedes self-generated forecasts, because analyst forecasts were unavailable in Vietnam | [PDF p.3 / p.66] |
+| P8 | None stated | — |
+| P9 | Governance score limited by unavailability of published governance data | [PDF p.25 / p.163] |
+| P9 | Future work: more governance variables; estimate Ke with other models | [PDF p.25 / p.163] |
+| P9 | True board independence cannot be determined from published statements | [PDF p.24 / p.162] |
+
+## B. Methodological limitations [INFERENCE]
+
+7. **GMM is not a substitute for exogenous variation (P6).** System GMM with internal instruments addresses dynamic panel bias. It is weaker against persistent omitted traits correlated with both CSR disclosure and COE. Year effects are not reported, and Circular 155 sits inside the 2014–2019 window unused.
+8. **Mediation by Baron–Kenny / Sobel (P6)** identifies correlational paths, not causal mechanisms. The mediator (crash risk) is itself endogenous to the same firm traits. The reported path arithmetic is inconsistent (contradiction C11).
+9. **Cross-section (P7)** cannot separate disclosure from time-invariant firm quality. The assumption that disclosure policy is stable over time is untested [PDF p.4 / p.67].
+10. **Undefined dependent variable (P8):** the COE estimation method is never described, so the result cannot be replicated or interpreted.
+11. **"Fixed effects" mislabelled (P8, P9).** P8 reports pooled OLS but discusses FE [PDF p.16]. P9's "fixed effects" are industry dummies [PDF p.14–15 / p.152–153]. Neither controls for firm heterogeneity.
+12. **Governance reforms not used for identification (P8, P9):** India Clause 49 / Companies Act 2013; Pakistan Code 2002, which P9 calls a "transition phase" [PDF p.1 / p.139].
+
+## C. Data limitations [INFERENCE unless marked]
+
+| Issue | Detail |
+|---|---|
+| Sample selection | P6 keeps industry leaders (≥90% of industry assets) and drops negative-earnings firms from the Easton estimation [PDF p.4 / p.1387; App. A]. P8 interpolates/extrapolates missing data and back-fills index replacements [PDF p.8]. P9's sample is textile-dominated (57/114) [PDF p.9 / p.147] |
+| Measurement of COE | Implied COE via model-based forecasts (P6 Harris–Wang; P7 ROE × plowback), which can tie COE mechanically to profitability and payout. CAPM with negative values (P9 min −0.93). **Undefined (P8)** |
+| Measurement of governance | Above-mandatory scoring (P8) vs banded percentage scores (P9) vs raw attributes (P4). Independence labels may be uninformative (P9 [EXPLICIT, p.161]) |
+| Missing variables | General disclosure is never controlled for in the CSR papers. Investor protection (country level) is discussed in P9 but untestable within single-country designs |
+| Geography | Now 3 countries, but **no paper is cross-national**, and measures are not comparable |
+| Time | Batch 2 adds older periods (2001–2007, P8/P9; 2015, P7; 2014–2019, P6). **Still nothing after 2023** |
+
+## D. Theoretical limitations [INFERENCE]
+
+6. **Mechanism theory now partly operationalised (P6) but narrowly.** Crash risk is one of several channels. P7's trilogy (adverse selection, estimation risk, public/private information) remains untested in Vietnam.
+7. **SOE theory gives opposite predictions** (multitask vs inefficiency; P6 [p.1386]). P6's own reporting conflict leaves the question open.
+8. **Governance–disclosure interplay remains untheorised in Vietnam**, though P9 points to the substitution/complementarity logic of Chen et al. (2004) [PDF p.8 / p.146].
+9. **CSR disclosure vs general disclosure.** No theory or test separates CSR-specific information from general transparency (P7 construct vs P1–P3, P5, P6 constructs).
+
+## E. External validity limitations [INFERENCE]
+
+| Dimension | Concern |
+|---|---|
+| Countries | India and Pakistan governance papers widen geography but use incompatible designs. They support "results are institution-dependent" (P9's investor-protection argument) rather than generalisation |
+| Industries | P9 textile-dominated; P6 industry leaders only; P7 HOSE-only |
+| Firms | P6 and P8 skew to large firms; small and UPCOM firms remain under-represented (only P3) |
+| Economic conditions | P9 shows large year effects (2007 dummy −0.287) [Table 6], so CAPM-COE is strongly time-varying. Designs without year effects (P1, P3, P6) are exposed to this |

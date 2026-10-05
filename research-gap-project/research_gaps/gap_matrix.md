@@ -44,3 +44,55 @@ Page references: `[PDF p.X / p.Y]`. Full claim log: `source_traceability/claims_
 | G10 E/S/Ec decomposition | B | Done by P2 [Table 6] | Little beyond replication | P1 call [p.71] | Low marginal value | Fold into G4/G6 as heterogeneity | P1, P2 |
 | G11 Non-linearity | B | Cited only (P2 [p.1261]) | Mechanism for a turning point | None | Low | **Rejected** | P2 |
 | G12 Governance structure → COE | C | P4 weak/inconsistent | Only a re-run | — | Low | **Rejected**; governance re-enters as a credibility moderator in G7 | P4 |
+
+---
+---
+
+# Batch 2 Update to Phases 7–9 (Batch 1 matrix above unchanged)
+
+## Phase 7 (v2): Re-screen by gap type after Batch 2
+
+| Gap type | What Batch 2 changes | Candidates (v2) |
+|---|---|---|
+| 1. Theoretical | P6 states competing SOE predictions. P7 states the disclosure-economics trilogy. P9 introduces the substitution/complementarity logic between disclosure, governance and investor protection | G6, G4, **G7 (re-framed)** |
+| 2. Empirical | No Batch 2 paper studies COD/WACC. Liquidity and investor-base channels still untested | G5, G3 (re-scoped) |
+| 3. Contradictory evidence | Disclosure–COE sign now 5:1 (C1 narrower). SOE moderation tested but self-contradictory (C10). Governance index sign differs India vs Pakistan (C8) | G4, G9 (downgraded), G13 |
+| 4. Methodological | GMM arrives (P6), but still **no DiD/IV/event study in 9 papers**. A third Vietnamese paper straddles Circular 155 unused (P6). India/Pakistan governance reforms also unused | **G1 (strengthened)**, **G14 (new)** |
+| 5. Measurement | Implied COE appears in Vietnam (P6, P7). Beta does not explain implied COE (P7). Size sign aligns partly with the proxy (C6). Governance measurement validity questioned (P9). Above-mandatory scoring precedent (P8) | **G2 (strengthened)**, **G13 (new)** |
+| 6. Contextual | India and Pakistan added, but designs are incompatible | G15 (new, low) |
+| 7. Temporal | Older periods added; nothing after 2023 | G8 |
+| 8. Mechanism | **First mechanism test (crash risk, P6)**, with inconsistent arithmetic (C11). Liquidity, adverse selection and investor base untested | G3 (re-scoped) |
+| 9. Heterogeneity | First moderator test (SOE, P6) | G9 (downgraded), G4 |
+| 10. Data | Refinitiv carries 1–2-year forecasts for Vietnamese firms (P6, C12). P6 shows CSR data for 225 firms from 2014, so pre-mandate panels are feasible | G1 feasibility ↑, G2 feasibility ↑ |
+
+## Phase 8 (v2): Weak-gap filter, additional rejections
+
+| Candidate | Why rejected / downgraded |
+|---|---|
+| "Replicate P8's governance index in Vietnam" | Index construction alone is not a gap. P8's DV is undefined, so even the benchmark is uninterpretable. **Rejected**; the measurement *validity* question survives as G13 |
+| "Test crash risk as a mediator in another country" (P6 future research [p.1393]) | Geographic replication of a mechanism whose Vietnamese evidence is itself inconsistent. **Rejected** as a standalone gap; a credible *re-test* in Vietnam is folded into G3 |
+| "State ownership moderates CSR → COE" as a novel test | **Downgraded (G9):** P6 already tests it. Remaining value is resolution, with economically scaled coefficients and better identification |
+| "Cross-national CSR → COE study" (P6 future research) | Data-intensive, and P9/P1 already cite cross-country results (Chen et al. 2004; Breuer et al. 2018). **Low priority (G15)** |
+
+## Phase 9 (v2): Impact of Batch 2 on existing gaps
+
+| Gap | Batch 1 status | Batch 2 evidence | v2 status |
+|---|---|---|---|
+| **G1** Causal effect of mandated disclosure | Unused shock inside P1, P5, P2, P3 windows; feasibility risk (P5: 48 firms in 2014) | P6's 2014–2019 window also straddles Circular 155, which P6 calls the key CSR regulation [PDF p.2 / p.1385], yet no DiD. **P6 has CSR data for 225 firms from 2014** [PDF p.4 / p.1387]. P9 attributes its results to a post-reform "transition phase" [PDF p.1 / p.139] without testing it | **Strengthened.** Novelty unchanged (still 0 quasi-experiments in 9 papers); **data feasibility upgraded** |
+| **G2** COE construct validity | Design standard; implied COE thought infeasible (P4) | P7: CAPM cannot test disclosure [PDF p.3 / p.66]; beta does not explain implied COE [Tables 2–3]. P6/P7 show implied COE is feasible; Refinitiv carries 1–2-year forecasts [PDF p.4 / p.1387]. Size sign aligns partly with the proxy (C6) | **Strengthened and feasible.** Still no within-sample CAPM-vs-implied comparison in any paper |
+| **G3** Mechanism | Asserted, never measured | Crash-risk channel tested (P6), but the arithmetic is inconsistent (C11). P7's channels remain untested | **Re-scoped:** liquidity / adverse selection / investor-base channels, plus a credible horse race against crash risk. Novelty ↓ one notch |
+| **G4** Sensitive industries | C1 unresolved | P3 now the sole positive estimate among 6 Vietnamese papers. P6 proposes SOEs in high-polluting industries as future research [PDF p.10 / p.1393]. Still no ESI interaction anywhere | **Unchanged, sharper target** |
+| **G5** Cost of debt | One study (P2) | No Batch 2 paper studies COD | **Unchanged** |
+| **G6** Mandated vs voluntary | Untested | P8 scores governance only *above* the mandatory minimum [PDF p.9], a design precedent. P6 notes Vietnam's legal framework "has not yet mandated full implementation of CSR activities" and urges supplementing required disclosures [PDF p.10 / p.1393]. Still no split of *disclosure* items | **Unchanged score; stronger precedent** |
+| **G7** Credibility / governance interplay | Data-constrained (assurance rare) | P9 cites Chen et al. (2004): disclosure lowers COE only under strong investor protection, governance only under weak [PDF p.8 / p.146]. P8/P9 governance measures are feasible as moderators. **But Chen et al. already studied disclosure + governance jointly in emerging markets** | **Re-framed** to "governance as a credibility moderator of CSR disclosure in Vietnam". Feasibility ↑, novelty capped by the cited cross-country work |
+| **G8** Time variation | One COVID dummy | P9 year dummies show large CAPM-COE time variation [Table 6] | Unchanged (supports the year-FE design standard) |
+| **G9** SOE moderator | Untested; C3 | **Tested by P6** (attenuation per table; "strengthens" per abstract) | **Downgraded** to a resolution question |
+| G10–G12 | Weak / rejected | — | Unchanged |
+
+## Phase 9 (v2): New gap rows
+
+| Gap ID | Research stream | Existing evidence | Missing knowledge | Evidence of gap | Why it matters | Possible solution | Key papers |
+|---|---|---|---|---|---|---|---|
+| **G13** Governance measurement validity: compliance labels vs substantive governance | C | Governance → COE weak or null with compliance-type measures: P4 (individual attributes, 10% only) [Table 8]; P9 (independence n.s., CGS n.s.) [Tables 6, 10]. Negative with above-mandatory index: P8 [Table III] | Whether governance lowers COE when measured as *substantive / beyond-compliance* practice rather than formal labels, in Vietnam | P9: independence labels are uninformative where law does not distinguish INEDs [PDF p.23 / p.161]; P8: scores only above-mandatory practice [PDF p.9]; P4: BOARDP mean 0.156, n.s. [Table 2]; C8, C9 | Explains why governance → COE findings are null in some markets. Same logic as G6 (compliance vs voluntary) applied to governance, so the two together form one theory of "beyond-compliance" signals | Build a Vietnamese beyond-compliance governance index (P8 logic) vs a compliance index (P4 logic); compare predictive power for implied COE; test independence substance (tenure, ties) vs label | P4, P8, P9 |
+| **G14** Governance / disclosure mandates as quasi-experiments | C (and A/B) | Governance reforms named but unused: India Clause 49 / Companies Act 2013 (P8 [PDF p.4–6]); Pakistan Code 2002 (P9 [PDF p.1–2 / p.139–140]). Disclosure mandates unused (G1) | Causal effect of governance-code reforms on COE in the region, and in Vietnam if comparable reforms exist (external, verify) | P9 attributes its null to the reform "transition phase" [PDF p.1 / p.139] but never tests pre/post. P8 lists a reform timeline [PDF p.4–6] and uses pooled OLS | Converts the governance stream's weakest feature (identification) into a design | Event-study / DiD around reform dates, with compliance-gap intensity; for Vietnam, best folded into Idea 1 as a governance extension | P8, P9 (+ G1 papers) |
+| **G15** Cross-country institutional moderation | A, C | Single-country designs only; investor-protection conditionality cited (P1 Breuer/Feng [p.62]; P9 Klapper & Love, Chen et al. [p.144, 146]) | Whether disclosure and governance effects on COE depend on country investor protection | Corpus spans 3 countries with non-comparable designs; P6 calls for cross-national samples [PDF p.10 / p.1393] | Theory-relevant but already studied in cited cross-country work | Harmonised multi-country panel | P1, P6, P8, P9 |

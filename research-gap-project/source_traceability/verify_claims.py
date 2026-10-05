@@ -7,7 +7,7 @@ import os
 import re
 import sys
 
-from claims import CLAIMS, OFFSET, TEXT
+from claims import CLAIMS, DUPLICATES, OFFSET, TEXT
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TEXT_DIR = os.path.join(HERE, "..", "papers", "text")
@@ -27,7 +27,7 @@ def main():
     pages = {p: load_pages(f) for p, f in TEXT.items()}
     rows, failures = [], []
     for cid, paper, pdf_page, loc, claim, anchor, used in CLAIMS:
-        printed = pdf_page + OFFSET[paper]
+        printed = "n/a" if OFFSET[paper] is None else pdf_page + OFFSET[paper]
         if anchor is None:
             status = "VISUAL (image table, checked on rendered page)"
         elif norm(anchor) in pages[paper].get(pdf_page, ""):
@@ -36,6 +36,16 @@ def main():
             status = "NOT FOUND"
             failures.append(cid)
         rows.append([cid, paper, pdf_page, printed, loc, claim, anchor or "", status, used])
+
+    dup_rows = []
+    for dup_file, of in DUPLICATES:
+        a = norm(open(os.path.join(TEXT_DIR, dup_file), encoding="utf-8").read())
+        b = norm(open(os.path.join(TEXT_DIR, TEXT[of]), encoding="utf-8").read())
+        # strip the cover-sheet author block (PDF p.1) and compare the article body
+        same_body = a.split("===== PAGE 2 =====")[1] == b.split("===== PAGE 2 =====")[1]
+        dup_rows.append((dup_file, of, "BODY IDENTICAL" if same_body else "DIFFERS"))
+        if not same_body:
+            failures.append(dup_file)
 
     header = ["claim_id", "paper", "pdf_page", "printed_page", "location", "claim", "verbatim_anchor", "status", "used_in"]
     with open(os.path.join(HERE, "claims_register.csv"), "w", encoding="utf-8", newline="") as f:
@@ -50,6 +60,10 @@ def main():
         n_ver = sum(r[7].startswith("VERIFIED") for r in rows)
         n_vis = sum(r[7].startswith("VISUAL") for r in rows)
         f.write(f"**{len(rows)} claims · {n_ver} text-verified · {n_vis} visually verified · {len(failures)} not found**\n\n")
+        f.write("## Duplicate-file check\n\n| File | Duplicate of | Article body (PDF p.2 onward) |\n|---|---|---|\n")
+        for d in dup_rows:
+            f.write(f"| {d[0]} | {d[1]} | {d[2]} |\n")
+        f.write("\n## Claims\n\n")
         f.write("| ID | Paper | PDF p. | Printed p. | Location | Claim | Anchor | Status | Used in |\n|---|---|---|---|---|---|---|---|---|\n")
         for r in rows:
             f.write("| " + " | ".join(str(x).replace("|", "\\|") for x in r) + " |\n")
