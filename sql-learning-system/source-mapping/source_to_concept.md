@@ -5,284 +5,359 @@ Every concept, exercise, debugging item and review card points back to transcrip
 
 | Short name | Original upload |
 |---|---|
+| `lecture0` (Querying) | `cs50_sql_lecture0-720p-en.txt` |
+| `lecture1` (Relating) | `cs50_sql_lecture1-720p_resize-en.txt` |
 | `lecture2` (Designing) | `cs50_sql_lecture2-720p-en.txt` |
 | `lecture3` (Writing) | `cs50_sql_lecture3-720p-en.txt` |
 | `lecture4` (Viewing) | `cs50_sql_lecture4-720p-en.txt` |
 | `lecture5` (Optimizing) | `cs50_sql_lecture5-720p_MBR-en.txt` |
 | `lecture6` (Scaling) | `cs50_sql_lecture6-720p_MBR-en.txt` |
 
+## lecture0 · Querying
+
+| Lines | Item | Kind |
+|---|---|---|
+| [L64-169](../sources/lecture0.txt) | **C0.1** Databases, DBMSs, SQL | concept |
+| [L251-360](../sources/lecture0.txt) | **C0.2** SELECT / FROM | concept |
+| [L286-298](../sources/lecture0.txt) | M0-E01 Titles and authors | exercise · source-demo |
+| [L306-315](../sources/lecture0.txt) | R0-03 | review |
+| [L366-374](../sources/lecture0.txt) | R0-01 | review |
+| [L366-396](../sources/lecture0.txt) | **C0.3** LIMIT | concept |
+| [L370-392](../sources/lecture0.txt) | M0-E02 Peek with LIMIT | exercise · source-demo |
+| [L397-515](../sources/lecture0.txt) | **C0.4** WHERE, =, != / <>, NOT | concept |
+| [L410-426](../sources/lecture0.txt) | M0-E03 The 2023 longlist | exercise · source-demo |
+| [L471-515](../sources/lecture0.txt) | M0-E04 Everything that isn't hardcover | exercise · source-demo |
+| [L517-564](../sources/lecture0.txt) | **C0.5** AND / OR / parentheses | concept |
+| [L524-530](../sources/lecture0.txt) | D0-02 AND without parentheses | debug |
+| [L547-564](../sources/lecture0.txt) | M0-E05 Recent paperbacks with AND, OR and parentheses | exercise · source-demo |
+| [L587-633](../sources/lecture0.txt) | **C0.6** NULL | concept |
+| [L596-633](../sources/lecture0.txt) | D0-01 The NULL that never matches | debug |
+| [L598-606](../sources/lecture0.txt) | R0-02 | review |
+| [L610-622](../sources/lecture0.txt) | M0-E06 Books without a translator | exercise · source-demo |
+| [L638-830](../sources/lecture0.txt) | **C0.7** LIKE, % and _ | concept |
+| [L659-686](../sources/lecture0.txt) | M0-E07 "love" anywhere in the title | exercise · source-demo |
+| [L710-730](../sources/lecture0.txt) | M0-E08 Titles that start with the word "The" | exercise · source-question |
+| [L765-780](../sources/lecture0.txt) | M0-E09 Was it Pyre or Pire? | exercise · source-demo |
+| [L805-814](../sources/lecture0.txt) | R0-08 | review |
+| [L834-930](../sources/lecture0.txt) | **C0.8** Ranges and BETWEEN | concept |
+| [L846-888](../sources/lecture0.txt) | M0-E10 Books from 2019 to 2022 | exercise · source-question |
+| [L878-883](../sources/lecture0.txt) | R0-09 | review |
+| [L905-920](../sources/lecture0.txt) | M0-E11 Highly rated and widely rated | exercise · source-demo |
+| [L923-930](../sources/lecture0.txt) | M0-E12 Short reads | exercise · source-demo |
+| [L951-971](../sources/lecture0.txt) | **C0.7** LIKE, % and _ | concept |
+| [L963-971](../sources/lecture0.txt) | R0-04 | review |
+| [L976-1130](../sources/lecture0.txt) | **C0.9** ORDER BY | concept |
+| [L1002-1017](../sources/lecture0.txt) | R0-06 | review |
+| [L1030-1076](../sources/lecture0.txt) | M0-E13 The top 10, ties broken by votes | exercise · source-demo |
+| [L1097-1130](../sources/lecture0.txt) | M0-E14 Reverse alphabetical order | exercise · source-question |
+| [L1131-1343](../sources/lecture0.txt) | **C0.10** Aggregate functions | concept |
+| [L1202-1215](../sources/lecture0.txt) | M0-E15 A presentable average | exercise · source-demo |
+| [L1240-1269](../sources/lecture0.txt) | M0-E16 Highest, lowest, total | exercise · source-demo |
+| [L1305-1325](../sources/lecture0.txt) | R0-07 | review |
+| [L1330-1343](../sources/lecture0.txt) | M0-E17 COUNT(*) or COUNT(column)? | exercise · source-question |
+| [L1336-1343](../sources/lecture0.txt) | R0-05 | review |
+| [L1344-1401](../sources/lecture0.txt) | **C0.11** DISTINCT | concept |
+| [L1349-1357](../sources/lecture0.txt) | D0-04 Counting publishers twice | debug |
+| [L1349-1401](../sources/lecture0.txt) | M0-E18 How many different publishers? | exercise · source-question |
+| [L1363-1377](../sources/lecture0.txt) | D0-03 A column that doesn't exist, but no error | debug |
+
+## lecture1 · Relating
+
+| Lines | Item | Kind |
+|---|---|---|
+| [L48-146](../sources/lecture1.txt) | **C1.1** Relationships | concept |
+| [L119-146](../sources/lecture1.txt) | R1-01 | review |
+| [L147-246](../sources/lecture1.txt) | **C1.2** ER diagrams | concept |
+| [L167-210](../sources/lecture1.txt) | M1-E01 Read the ER diagram | exercise · source-question |
+| [L247-482](../sources/lecture1.txt) | **C1.3** Primary and foreign keys | concept |
+| [L317-324](../sources/lecture1.txt) | R1-02 | review |
+| [L320-334](../sources/lecture1.txt) | D1-02 Duplicate rows from a one-to-many join | debug |
+| [L340-380](../sources/lecture1.txt) | M1-E02 Why not use the ISBN as the primary key? | exercise · source-question |
+| [L393-412](../sources/lecture1.txt) | M1-E03 What does (23, 1) in authored mean? | exercise · source-question |
+| [L491-861](../sources/lecture1.txt) | **C1.4** Subqueries | concept |
+| [L553-584](../sources/lecture1.txt) | M1-E04 Books from Fitzcarraldo Editions | exercise · source-question |
+| [L623-646](../sources/lecture1.txt) | D1-06 no such table | debug |
+| [L640-680](../sources/lecture1.txt) | M1-E05 Books from MacLehose Press | exercise · source-demo |
+| [L682-731](../sources/lecture1.txt) | M1-E06 Average rating of In Memory of Memory | exercise · source-demo |
+| [L736-782](../sources/lecture1.txt) | M1-E22 Tom Hanks's movies | exercise · source-demo |
+| [L791-835](../sources/lecture1.txt) | M1-E07 Who wrote The Birthday Party? | exercise · source-demo |
+| [L862-985](../sources/lecture1.txt) | **C1.5** IN | concept |
+| [L896-941](../sources/lecture1.txt) | M1-E08 Fernanda Melchor's books, with IN | exercise · source-demo |
+| [L969-984](../sources/lecture1.txt) | D1-04 `=` with a subquery that returns many rows | debug |
+| [L975-984](../sources/lecture1.txt) | R1-03 | review |
+| [L1022-1162](../sources/lecture1.txt) | **C1.6** JOIN … ON | concept |
+| [L1025-1032](../sources/lecture1.txt) | M1-E13 Author names next to titles, with JOIN | exercise · source-demo |
+| [L1108-1162](../sources/lecture1.txt) | M1-E09 Join sea lions to their migrations | exercise · source-demo |
+| [L1119-1132](../sources/lecture1.txt) | D1-01 Joined on the wrong column | debug |
+| [L1149-1162](../sources/lecture1.txt) | D1-08 LEFT JOIN wanted, INNER JOIN written | debug |
+| [L1149-1162](../sources/lecture1.txt) | R1-04 | review |
+| [L1208-1379](../sources/lecture1.txt) | **C1.7** OUTER JOINs | concept |
+| [L1224-1251](../sources/lecture1.txt) | M1-E10 Keep every tracked sea lion (LEFT JOIN) | exercise · source-demo |
+| [L1274-1287](../sources/lecture1.txt) | R1-05 | review |
+| [L1274-1288](../sources/lecture1.txt) | M1-E11 Keep everything (FULL JOIN) | exercise · source-demo |
+| [L1380-1399](../sources/lecture1.txt) | M1-E12 Let the column names decide (NATURAL JOIN) | exercise · source-demo |
+| [L1380-1399](../sources/lecture1.txt) | R1-10 | review |
+| [L1380-1404](../sources/lecture1.txt) | **C1.8** NATURAL JOIN | concept |
+| [L1408-1663](../sources/lecture1.txt) | **C1.9** Sets: UNION / INTERSECT / EXCEPT | concept |
+| [L1461-1466](../sources/lecture1.txt) | M1-E18 Homework: in exactly one of the two sets | exercise · source-assigned |
+| [L1504-1528](../sources/lecture1.txt) | M1-E14 Authors and translators in one list, labelled | exercise · source-demo |
+| [L1530-1542](../sources/lecture1.txt) | M1-E15 Who is both an author and a translator? | exercise · source-demo |
+| [L1537-1542](../sources/lecture1.txt) | R1-08 | review |
+| [L1543-1556](../sources/lecture1.txt) | M1-E16 Authors who are only authors | exercise · source-demo |
+| [L1559-1600](../sources/lecture1.txt) | M1-E17 Finish the lecture's query: the book Hughes and Jull Costa share | exercise · source-assigned |
+| [L1652-1662](../sources/lecture1.txt) | D1-09 UNION of mismatched columns | debug |
+| [L1652-1662](../sources/lecture1.txt) | R1-09 | review |
+| [L1664-1839](../sources/lecture1.txt) | **C1.10** GROUP BY / HAVING | concept |
+| [L1683-1703](../sources/lecture1.txt) | D1-03 One average instead of one per book | debug |
+| [L1704-1713](../sources/lecture1.txt) | D1-05 Grouped by the wrong column | debug |
+| [L1712-1714](../sources/lecture1.txt) | M1-E23 Tally raw votes | exercise · source-demo |
+| [L1716-1737](../sources/lecture1.txt) | M1-E19 Average rating per book | exercise · source-demo |
+| [L1733-1737](../sources/lecture1.txt) | R1-06 | review |
+| [L1753-1770](../sources/lecture1.txt) | M1-E20 Only the well-rated books (HAVING) | exercise · source-demo |
+| [L1755-1764](../sources/lecture1.txt) | D1-07 WHERE on an aggregate | debug |
+| [L1759-1764](../sources/lecture1.txt) | R1-07 | review |
+| [L1777-1800](../sources/lecture1.txt) | M1-E21 How many ratings per book? | exercise · source-question |
+| [L1811-1829](../sources/lecture1.txt) | M1-E20 Only the well-rated books (HAVING) | exercise · source-demo |
+
 ## lecture2 · Designing
 
 | Lines | Item | Kind |
 |---|---|---|
-| [L23-110](../sources/lecture2.txt) | **C1.1** sqlite3 shell & schema files | concept |
-| [L38-48](../sources/lecture2.txt) | **C0.1** SELECT / LIMIT | concept |
-| [L42-48](../sources/lecture2.txt) | M0-E01 Peek at the first five books | exercise · source-demo |
-| [L192-263](../sources/lecture2.txt) | **C1.2** Normalizing | concept |
-| [L199-227](../sources/lecture2.txt) | M1-E01 Spot the redundancy in Charlie's fare log | exercise · source-question |
-| [L245-262](../sources/lecture2.txt) | R1-01 | review |
-| [L245-263](../sources/lecture2.txt) | M1-E01 Spot the redundancy in Charlie's fare log | exercise · source-question |
-| [L265-346](../sources/lecture2.txt) | **C1.3** Relationships & ER diagrams | concept |
-| [L348-468](../sources/lecture2.txt) | **C1.4** CREATE / DROP TABLE | concept |
-| [L425-438](../sources/lecture2.txt) | R1-02 | review |
-| [L425-444](../sources/lecture2.txt) | **C1.3** Relationships & ER diagrams | concept |
-| [L425-444](../sources/lecture2.txt) | M1-E03 The visits junction table | exercise · source-demo |
-| [L475-640](../sources/lecture2.txt) | **C1.5** Storage classes vs type affinities | concept |
-| [L540-571](../sources/lecture2.txt) | M1-E05 Fares in cents | exercise · generated |
-| [L563-571](../sources/lecture2.txt) | R1-06 | review |
-| [L599-611](../sources/lecture2.txt) | R1-03 | review |
-| [L613-638](../sources/lecture2.txt) | M1-E06 Watch type affinity convert values | exercise · source-demo |
-| [L632-634](../sources/lecture2.txt) | R1-04 | review |
-| [L647-658](../sources/lecture2.txt) | **C1.4** CREATE / DROP TABLE | concept |
-| [L659-720](../sources/lecture2.txt) | **C1.1** sqlite3 shell & schema files | concept |
-| [L659-720](../sources/lecture2.txt) | M1-E13 Lab: rebuild a database from schema.sql | exercise · source-demo |
-| [L672-695](../sources/lecture2.txt) | M1-E02 Create the riders and stations tables | exercise · source-demo |
-| [L769-913](../sources/lecture2.txt) | **C1.6** PRIMARY KEY / FOREIGN KEY | concept |
-| [L800-811](../sources/lecture2.txt) | M1-E02 Create the riders and stations tables | exercise · source-demo |
-| [L816-834](../sources/lecture2.txt) | M1-E04 Why a composite primary key is wrong for visits | exercise · source-question |
-| [L829-839](../sources/lecture2.txt) | D1-04 A primary key that forbids repeat visits | debug |
-| [L848-865](../sources/lecture2.txt) | M1-E03 The visits junction table | exercise · source-demo |
-| [L883-895](../sources/lecture2.txt) | D1-01 A comma too many | debug |
-| [L915-1022](../sources/lecture2.txt) | **C1.7** Column constraints | concept |
-| [L940-1005](../sources/lecture2.txt) | M1-E07 Stations with NOT NULL and UNIQUE | exercise · source-demo |
-| [L968-978](../sources/lecture2.txt) | D1-03 A foreign key that allows "no card" | debug |
-| [L968-978](../sources/lecture2.txt) | R1-09 | review |
-| [L1016-1022](../sources/lecture2.txt) | R1-07 | review |
-| [L1060-1090](../sources/lecture2.txt) | **C1.3** Relationships & ER diagrams | concept |
-| [L1094-1180](../sources/lecture2.txt) | **C1.8** ALTER TABLE | concept |
-| [L1128-1151](../sources/lecture2.txt) | M1-E09 Rename visits to swipes and add a column | exercise · source-demo |
-| [L1153-1166](../sources/lecture2.txt) | M1-E10 Fix a typo in a column name | exercise · source-demo |
-| [L1168-1176](../sources/lecture2.txt) | M1-E11 Drop a column you no longer want | exercise · source-demo |
-| [L1189-1230](../sources/lecture2.txt) | M1-E12 Capstone: the full CharlieCard schema | exercise · generated |
-| [L1231-1305](../sources/lecture2.txt) | **C1.7** Column constraints | concept |
-| [L1241-1290](../sources/lecture2.txt) | M1-E08 The swipes table with CHECK and DEFAULT | exercise · source-demo |
-| [L1280-1287](../sources/lecture2.txt) | D1-02 A CHECK that checks nothing | debug |
-| [L1299-1305](../sources/lecture2.txt) | M1-E12 Capstone: the full CharlieCard schema | exercise · generated |
-| [L1335-1347](../sources/lecture2.txt) | **C1.5** Storage classes vs type affinities | concept |
-| [L1338-1347](../sources/lecture2.txt) | R1-08 | review |
+| [L23-110](../sources/lecture2.txt) | **C2.1** sqlite3 shell & schema files | concept |
+| [L192-263](../sources/lecture2.txt) | **C2.2** Normalizing | concept |
+| [L199-227](../sources/lecture2.txt) | M2-E01 Spot the redundancy in Charlie's fare log | exercise · source-question |
+| [L245-262](../sources/lecture2.txt) | R2-01 | review |
+| [L245-263](../sources/lecture2.txt) | M2-E01 Spot the redundancy in Charlie's fare log | exercise · source-question |
+| [L265-346](../sources/lecture2.txt) | **C2.3** Relationships & ER diagrams | concept |
+| [L348-468](../sources/lecture2.txt) | **C2.4** CREATE / DROP TABLE | concept |
+| [L425-438](../sources/lecture2.txt) | R2-02 | review |
+| [L425-444](../sources/lecture2.txt) | **C2.3** Relationships & ER diagrams | concept |
+| [L425-444](../sources/lecture2.txt) | M2-E03 The visits junction table | exercise · source-demo |
+| [L475-640](../sources/lecture2.txt) | **C2.5** Storage classes vs type affinities | concept |
+| [L540-571](../sources/lecture2.txt) | M2-E05 Fares in cents | exercise · generated |
+| [L563-571](../sources/lecture2.txt) | R2-06 | review |
+| [L599-611](../sources/lecture2.txt) | R2-03 | review |
+| [L613-638](../sources/lecture2.txt) | M2-E06 Watch type affinity convert values | exercise · source-demo |
+| [L632-634](../sources/lecture2.txt) | R2-04 | review |
+| [L647-658](../sources/lecture2.txt) | **C2.4** CREATE / DROP TABLE | concept |
+| [L659-720](../sources/lecture2.txt) | **C2.1** sqlite3 shell & schema files | concept |
+| [L659-720](../sources/lecture2.txt) | M2-E13 Lab: rebuild a database from schema.sql | exercise · source-demo |
+| [L672-695](../sources/lecture2.txt) | M2-E02 Create the riders and stations tables | exercise · source-demo |
+| [L769-913](../sources/lecture2.txt) | **C2.6** PRIMARY KEY / FOREIGN KEY | concept |
+| [L800-811](../sources/lecture2.txt) | M2-E02 Create the riders and stations tables | exercise · source-demo |
+| [L816-834](../sources/lecture2.txt) | M2-E04 Why a composite primary key is wrong for visits | exercise · source-question |
+| [L829-839](../sources/lecture2.txt) | D2-04 A primary key that forbids repeat visits | debug |
+| [L848-865](../sources/lecture2.txt) | M2-E03 The visits junction table | exercise · source-demo |
+| [L883-895](../sources/lecture2.txt) | D2-01 A comma too many | debug |
+| [L915-1022](../sources/lecture2.txt) | **C2.7** Column constraints | concept |
+| [L940-1005](../sources/lecture2.txt) | M2-E07 Stations with NOT NULL and UNIQUE | exercise · source-demo |
+| [L968-978](../sources/lecture2.txt) | D2-03 A foreign key that allows "no card" | debug |
+| [L968-978](../sources/lecture2.txt) | R2-09 | review |
+| [L1016-1022](../sources/lecture2.txt) | R2-07 | review |
+| [L1060-1090](../sources/lecture2.txt) | **C2.3** Relationships & ER diagrams | concept |
+| [L1094-1180](../sources/lecture2.txt) | **C2.8** ALTER TABLE | concept |
+| [L1128-1151](../sources/lecture2.txt) | M2-E09 Rename visits to swipes and add a column | exercise · source-demo |
+| [L1153-1166](../sources/lecture2.txt) | M2-E10 Fix a typo in a column name | exercise · source-demo |
+| [L1168-1176](../sources/lecture2.txt) | M2-E11 Drop a column you no longer want | exercise · source-demo |
+| [L1189-1230](../sources/lecture2.txt) | M2-E12 Capstone: the full CharlieCard schema | exercise · generated |
+| [L1231-1305](../sources/lecture2.txt) | **C2.7** Column constraints | concept |
+| [L1241-1290](../sources/lecture2.txt) | M2-E08 The swipes table with CHECK and DEFAULT | exercise · source-demo |
+| [L1280-1287](../sources/lecture2.txt) | D2-02 A CHECK that checks nothing | debug |
+| [L1299-1305](../sources/lecture2.txt) | M2-E12 Capstone: the full CharlieCard schema | exercise · generated |
+| [L1335-1347](../sources/lecture2.txt) | **C2.5** Storage classes vs type affinities | concept |
+| [L1338-1347](../sources/lecture2.txt) | R2-08 | review |
 
 ## lecture3 · Writing
 
 | Lines | Item | Kind |
 |---|---|---|
-| [L67-246](../sources/lecture3.txt) | **C2.1** INSERT INTO | concept |
-| [L130-153](../sources/lecture3.txt) | M2-E01 Insert the first artwork | exercise · source-demo |
-| [L206-232](../sources/lecture3.txt) | M2-E02 Let SQLite choose the primary key | exercise · source-demo |
-| [L247-312](../sources/lecture3.txt) | **C2.2** Constraint violations | concept |
-| [L262-284](../sources/lecture3.txt) | M2-E03 Break the UNIQUE constraint | exercise · source-demo |
-| [L286-307](../sources/lecture3.txt) | M2-E04 Break the NOT NULL constraint | exercise · source-demo |
-| [L313-364](../sources/lecture3.txt) | **C2.3** Multi-row INSERT / INSERT ... SELECT | concept |
-| [L324-330](../sources/lecture3.txt) | R2-01 | review |
-| [L334-364](../sources/lecture3.txt) | M2-E05 Insert two rows in one statement | exercise · source-demo |
-| [L357-359](../sources/lecture3.txt) | R2-09 | review |
-| [L381-663](../sources/lecture3.txt) | **C2.4** .import CSV | concept |
-| [L570-603](../sources/lecture3.txt) | **C2.3** Multi-row INSERT / INSERT ... SELECT | concept |
-| [L570-603](../sources/lecture3.txt) | M2-E06 From an imported CSV into the real table | exercise · source-demo |
-| [L604-605](../sources/lecture3.txt) | R2-03 | review |
-| [L632-638](../sources/lecture3.txt) | R2-02 | review |
-| [L644-663](../sources/lecture3.txt) | M2-E06 From an imported CSV into the real table | exercise · source-demo |
-| [L653-663](../sources/lecture3.txt) | D2-04 Missing dates that aren't NULL | debug |
-| [L670-819](../sources/lecture3.txt) | **C2.5** DELETE | concept |
-| [L693-698](../sources/lecture3.txt) | D2-01 The DELETE that emptied the table | debug |
-| [L727-745](../sources/lecture3.txt) | M2-E08 Delete the undated artwork | exercise · source-demo |
-| [L734-741](../sources/lecture3.txt) | **C0.2** WHERE filters | concept |
-| [L734-741](../sources/lecture3.txt) | D0-01 The NULL that never matches | debug |
-| [L734-741](../sources/lecture3.txt) | M0-E03 Artworks with no acquisition date | exercise · generated |
-| [L734-741](../sources/lecture3.txt) | R0-02 | review |
-| [L750-813](../sources/lecture3.txt) | M2-E07 Delete everything acquired before 1909 | exercise · source-question |
-| [L798-808](../sources/lecture3.txt) | R2-05 | review |
-| [L820-1052](../sources/lecture3.txt) | **C2.6** FK actions on delete | concept |
-| [L885-896](../sources/lecture3.txt) | M2-E10 Hit the FOREIGN KEY constraint | exercise · source-demo |
-| [L947-961](../sources/lecture3.txt) | D2-02 Deleting from the wrong table | debug |
-| [L954-979](../sources/lecture3.txt) | M2-E09 Delete an artist the two-step way | exercise · source-demo |
-| [L988-1013](../sources/lecture3.txt) | M2-E11 Let ON DELETE CASCADE do both steps | exercise · source-demo |
-| [L1010-1013](../sources/lecture3.txt) | R2-06 | review |
-| [L1044-1052](../sources/lecture3.txt) | M2-E11 Let ON DELETE CASCADE do both steps | exercise · source-demo |
-| [L1077-1087](../sources/lecture3.txt) | R2-04 | review |
-| [L1093-1196](../sources/lecture3.txt) | **C2.7** UPDATE | concept |
-| [L1146-1176](../sources/lecture3.txt) | M2-E12 Re-attribute an artwork with UPDATE | exercise · source-demo |
-| [L1155-1162](../sources/lecture3.txt) | D2-03 An UPDATE that re-attributed everything | debug |
-| [L1197-1486](../sources/lecture3.txt) | **C2.8** Data cleaning | concept |
-| [L1229-1246](../sources/lecture3.txt) | M0-E05 Tally raw votes | exercise · source-demo |
-| [L1229-1256](../sources/lecture3.txt) | **C0.4** Aggregates + GROUP BY | concept |
-| [L1250-1256](../sources/lecture3.txt) | R0-04 | review |
-| [L1281-1299](../sources/lecture3.txt) | M2-E13 Clean the votes and get four groups | exercise · source-demo |
-| [L1330-1339](../sources/lecture3.txt) | R2-07 | review |
-| [L1374-1394](../sources/lecture3.txt) | **C0.2** WHERE filters | concept |
-| [L1384-1394](../sources/lecture3.txt) | M2-E13 Clean the votes and get four groups | exercise · source-demo |
-| [L1388-1394](../sources/lecture3.txt) | D2-06 An over-eager LIKE | debug |
-| [L1444-1448](../sources/lecture3.txt) | M2-E13 Clean the votes and get four groups | exercise · source-demo |
-| [L1494-1693](../sources/lecture3.txt) | **C2.9** Triggers | concept |
-| [L1588-1631](../sources/lecture3.txt) | M2-E14 Triggers that log sales and purchases | exercise · source-demo |
-| [L1603-1608](../sources/lecture3.txt) | D2-05 NEW in a DELETE trigger | debug |
-| [L1604-1608](../sources/lecture3.txt) | R2-08 | review |
-| [L1638-1678](../sources/lecture3.txt) | M2-E14 Triggers that log sales and purchases | exercise · source-demo |
-| [L1694-1793](../sources/lecture3.txt) | **C2.10** Soft deletion | concept |
-| [L1737-1757](../sources/lecture3.txt) | M2-E15 Soft-delete instead of delete | exercise · source-demo |
-| [L1774-1784](../sources/lecture3.txt) | R2-10 | review |
+| [L67-246](../sources/lecture3.txt) | **C3.1** INSERT INTO | concept |
+| [L130-153](../sources/lecture3.txt) | M3-E01 Insert the first artwork | exercise · source-demo |
+| [L206-232](../sources/lecture3.txt) | M3-E02 Let SQLite choose the primary key | exercise · source-demo |
+| [L247-312](../sources/lecture3.txt) | **C3.2** Constraint violations | concept |
+| [L262-284](../sources/lecture3.txt) | M3-E03 Break the UNIQUE constraint | exercise · source-demo |
+| [L286-307](../sources/lecture3.txt) | M3-E04 Break the NOT NULL constraint | exercise · source-demo |
+| [L313-364](../sources/lecture3.txt) | **C3.3** Multi-row INSERT / INSERT ... SELECT | concept |
+| [L324-330](../sources/lecture3.txt) | R3-01 | review |
+| [L334-364](../sources/lecture3.txt) | M3-E05 Insert two rows in one statement | exercise · source-demo |
+| [L357-359](../sources/lecture3.txt) | R3-09 | review |
+| [L381-663](../sources/lecture3.txt) | **C3.4** .import CSV | concept |
+| [L570-603](../sources/lecture3.txt) | **C3.3** Multi-row INSERT / INSERT ... SELECT | concept |
+| [L570-603](../sources/lecture3.txt) | M3-E06 From an imported CSV into the real table | exercise · source-demo |
+| [L604-605](../sources/lecture3.txt) | R3-03 | review |
+| [L632-638](../sources/lecture3.txt) | R3-02 | review |
+| [L644-663](../sources/lecture3.txt) | M3-E06 From an imported CSV into the real table | exercise · source-demo |
+| [L653-663](../sources/lecture3.txt) | D3-04 Missing dates that aren't NULL | debug |
+| [L670-819](../sources/lecture3.txt) | **C3.5** DELETE | concept |
+| [L693-698](../sources/lecture3.txt) | D3-01 The DELETE that emptied the table | debug |
+| [L727-745](../sources/lecture3.txt) | M3-E08 Delete the undated artwork | exercise · source-demo |
+| [L750-813](../sources/lecture3.txt) | M3-E07 Delete everything acquired before 1909 | exercise · source-question |
+| [L798-808](../sources/lecture3.txt) | R3-05 | review |
+| [L820-1052](../sources/lecture3.txt) | **C3.6** FK actions on delete | concept |
+| [L885-896](../sources/lecture3.txt) | M3-E10 Hit the FOREIGN KEY constraint | exercise · source-demo |
+| [L947-961](../sources/lecture3.txt) | D3-02 Deleting from the wrong table | debug |
+| [L954-979](../sources/lecture3.txt) | M3-E09 Delete an artist the two-step way | exercise · source-demo |
+| [L988-1013](../sources/lecture3.txt) | M3-E11 Let ON DELETE CASCADE do both steps | exercise · source-demo |
+| [L1010-1013](../sources/lecture3.txt) | R3-06 | review |
+| [L1044-1052](../sources/lecture3.txt) | M3-E11 Let ON DELETE CASCADE do both steps | exercise · source-demo |
+| [L1077-1087](../sources/lecture3.txt) | R3-04 | review |
+| [L1093-1196](../sources/lecture3.txt) | **C3.7** UPDATE | concept |
+| [L1146-1176](../sources/lecture3.txt) | M3-E12 Re-attribute an artwork with UPDATE | exercise · source-demo |
+| [L1155-1162](../sources/lecture3.txt) | D3-03 An UPDATE that re-attributed everything | debug |
+| [L1197-1486](../sources/lecture3.txt) | **C3.8** Data cleaning | concept |
+| [L1229-1246](../sources/lecture3.txt) | M1-E23 Tally raw votes | exercise · source-demo |
+| [L1281-1299](../sources/lecture3.txt) | M3-E13 Clean the votes and get four groups | exercise · source-demo |
+| [L1330-1339](../sources/lecture3.txt) | R3-07 | review |
+| [L1384-1394](../sources/lecture3.txt) | M3-E13 Clean the votes and get four groups | exercise · source-demo |
+| [L1388-1394](../sources/lecture3.txt) | D3-06 An over-eager LIKE | debug |
+| [L1444-1448](../sources/lecture3.txt) | M3-E13 Clean the votes and get four groups | exercise · source-demo |
+| [L1494-1693](../sources/lecture3.txt) | **C3.9** Triggers | concept |
+| [L1588-1631](../sources/lecture3.txt) | M3-E14 Triggers that log sales and purchases | exercise · source-demo |
+| [L1603-1608](../sources/lecture3.txt) | D3-05 NEW in a DELETE trigger | debug |
+| [L1604-1608](../sources/lecture3.txt) | R3-08 | review |
+| [L1638-1678](../sources/lecture3.txt) | M3-E14 Triggers that log sales and purchases | exercise · source-demo |
+| [L1694-1793](../sources/lecture3.txt) | **C3.10** Soft deletion | concept |
+| [L1737-1757](../sources/lecture3.txt) | M3-E15 Soft-delete instead of delete | exercise · source-demo |
+| [L1774-1784](../sources/lecture3.txt) | R3-10 | review |
 
 ## lecture4 · Viewing
 
 | Lines | Item | Kind |
 |---|---|---|
-| [L63-67](../sources/lecture4.txt) | R0-06 | review |
-| [L77-104](../sources/lecture4.txt) | **C3.1** View | concept |
-| [L77-80](../sources/lecture4.txt) | M3-E01 A view that hides the joins | exercise · source-demo |
-| [L97-105](../sources/lecture4.txt) | R3-01 | review |
-| [L106-336](../sources/lecture4.txt) | **C3.2** Simplifying view | concept |
-| [L127-192](../sources/lecture4.txt) | **C0.5** Subqueries | concept |
-| [L131-136](../sources/lecture4.txt) | M0-E07 Look up an author's id | exercise · source-demo |
-| [L168-192](../sources/lecture4.txt) | M0-E08 Fernanda Melchor's books, with nested subqueries | exercise · source-demo |
-| [L171-174](../sources/lecture4.txt) | R0-03 | review |
-| [L202-240](../sources/lecture4.txt) | **C0.6** JOIN ... ON | concept |
-| [L203-240](../sources/lecture4.txt) | M0-E09 Author names next to book titles, with JOIN | exercise · source-demo |
-| [L207-219](../sources/lecture4.txt) | D0-02 Joined on the wrong column | debug |
-| [L244-278](../sources/lecture4.txt) | **C3.1** View | concept |
-| [L255-278](../sources/lecture4.txt) | M3-E01 A view that hides the joins | exercise · source-demo |
-| [L280-304](../sources/lecture4.txt) | M3-E02 Fernanda's books, now in one line | exercise · source-question |
-| [L296-297](../sources/lecture4.txt) | M0-E08 Fernanda Melchor's books, with nested subqueries | exercise · source-demo |
-| [L317-323](../sources/lecture4.txt) | M0-E04 2023 longlist, alphabetically | exercise · generated |
-| [L317-330](../sources/lecture4.txt) | **C0.3** ORDER BY | concept |
-| [L337-526](../sources/lecture4.txt) | **C3.3** Aggregating view; view on view | concept |
-| [L344-351](../sources/lecture4.txt) | D0-03 Duplicate rows from a one-to-many join | debug |
-| [L371-433](../sources/lecture4.txt) | **C0.4** Aggregates + GROUP BY | concept |
-| [L374-386](../sources/lecture4.txt) | M0-E06 Average rating per book | exercise · source-demo |
-| [L383-384](../sources/lecture4.txt) | R0-05 | review |
-| [L403-407](../sources/lecture4.txt) | D0-04 One average instead of one per book | debug |
-| [L423-433](../sources/lecture4.txt) | M0-E06 Average rating per book | exercise · source-demo |
-| [L438-466](../sources/lecture4.txt) | **C0.6** JOIN ... ON | concept |
-| [L471-495](../sources/lecture4.txt) | M3-E03 The average_book_ratings view | exercise · source-demo |
-| [L514-526](../sources/lecture4.txt) | M3-E03 The average_book_ratings view | exercise · source-demo |
-| [L519-526](../sources/lecture4.txt) | R3-03 | review |
-| [L527-632](../sources/lecture4.txt) | **C3.4** Temporary view | concept |
-| [L554-603](../sources/lecture4.txt) | **C3.3** Aggregating view; view on view | concept |
-| [L577-583](../sources/lecture4.txt) | D0-06 Grouped by the wrong column | debug |
-| [L588-612](../sources/lecture4.txt) | M3-E04 A temporary view built on a view | exercise · source-demo |
-| [L633-648](../sources/lecture4.txt) | M3-E05 The same analysis with a CTE | exercise · source-demo |
-| [L633-703](../sources/lecture4.txt) | **C3.5** CTE | concept |
-| [L636-638](../sources/lecture4.txt) | R3-02 | review |
-| [L642-646](../sources/lecture4.txt) | R3-07 | review |
-| [L644-646](../sources/lecture4.txt) | D3-01 A trailing comma after the CTE | debug |
-| [L653-658](../sources/lecture4.txt) | **C3.1** View | concept |
-| [L664-696](../sources/lecture4.txt) | M3-E05 The same analysis with a CTE | exercise · source-demo |
-| [L709-811](../sources/lecture4.txt) | **C3.6** Partitioning view | concept |
-| [L726-732](../sources/lecture4.txt) | M0-E04 2023 longlist, alphabetically | exercise · generated |
-| [L749-790](../sources/lecture4.txt) | M3-E06 Partition the books by year | exercise · source-demo |
-| [L751-756](../sources/lecture4.txt) | D3-03 A view name made of digits | debug |
-| [L827-838](../sources/lecture4.txt) | M3-E07 Try to update a view | exercise · source-demo |
-| [L837-838](../sources/lecture4.txt) | R3-04 | review |
-| [L839-848](../sources/lecture4.txt) | M3-E08 Fix the typo where the data lives | exercise · source-question |
-| [L853-968](../sources/lecture4.txt) | **C3.7** Securing view | concept |
-| [L916-942](../sources/lecture4.txt) | M3-E09 An anonymized view for analysts | exercise · source-demo |
-| [L962-968](../sources/lecture4.txt) | M3-E09 An anonymized view for analysts | exercise · source-demo |
-| [L962-968](../sources/lecture4.txt) | R3-05 | review |
-| [L974-1336](../sources/lecture4.txt) | **C3.8** INSTEAD OF triggers on views | concept |
-| [L1065-1077](../sources/lecture4.txt) | M3-E10 current_collections, a view over soft deletes | exercise · source-demo |
-| [L1133-1170](../sources/lecture4.txt) | M3-E11 INSTEAD OF DELETE, turning a delete into a soft delete | exercise · source-demo |
-| [L1147-1153](../sources/lecture4.txt) | D3-02 The soft-delete trigger that hid everything | debug |
-| [L1178-1194](../sources/lecture4.txt) | M3-E11 INSTEAD OF DELETE, turning a delete into a soft delete | exercise · source-demo |
-| [L1236-1242](../sources/lecture4.txt) | M3-E13 Assigned: INSTEAD OF INSERT for genuinely new items | exercise · source-assigned |
-| [L1236-1242](../sources/lecture4.txt) | R3-06 | review |
-| [L1246-1278](../sources/lecture4.txt) | M3-E12 INSTEAD OF INSERT ... WHEN, re-acquiring a deleted item | exercise · source-demo |
-| [L1311-1330](../sources/lecture4.txt) | M3-E12 INSTEAD OF INSERT ... WHEN, re-acquiring a deleted item | exercise · source-demo |
-| [L1331-1336](../sources/lecture4.txt) | M3-E13 Assigned: INSTEAD OF INSERT for genuinely new items | exercise · source-assigned |
+| [L77-104](../sources/lecture4.txt) | **C4.1** View | concept |
+| [L77-80](../sources/lecture4.txt) | M4-E01 A view that hides the joins | exercise · source-demo |
+| [L97-105](../sources/lecture4.txt) | R4-01 | review |
+| [L106-336](../sources/lecture4.txt) | **C4.2** Simplifying view | concept |
+| [L203-240](../sources/lecture4.txt) | M1-E13 Author names next to titles, with JOIN | exercise · source-demo |
+| [L207-219](../sources/lecture4.txt) | D1-01 Joined on the wrong column | debug |
+| [L244-278](../sources/lecture4.txt) | **C4.1** View | concept |
+| [L255-278](../sources/lecture4.txt) | M4-E01 A view that hides the joins | exercise · source-demo |
+| [L280-304](../sources/lecture4.txt) | M4-E02 Fernanda's books, now in one line | exercise · source-question |
+| [L337-526](../sources/lecture4.txt) | **C4.3** Aggregating view; view on view | concept |
+| [L471-495](../sources/lecture4.txt) | M4-E03 The average_book_ratings view | exercise · source-demo |
+| [L514-526](../sources/lecture4.txt) | M4-E03 The average_book_ratings view | exercise · source-demo |
+| [L519-526](../sources/lecture4.txt) | R4-03 | review |
+| [L527-632](../sources/lecture4.txt) | **C4.4** Temporary view | concept |
+| [L554-603](../sources/lecture4.txt) | **C4.3** Aggregating view; view on view | concept |
+| [L588-612](../sources/lecture4.txt) | M4-E04 A temporary view built on a view | exercise · source-demo |
+| [L633-648](../sources/lecture4.txt) | M4-E05 The same analysis with a CTE | exercise · source-demo |
+| [L633-703](../sources/lecture4.txt) | **C4.5** CTE | concept |
+| [L636-638](../sources/lecture4.txt) | R4-02 | review |
+| [L642-646](../sources/lecture4.txt) | R4-07 | review |
+| [L644-646](../sources/lecture4.txt) | D4-01 A trailing comma after the CTE | debug |
+| [L653-658](../sources/lecture4.txt) | **C4.1** View | concept |
+| [L664-696](../sources/lecture4.txt) | M4-E05 The same analysis with a CTE | exercise · source-demo |
+| [L709-811](../sources/lecture4.txt) | **C4.6** Partitioning view | concept |
+| [L749-790](../sources/lecture4.txt) | M4-E06 Partition the books by year | exercise · source-demo |
+| [L751-756](../sources/lecture4.txt) | D4-03 A view name made of digits | debug |
+| [L827-838](../sources/lecture4.txt) | M4-E07 Try to update a view | exercise · source-demo |
+| [L837-838](../sources/lecture4.txt) | R4-04 | review |
+| [L839-848](../sources/lecture4.txt) | M4-E08 Fix the typo where the data lives | exercise · source-question |
+| [L853-968](../sources/lecture4.txt) | **C4.7** Securing view | concept |
+| [L916-942](../sources/lecture4.txt) | M4-E09 An anonymized view for analysts | exercise · source-demo |
+| [L962-968](../sources/lecture4.txt) | M4-E09 An anonymized view for analysts | exercise · source-demo |
+| [L962-968](../sources/lecture4.txt) | R4-05 | review |
+| [L974-1336](../sources/lecture4.txt) | **C4.8** INSTEAD OF triggers on views | concept |
+| [L1065-1077](../sources/lecture4.txt) | M4-E10 current_collections, a view over soft deletes | exercise · source-demo |
+| [L1133-1170](../sources/lecture4.txt) | M4-E11 INSTEAD OF DELETE, turning a delete into a soft delete | exercise · source-demo |
+| [L1147-1153](../sources/lecture4.txt) | D4-02 The soft-delete trigger that hid everything | debug |
+| [L1178-1194](../sources/lecture4.txt) | M4-E11 INSTEAD OF DELETE, turning a delete into a soft delete | exercise · source-demo |
+| [L1236-1242](../sources/lecture4.txt) | M4-E13 Assigned: INSTEAD OF INSERT for genuinely new items | exercise · source-assigned |
+| [L1236-1242](../sources/lecture4.txt) | R4-06 | review |
+| [L1246-1278](../sources/lecture4.txt) | M4-E12 INSTEAD OF INSERT ... WHEN, re-acquiring a deleted item | exercise · source-demo |
+| [L1311-1330](../sources/lecture4.txt) | M4-E12 INSTEAD OF INSERT ... WHEN, re-acquiring a deleted item | exercise · source-demo |
+| [L1331-1336](../sources/lecture4.txt) | M4-E13 Assigned: INSTEAD OF INSERT for genuinely new items | exercise · source-assigned |
 
 ## lecture5 · Optimizing
 
 | Lines | Item | Kind |
 |---|---|---|
-| [L91-103](../sources/lecture5.txt) | **C0.1** SELECT / LIMIT | concept |
-| [L93-103](../sources/lecture5.txt) | R0-01 | review |
-| [L116-123](../sources/lecture5.txt) | M0-E02 Search for a movie by title | exercise · source-demo |
-| [L118](../sources/lecture5.txt) | **C0.2** WHERE filters | concept |
-| [L124-211](../sources/lecture5.txt) | **C4.1** Measuring queries; scans | concept |
-| [L127-148](../sources/lecture5.txt) | M4-E11 Lab: time a query before and after an index | exercise · source-demo |
-| [L214-348](../sources/lecture5.txt) | **C4.2** Index + EXPLAIN QUERY PLAN | concept |
-| [L273-278](../sources/lecture5.txt) | D4-02 An index nobody uses | debug |
-| [L273-286](../sources/lecture5.txt) | M4-E01 Index the title column | exercise · source-demo |
-| [L297-316](../sources/lecture5.txt) | M4-E01 Index the title column | exercise · source-demo |
-| [L322-332](../sources/lecture5.txt) | M4-E05 Drop an index | exercise · source-demo |
-| [L328-332](../sources/lecture5.txt) | R4-01 | review |
-| [L338-348](../sources/lecture5.txt) | M4-E02 Which columns should be indexed for the Tom Hanks query? | exercise · source-question |
-| [L349-542](../sources/lecture5.txt) | **C4.3** Covering index | concept |
-| [L364-394](../sources/lecture5.txt) | **C0.5** Subqueries | concept |
-| [L364-394](../sources/lecture5.txt) | M0-E10 Tom Hanks's movies | exercise · source-demo |
-| [L376-379](../sources/lecture5.txt) | D0-05 `=` with a subquery that returns many rows | debug |
-| [L405-447](../sources/lecture5.txt) | M4-E02 Which columns should be indexed for the Tom Hanks query? | exercise · source-question |
-| [L427-430](../sources/lecture5.txt) | R4-02 | review |
-| [L482-496](../sources/lecture5.txt) | M4-E03 Make the stars index covering | exercise · source-demo |
-| [L483-488](../sources/lecture5.txt) | R4-03 | review |
-| [L499-542](../sources/lecture5.txt) | M4-E03 Make the stars index covering | exercise · source-demo |
-| [L507-517](../sources/lecture5.txt) | D4-01 An index with the columns backwards | debug |
-| [L543-861](../sources/lecture5.txt) | **C4.4** B-trees & trade-offs | concept |
-| [L624-648](../sources/lecture5.txt) | M4-E12 Walk the B-tree to find Turning Red | exercise · source-question |
-| [L782-809](../sources/lecture5.txt) | M4-E12 Walk the B-tree to find Turning Red | exercise · source-question |
-| [L848-861](../sources/lecture5.txt) | M4-E12 Walk the B-tree to find Turning Red | exercise · source-question |
-| [L852-857](../sources/lecture5.txt) | R4-04 | review |
-| [L862-942](../sources/lecture5.txt) | **C4.5** Partial index | concept |
-| [L892-924](../sources/lecture5.txt) | M4-E04 A partial index for recent movies | exercise · source-demo |
-| [L917-924](../sources/lecture5.txt) | D4-03 A partial index that doesn't match the query | debug |
-| [L917-924](../sources/lecture5.txt) | R4-05 | review |
-| [L943-1042](../sources/lecture5.txt) | **C4.6** VACUUM | concept |
-| [L991-1010](../sources/lecture5.txt) | M4-E10 Lab: VACUUM gives space back | exercise · source-demo |
-| [L996-999](../sources/lecture5.txt) | R4-06 | review |
-| [L1049-1330](../sources/lecture5.txt) | **C4.7** Transactions / ACID | concept |
-| [L1110-1127](../sources/lecture5.txt) | R4-07 | review |
-| [L1201-1230](../sources/lecture5.txt) | M4-E06 Alice pays Bob $10, atomically | exercise · source-demo |
-| [L1263-1267](../sources/lecture5.txt) | R4-08 | review |
-| [L1285-1296](../sources/lecture5.txt) | D4-04 A transfer that created money | debug |
-| [L1292-1296](../sources/lecture5.txt) | M4-E07 Roll back a transfer that breaks a constraint | exercise · source-demo |
-| [L1309-1325](../sources/lecture5.txt) | M4-E07 Roll back a transfer that breaks a constraint | exercise · source-demo |
-| [L1331-1455](../sources/lecture5.txt) | **C4.8** Race conditions / isolation | concept |
-| [L1337-1388](../sources/lecture5.txt) | M4-E08 Defuse the race condition | exercise · source-question |
-| [L1397-1430](../sources/lecture5.txt) | M4-E08 Defuse the race condition | exercise · source-question |
-| [L1456-1553](../sources/lecture5.txt) | **C4.9** Locks | concept |
-| [L1464-1494](../sources/lecture5.txt) | M4-E09 Lab: see an exclusive lock block a reader | exercise · source-demo |
-| [L1476-1479](../sources/lecture5.txt) | R4-09 | review |
-| [L1534-1546](../sources/lecture5.txt) | M4-E09 Lab: see an exclusive lock block a reader | exercise · source-demo |
+| [L124-211](../sources/lecture5.txt) | **C5.1** Measuring queries; scans | concept |
+| [L127-148](../sources/lecture5.txt) | M5-E11 Lab: time a query before and after an index | exercise · source-demo |
+| [L214-348](../sources/lecture5.txt) | **C5.2** Index + EXPLAIN QUERY PLAN | concept |
+| [L273-278](../sources/lecture5.txt) | D5-02 An index nobody uses | debug |
+| [L273-286](../sources/lecture5.txt) | M5-E01 Index the title column | exercise · source-demo |
+| [L297-316](../sources/lecture5.txt) | M5-E01 Index the title column | exercise · source-demo |
+| [L322-332](../sources/lecture5.txt) | M5-E05 Drop an index | exercise · source-demo |
+| [L328-332](../sources/lecture5.txt) | R5-01 | review |
+| [L338-348](../sources/lecture5.txt) | M5-E02 Which columns should be indexed for the Tom Hanks query? | exercise · source-question |
+| [L349-542](../sources/lecture5.txt) | **C5.3** Covering index | concept |
+| [L364-394](../sources/lecture5.txt) | M1-E22 Tom Hanks's movies | exercise · source-demo |
+| [L405-447](../sources/lecture5.txt) | M5-E02 Which columns should be indexed for the Tom Hanks query? | exercise · source-question |
+| [L427-430](../sources/lecture5.txt) | R5-02 | review |
+| [L482-496](../sources/lecture5.txt) | M5-E03 Make the stars index covering | exercise · source-demo |
+| [L483-488](../sources/lecture5.txt) | R5-03 | review |
+| [L499-542](../sources/lecture5.txt) | M5-E03 Make the stars index covering | exercise · source-demo |
+| [L507-517](../sources/lecture5.txt) | D5-01 An index with the columns backwards | debug |
+| [L543-861](../sources/lecture5.txt) | **C5.4** B-trees & trade-offs | concept |
+| [L624-648](../sources/lecture5.txt) | M5-E12 Walk the B-tree to find Turning Red | exercise · source-question |
+| [L782-809](../sources/lecture5.txt) | M5-E12 Walk the B-tree to find Turning Red | exercise · source-question |
+| [L848-861](../sources/lecture5.txt) | M5-E12 Walk the B-tree to find Turning Red | exercise · source-question |
+| [L852-857](../sources/lecture5.txt) | R5-04 | review |
+| [L862-942](../sources/lecture5.txt) | **C5.5** Partial index | concept |
+| [L892-924](../sources/lecture5.txt) | M5-E04 A partial index for recent movies | exercise · source-demo |
+| [L917-924](../sources/lecture5.txt) | D5-03 A partial index that doesn't match the query | debug |
+| [L917-924](../sources/lecture5.txt) | R5-05 | review |
+| [L943-1042](../sources/lecture5.txt) | **C5.6** VACUUM | concept |
+| [L991-1010](../sources/lecture5.txt) | M5-E10 Lab: VACUUM gives space back | exercise · source-demo |
+| [L996-999](../sources/lecture5.txt) | R5-06 | review |
+| [L1049-1330](../sources/lecture5.txt) | **C5.7** Transactions / ACID | concept |
+| [L1110-1127](../sources/lecture5.txt) | R5-07 | review |
+| [L1201-1230](../sources/lecture5.txt) | M5-E06 Alice pays Bob $10, atomically | exercise · source-demo |
+| [L1263-1267](../sources/lecture5.txt) | R5-08 | review |
+| [L1285-1296](../sources/lecture5.txt) | D5-04 A transfer that created money | debug |
+| [L1292-1296](../sources/lecture5.txt) | M5-E07 Roll back a transfer that breaks a constraint | exercise · source-demo |
+| [L1309-1325](../sources/lecture5.txt) | M5-E07 Roll back a transfer that breaks a constraint | exercise · source-demo |
+| [L1331-1455](../sources/lecture5.txt) | **C5.8** Race conditions / isolation | concept |
+| [L1337-1388](../sources/lecture5.txt) | M5-E08 Defuse the race condition | exercise · source-question |
+| [L1397-1430](../sources/lecture5.txt) | M5-E08 Defuse the race condition | exercise · source-question |
+| [L1456-1553](../sources/lecture5.txt) | **C5.9** Locks | concept |
+| [L1464-1494](../sources/lecture5.txt) | M5-E09 Lab: see an exclusive lock block a reader | exercise · source-demo |
+| [L1476-1479](../sources/lecture5.txt) | R5-09 | review |
+| [L1534-1546](../sources/lecture5.txt) | M5-E09 Lab: see an exclusive lock block a reader | exercise · source-demo |
 
 ## lecture6 · Scaling
 
 | Lines | Item | Kind |
 |---|---|---|
-| [L40-156](../sources/lecture6.txt) | **C5.1** Database servers | concept |
-| [L159-352](../sources/lecture6.txt) | **C5.1** Database servers | concept |
-| [L183-852](../sources/lecture6.txt) | **C5.2** MySQL types | concept |
-| [L227-233](../sources/lecture6.txt) | R5-01 | review |
-| [L264-273](../sources/lecture6.txt) | M5-E01 The cards table in MySQL | exercise · source-demo |
-| [L274-292](../sources/lecture6.txt) | M5-E01 The cards table in MySQL | exercise · source-demo |
-| [L423-432](../sources/lecture6.txt) | R5-02 | review |
-| [L442-456](../sources/lecture6.txt) | M5-E02 Stations with VARCHAR and ENUM | exercise · source-question |
-| [L499-521](../sources/lecture6.txt) | M5-E02 Stations with VARCHAR and ENUM | exercise · source-question |
-| [L653-668](../sources/lecture6.txt) | M5-E03 Swipes with DATETIME and DECIMAL | exercise · source-demo |
-| [L656-661](../sources/lecture6.txt) | R5-03 | review |
-| [L723-777](../sources/lecture6.txt) | M5-E03 Swipes with DATETIME and DECIMAL | exercise · source-demo |
-| [L844-852](../sources/lecture6.txt) | R1-05 | review |
-| [L853-923](../sources/lecture6.txt) | **C5.3** ALTER TABLE ... MODIFY | concept |
-| [L905-919](../sources/lecture6.txt) | M5-E04 Add the silver line with MODIFY | exercise · source-demo |
-| [L947-1278](../sources/lecture6.txt) | **C5.4** Stored procedures | concept |
-| [L1049-1058](../sources/lecture6.txt) | R5-05 | review |
-| [L1049-1063](../sources/lecture6.txt) | D5-02 A procedure cut short by the delimiter | debug |
-| [L1056-1090](../sources/lecture6.txt) | M5-E05 A stored procedure for the current collection | exercise · source-demo |
-| [L1169-1222](../sources/lecture6.txt) | M5-E06 Assigned: a sell procedure that refuses double sales | exercise · source-assigned |
-| [L1258-1277](../sources/lecture6.txt) | M5-E06 Assigned: a sell procedure that refuses double sales | exercise · source-assigned |
-| [L1288-1490](../sources/lecture6.txt) | **C5.1** Database servers | concept |
-| [L1293-1477](../sources/lecture6.txt) | **C5.5** PostgreSQL types | concept |
-| [L1320-1323](../sources/lecture6.txt) | R5-04 | review |
-| [L1422-1476](../sources/lecture6.txt) | M5-E07 Swipes in PostgreSQL | exercise · source-demo |
-| [L1494-1785](../sources/lecture6.txt) | **C5.6** Scaling strategies | concept |
-| [L1498-1545](../sources/lecture6.txt) | M5-E11 Choose a scaling plan | exercise · source-question |
-| [L1676-1738](../sources/lecture6.txt) | M5-E11 Choose a scaling plan | exercise · source-question |
-| [L1700-1706](../sources/lecture6.txt) | R5-06 | review |
-| [L1763-1784](../sources/lecture6.txt) | M5-E11 Choose a scaling plan | exercise · source-question |
-| [L1763-1784](../sources/lecture6.txt) | R5-07 | review |
-| [L1786-1920](../sources/lecture6.txt) | **C5.7** Access control | concept |
-| [L1796-1804](../sources/lecture6.txt) | M5-E10 Give an analyst read access to one view only | exercise · source-demo |
-| [L1878-1899](../sources/lecture6.txt) | M5-E10 Give an analyst read access to one view only | exercise · source-demo |
-| [L1883-1886](../sources/lecture6.txt) | R5-08 | review |
-| [L1921-2148](../sources/lecture6.txt) | **C5.8** SQL injection & prepared statements | concept |
-| [L1958-1966](../sources/lecture6.txt) | M5-E09 Log in as Carter without the password | exercise · source-question |
-| [L1959-1966](../sources/lecture6.txt) | R5-09 | review |
-| [L2020-2031](../sources/lecture6.txt) | M5-E08 Dump every account with SQL injection | exercise · source-demo |
-| [L2050-2067](../sources/lecture6.txt) | M5-E08 Dump every account with SQL injection | exercise · source-demo |
-| [L2138-2147](../sources/lecture6.txt) | D5-01 Query built by string formatting | debug |
+| [L40-156](../sources/lecture6.txt) | **C6.1** Database servers | concept |
+| [L159-352](../sources/lecture6.txt) | **C6.1** Database servers | concept |
+| [L183-852](../sources/lecture6.txt) | **C6.2** MySQL types | concept |
+| [L227-233](../sources/lecture6.txt) | R6-01 | review |
+| [L264-273](../sources/lecture6.txt) | M6-E01 The cards table in MySQL | exercise · source-demo |
+| [L274-292](../sources/lecture6.txt) | M6-E01 The cards table in MySQL | exercise · source-demo |
+| [L423-432](../sources/lecture6.txt) | R6-02 | review |
+| [L442-456](../sources/lecture6.txt) | M6-E02 Stations with VARCHAR and ENUM | exercise · source-question |
+| [L499-521](../sources/lecture6.txt) | M6-E02 Stations with VARCHAR and ENUM | exercise · source-question |
+| [L653-668](../sources/lecture6.txt) | M6-E03 Swipes with DATETIME and DECIMAL | exercise · source-demo |
+| [L656-661](../sources/lecture6.txt) | R6-03 | review |
+| [L723-777](../sources/lecture6.txt) | M6-E03 Swipes with DATETIME and DECIMAL | exercise · source-demo |
+| [L844-852](../sources/lecture6.txt) | R2-05 | review |
+| [L853-923](../sources/lecture6.txt) | **C6.3** ALTER TABLE ... MODIFY | concept |
+| [L905-919](../sources/lecture6.txt) | M6-E04 Add the silver line with MODIFY | exercise · source-demo |
+| [L947-1278](../sources/lecture6.txt) | **C6.4** Stored procedures | concept |
+| [L1049-1058](../sources/lecture6.txt) | R6-05 | review |
+| [L1049-1063](../sources/lecture6.txt) | D6-02 A procedure cut short by the delimiter | debug |
+| [L1056-1090](../sources/lecture6.txt) | M6-E05 A stored procedure for the current collection | exercise · source-demo |
+| [L1169-1222](../sources/lecture6.txt) | M6-E06 Assigned: a sell procedure that refuses double sales | exercise · source-assigned |
+| [L1258-1277](../sources/lecture6.txt) | M6-E06 Assigned: a sell procedure that refuses double sales | exercise · source-assigned |
+| [L1288-1490](../sources/lecture6.txt) | **C6.1** Database servers | concept |
+| [L1293-1477](../sources/lecture6.txt) | **C6.5** PostgreSQL types | concept |
+| [L1320-1323](../sources/lecture6.txt) | R6-04 | review |
+| [L1422-1476](../sources/lecture6.txt) | M6-E07 Swipes in PostgreSQL | exercise · source-demo |
+| [L1494-1785](../sources/lecture6.txt) | **C6.6** Scaling strategies | concept |
+| [L1498-1545](../sources/lecture6.txt) | M6-E11 Choose a scaling plan | exercise · source-question |
+| [L1676-1738](../sources/lecture6.txt) | M6-E11 Choose a scaling plan | exercise · source-question |
+| [L1700-1706](../sources/lecture6.txt) | R6-06 | review |
+| [L1763-1784](../sources/lecture6.txt) | M6-E11 Choose a scaling plan | exercise · source-question |
+| [L1763-1784](../sources/lecture6.txt) | R6-07 | review |
+| [L1786-1920](../sources/lecture6.txt) | **C6.7** Access control | concept |
+| [L1796-1804](../sources/lecture6.txt) | M6-E10 Give an analyst read access to one view only | exercise · source-demo |
+| [L1878-1899](../sources/lecture6.txt) | M6-E10 Give an analyst read access to one view only | exercise · source-demo |
+| [L1883-1886](../sources/lecture6.txt) | R6-08 | review |
+| [L1921-2148](../sources/lecture6.txt) | **C6.8** SQL injection & prepared statements | concept |
+| [L1958-1966](../sources/lecture6.txt) | M6-E09 Log in as Carter without the password | exercise · source-question |
+| [L1959-1966](../sources/lecture6.txt) | R6-09 | review |
+| [L2020-2031](../sources/lecture6.txt) | M6-E08 Dump every account with SQL injection | exercise · source-demo |
+| [L2050-2067](../sources/lecture6.txt) | M6-E08 Dump every account with SQL injection | exercise · source-demo |
+| [L2138-2147](../sources/lecture6.txt) | D6-01 Query built by string formatting | debug |

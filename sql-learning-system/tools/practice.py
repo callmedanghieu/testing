@@ -22,7 +22,7 @@ import content as C  # noqa: E402
 import sqlcheck as S  # noqa: E402
 
 PROGRESS = C.ROOT / "progress" / "progress.json"
-ORDER = ["M0", "M1", "M2", "M3", "M4", "M5"]
+ORDER = ["M0", "M1", "M2", "M3", "M4", "M5", "M6"]
 
 
 def load_progress():

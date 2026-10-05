@@ -1,457 +1,450 @@
-# Module 2: Writing (sources/lecture3.txt)
+# Module 1: Designing (sources/lecture2.txt)
 - id: M2-E01
-  title: Insert the first artwork
-  origin: source-demo
-  concepts: [C2.1]
-  difficulty: 1
-  skills: [INSERT INTO]
-  db: mfa
-  kind: modify
-  setup: |
-    DELETE FROM "created"; DELETE FROM "collections";
+  title: Spot the redundancy in Charlie's fare log
+  origin: source-question
+  concepts: [C2.2]
+  difficulty: 2
+  skills: [normalizing, design critique]
+  db: charlie
+  kind: selfcheck
   prompt: |
-    The `collections` table is empty. The museum acquires **Profusion of Flowers**, accession number `56.257`, acquired `1956-04-12`.
-    Insert it with **id 1**, listing all four columns explicitly.
+    The `log` table is the first draft from Lecture 2: `id, name, station, action, fare, balance`.
+    Run `SELECT * FROM "log";`, then write down:
+    1. Which values are repeated, and why that is a problem.
+    2. Which **entities** are hiding in this one table.
+    3. Which tables you would create instead.
   hints:
-    - "INSERT needs three things: the table, the list of columns, and the matching list of values."
-    - "The statement is `INSERT INTO table (column, ...) VALUES (value, ...);`. The n-th value goes into the n-th listed column."
-    - "List all four columns (id, title, accession_number, acquired), then the four values in the same order. Quote the text values, including the accession number."
+    - Look at the `name` column. What if two different people are both called Charlie?
+    - Which columns describe a *person*, which describe a *station*, and which describe an *event*?
+    - "Entities → their own tables, each with its own id. The event table refers to them by id."
   solution: |
-    INSERT INTO "collections" ("id", "title", "accession_number", "acquired")
-    VALUES (1, 'Profusion of Flowers', '56.257', '1956-04-12');
-  check:
-    - SELECT * FROM "collections"
-  explanation: Value 1 goes into column 1, value 2 into column 2, and so on.
+    -- Model answer (design, not executable):
+    -- 1. Names and station names repeat in every row. Two different "Charlie"s are indistinguishable,
+    --    and renaming a station means editing many rows.
+    -- 2. Entities: riders (people), stations, and the visits/swipes that relate them.
+    -- 3. riders(id, name), stations(id, name, line), visits(rider_id, station_id, ...)
+    --    -- later refined to cards / stations / swipes (exercise M2-E12).
+  explanation: |
+    Normalizing means putting each entity in its own table, and keeping every column of a table about that entity only.
   source:
-    - {file: lecture3, lines: "130-153", quote: "The accession number that we gave it was 56.257."}
+    - {file: lecture2, lines: "199-227", quote: "what redundancies or inefficiencies do you see here?"}
+    - {file: lecture2, lines: "245-263", quote: "So that is the process here of normalizing."}
 
 - id: M2-E02
-  title: Let SQLite choose the primary key
+  title: Create the riders and stations tables
+  origin: source-demo
+  concepts: [C2.4, C2.5, C2.6]
+  difficulty: 1
+  skills: [CREATE TABLE, type affinity, PRIMARY KEY]
+  db: null
+  kind: modify
+  prompt: |
+    In an empty database, create:
+    * `riders` with `id` INTEGER and `name` TEXT, where `id` is the primary key
+    * `stations` with `id` INTEGER, `name` TEXT and `line` TEXT, where `id` is the primary key
+
+    Use the table-constraint style from the lecture: `PRIMARY KEY("id")` after the columns.
+  hints:
+    - One `CREATE TABLE name (...);` per table, columns separated by commas.
+    - Each column is `"name" AFFINITY`. Put the constraint `PRIMARY KEY("id")` after the last column, preceded by a comma.
+    - "`CREATE TABLE \"riders\" (\"id\" INTEGER, \"name\" TEXT, PRIMARY KEY(\"id\"));`, then the same shape for stations."
+  solution: |
+    CREATE TABLE "riders" (
+        "id" INTEGER,
+        "name" TEXT,
+        PRIMARY KEY("id")
+    );
+    CREATE TABLE "stations" (
+        "id" INTEGER,
+        "name" TEXT,
+        "line" TEXT,
+        PRIMARY KEY("id")
+    );
+  check:
+    - SELECT "name", upper("type"), "pk" FROM pragma_table_info('riders')
+    - SELECT "name", upper("type"), "pk" FROM pragma_table_info('stations')
+  explanation: |
+    Riders and stations are separate entities, so they get separate tables, each with its own primary key.
+    The same id value (1, 2, 3) can appear in both tables without any conflict (L319-326).
+  source:
+    - {file: lecture2, lines: "672-695", quote: "I could say, ID has the integer type affinity."}
+    - {file: lecture2, lines: "800-811", quote: "and then say, primary key ID, just like this"}
+
+- id: M2-E03
+  title: The visits junction table
+  origin: source-demo
+  concepts: [C2.3, C2.6]
+  difficulty: 2
+  skills: [junction table, FOREIGN KEY]
+  db: null
+  kind: modify
+  setup: |
+    CREATE TABLE "riders" ("id" INTEGER, "name" TEXT, PRIMARY KEY("id"));
+    CREATE TABLE "stations" ("id" INTEGER, "name" TEXT, "line" TEXT, PRIMARY KEY("id"));
+    INSERT INTO "riders" VALUES (1, 'Charlie'), (2, 'Alice');
+    INSERT INTO "stations" VALUES (1, 'Harvard', 'red'), (2, 'Kendall/MIT', 'red');
+  prompt: |
+    Riders and stations are many-to-many. Create the junction table `visits(rider_id INTEGER, station_id INTEGER)`
+    with two foreign keys: `rider_id` → `riders(id)` and `station_id` → `stations(id)`.
+  hints:
+    - A junction table holds pairs of ids. Each column references another table's primary key.
+    - "Table constraint syntax: `FOREIGN KEY(\"col\") REFERENCES \"table\"(\"id\")`."
+    - "`CREATE TABLE \"visits\" (\"rider_id\" INTEGER, \"station_id\" INTEGER, FOREIGN KEY(\"rider_id\") REFERENCES \"riders\"(\"id\"), FOREIGN KEY(...) REFERENCES ...);`"
+  solution: |
+    CREATE TABLE "visits" (
+        "rider_id" INTEGER,
+        "station_id" INTEGER,
+        FOREIGN KEY("rider_id") REFERENCES "riders"("id"),
+        FOREIGN KEY("station_id") REFERENCES "stations"("id")
+    );
+  probes:
+    - INSERT INTO "visits" VALUES (1, 1)
+    - INSERT INTO "visits" VALUES (1, 1)
+    - INSERT INTO "visits" VALUES (99, 1)
+    - INSERT INTO "visits" VALUES (2, 42)
+  check:
+    - SELECT "table", "from", "to" FROM pragma_foreign_key_list('visits')
+    - SELECT COUNT(*) FROM "visits"
+  explanation: |
+    With foreign keys on, `(99, 1)` is rejected because rider 99 doesn't exist. Repeat visits `(1, 1)` are allowed.
+    Note that SQLite only enforces foreign keys after `PRAGMA foreign_keys = ON;`, which this trainer always runs (see errata #4).
+  source:
+    - {file: lecture2, lines: "425-444", quote: "So I'll call this table visits."}
+    - {file: lecture2, lines: "848-865", quote: "The foreign key of this table is rider ID"}
+
+- id: M2-E04
+  title: Why a composite primary key is wrong for visits
+  origin: source-question
+  concepts: [C2.6]
+  difficulty: 2
+  skills: [composite PRIMARY KEY, constraint failure]
+  db: null
+  kind: error
+  expect_error: UNIQUE constraint failed
+  setup: |
+    CREATE TABLE "visits" ("rider_id" INTEGER, "station_id" INTEGER, PRIMARY KEY("rider_id", "station_id"));
+    INSERT INTO "visits" VALUES (1, 1);
+  prompt: |
+    Here `visits` has the **joint primary key** `(rider_id, station_id)`, and rider 1 has already visited station 1 once.
+    Write the INSERT that records rider 1 visiting station 1 **again**, and observe what happens.
+  hints:
+    - A primary key must be unique, so what makes a row unique here?
+    - Insert the exact same pair again.
+    - "`INSERT INTO \"visits\" VALUES (1, 1);`"
+  solution: |
+    INSERT INTO "visits" VALUES (1, 1);
+  explanation: |
+    A composite PK forbids repeating a (rider, station) pair, but real riders visit the same station many times.
+    That is why the lecture prefers its own `id` primary key (or the implicit `rowid`) for visits.
+  source:
+    - {file: lecture2, lines: "816-834", quote: "So maybe not the best design for this table"}
+
+- id: M2-E05
+  title: Fares in cents
+  origin: generated
+  concepts: [C2.5]
+  difficulty: 2
+  skills: [REAL vs INTEGER, CAST, ROUND, SUM]
+  db: charlie
+  kind: query
+  prompt: |
+    The `log.fare` column stores dollars as REAL values (0.10, 0.05, ...). Floating-point values aren't exact.
+    Return a single number: the **total of all fares in whole cents**, as an integer.
+  hints:
+    - Convert each fare to cents *before* adding, so you add exact integers.
+    - "`fare * 100` can come out as 9.999999...; `ROUND` it, then `CAST(... AS INTEGER)`."
+    - "`SELECT SUM(CAST(ROUND(\"fare\" * 100) AS INTEGER)) FROM \"log\";`"
+  solution: |
+    SELECT SUM(CAST(ROUND("fare" * 100) AS INTEGER)) FROM "log";
+  expected_known: [[50]]
+  explanation: |
+    This is the lecture's integer-vs-real trade-off for fares, made concrete. Whole cents in an INTEGER column are exact and easy to add up.
+    REAL dollars risk values like 0.10000056789 (L540-547).
+  source:
+    - {file: lecture2, lines: "540-571", quote: "it can get very wonky if I really need that kind of precision"}
+
+- id: M2-E06
+  title: Watch type affinity convert values
+  origin: source-demo
+  concepts: [C2.5]
+  difficulty: 2
+  skills: [type affinity, typeof]
+  db: null
+  kind: query
+  prompt: |
+    Recreate the lecture's demo:
+    1. Create `fares_text("amount" TEXT)` and `fares_int("amount" INTEGER)`.
+    2. Insert the **integer** `10` into `fares_text`, and the **text** `'25'` into `fares_int`.
+    3. Finish with one query returning two rows: `typeof("amount")` from each table, `fares_text` first (use `UNION ALL`).
+  hints:
+    - The column's affinity, not the literal you typed, decides how the value is stored when conversion is possible.
+    - "`typeof(x)` returns 'integer', 'text', 'real', 'blob' or 'null'."
+    - "`SELECT typeof(\"amount\") FROM \"fares_text\" UNION ALL SELECT typeof(\"amount\") FROM \"fares_int\";`"
+  solution: |
+    CREATE TABLE "fares_text" ("amount" TEXT);
+    CREATE TABLE "fares_int" ("amount" INTEGER);
+    INSERT INTO "fares_text" VALUES (10);
+    INSERT INTO "fares_int" VALUES ('25');
+    SELECT typeof("amount") FROM "fares_text"
+    UNION ALL
+    SELECT typeof("amount") FROM "fares_int";
+  ordered: true
+  expected_known: [["text"], ["integer"]]
+  explanation: |
+    Storage classes belong to **values**, and affinities belong to **columns**. A column converts what you insert to its preferred class when it can.
+    A value that can't be converted (e.g. `'red line'` into INTEGER) is stored as it is.
+  source:
+    - {file: lecture2, lines: "613-638", quote: "I'll get back not 10, the text, but 10 the integer"}
+
+- id: M2-E07
+  title: Stations with NOT NULL and UNIQUE
+  origin: source-demo
+  concepts: [C2.7]
+  difficulty: 2
+  skills: [NOT NULL, UNIQUE]
+  db: null
+  kind: modify
+  prompt: |
+    Create `stations(id, name, line)` where:
+    * `id` is an INTEGER primary key
+    * `name` is TEXT, required and unique
+    * `line` is TEXT and required, but **not** unique (many stations share a line)
+  hints:
+    - Column constraints go right after the column's affinity.
+    - "`NOT NULL` makes a value required; `UNIQUE` forbids repeats."
+    - "`\"name\" TEXT NOT NULL UNIQUE, \"line\" TEXT NOT NULL, PRIMARY KEY(\"id\")`"
+  solution: |
+    CREATE TABLE "stations" (
+        "id" INTEGER,
+        "name" TEXT NOT NULL UNIQUE,
+        "line" TEXT NOT NULL,
+        PRIMARY KEY("id")
+    );
+  probes:
+    - INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red')
+    - INSERT INTO "stations" ("name", "line") VALUES ('Kendall/MIT', 'red')
+    - INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red')
+    - INSERT INTO "stations" ("name", "line") VALUES (NULL, 'blue')
+    - INSERT INTO "stations" ("name", "line") VALUES ('Aquarium', NULL)
+  check:
+    - SELECT "name", "line" FROM "stations"
+  explanation: |
+    There is no need to add NOT NULL or UNIQUE to `id`, because `PRIMARY KEY` already implies both (L958-966, L1016-1022).
+  source:
+    - {file: lecture2, lines: "940-1005", quote: "So I'll say not null and unique."}
+
+- id: M2-E08
+  title: The swipes table with CHECK and DEFAULT
+  origin: source-demo
+  concepts: [C2.6, C2.7]
+  difficulty: 3
+  skills: [CHECK, DEFAULT, CURRENT_TIMESTAMP, FOREIGN KEY]
+  db: null
+  kind: modify
+  setup: |
+    CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));
+    CREATE TABLE "stations" ("id" INTEGER, "name" TEXT NOT NULL UNIQUE, "line" TEXT NOT NULL, PRIMARY KEY("id"));
+    INSERT INTO "cards" VALUES (1);
+    INSERT INTO "stations" VALUES (1, 'Harvard', 'red');
+  prompt: |
+    Create `swipes` exactly as designed in Lecture 2:
+    * `id` INTEGER primary key; `card_id` and `station_id` INTEGER foreign keys to `cards(id)` / `stations(id)`
+    * `type` TEXT, required, only `'enter'`, `'exit'` or `'deposit'`
+    * `datetime` NUMERIC, required, defaulting to the current timestamp
+    * `amount` NUMERIC, required, never 0
+  hints:
+    - "Restricting a column to a list of values: `CHECK(\"type\" IN (...))`."
+    - "`DEFAULT CURRENT_TIMESTAMP`; `CHECK(\"amount\" != 0)`."
+    - "`\"type\" TEXT NOT NULL CHECK(\"type\" IN ('enter', 'exit', 'deposit')), \"datetime\" NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP, ...` then PRIMARY KEY and two FOREIGN KEYs."
+  solution: |
+    CREATE TABLE "swipes" (
+        "id" INTEGER,
+        "card_id" INTEGER,
+        "station_id" INTEGER,
+        "type" TEXT NOT NULL CHECK("type" IN ('enter', 'exit', 'deposit')),
+        "datetime" NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "amount" NUMERIC NOT NULL CHECK("amount" != 0),
+        PRIMARY KEY("id"),
+        FOREIGN KEY("card_id") REFERENCES "cards"("id"),
+        FOREIGN KEY("station_id") REFERENCES "stations"("id")
+    );
+  probes:
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'enter', -2.40)
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'teleport', -2.40)
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'deposit', 0)
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, NULL, 5)
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (7, 1, 'enter', -2.40)
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'deposit', NULL)
+  check:
+    - SELECT "type", "amount", "datetime" IS NOT NULL FROM "swipes"
+  explanation: |
+    Constraints are guardrails. Each rejected probe above is a bad row that could never get into this table.
+  source:
+    - {file: lecture2, lines: "1241-1290", quote: "I could say, maybe the type is in enter exit or is in deposit."}
+
+- id: M2-E09
+  title: Rename visits to swipes and add a column
+  origin: source-demo
+  concepts: [C2.8]
+  difficulty: 1
+  skills: [ALTER TABLE RENAME TO, ADD COLUMN]
+  db: null
+  kind: modify
+  setup: |
+    CREATE TABLE "visits" ("rider_id" INTEGER, "station_id" INTEGER);
+    INSERT INTO "visits" VALUES (1, 1), (2, 1);
+  prompt: |
+    Without dropping any data:
+    1. Rename table `visits` to `swipes`.
+    2. Add a column `type` with TEXT affinity to `swipes`.
+  hints:
+    - Use `ALTER TABLE`, not `DROP TABLE`, so the rows survive.
+    - "`ALTER TABLE ... RENAME TO ...;` then `ALTER TABLE ... ADD COLUMN ... TEXT;`"
+    - "`ALTER TABLE \"visits\" RENAME TO \"swipes\"; ALTER TABLE \"swipes\" ADD COLUMN \"type\" TEXT;`"
+  solution: |
+    ALTER TABLE "visits" RENAME TO "swipes";
+    ALTER TABLE "swipes" ADD COLUMN "type" TEXT;
+  check:
+    - SELECT "name" FROM sqlite_master WHERE "type" = 'table' ORDER BY "name"
+    - SELECT "name", upper("type") FROM pragma_table_info('swipes')
+    - SELECT COUNT(*) FROM "swipes"
+  explanation: Existing rows get NULL in the new column, or the column's DEFAULT if one is declared.
+  source:
+    - {file: lecture2, lines: "1128-1151", quote: "alter table, as we saw before, visits"}
+
+- id: M2-E10
+  title: Fix a typo in a column name
+  origin: source-demo
+  concepts: [C2.8]
+  difficulty: 1
+  skills: [RENAME COLUMN]
+  db: null
+  kind: modify
+  setup: |
+    CREATE TABLE "swipes" ("rider_id" INTEGER, "station_id" INTEGER, "ttpe" TEXT);
+  prompt: |
+    Like the lecturer, you made a typo: the column is called `ttpe`. Rename it to `type`.
+  hints:
+    - "`ALTER TABLE` has a sub-command for renaming one column."
+    - "`RENAME COLUMN old TO new`"
+    - "`ALTER TABLE \"swipes\" RENAME COLUMN \"ttpe\" TO \"type\";`"
+  solution: |
+    ALTER TABLE "swipes" RENAME COLUMN "ttpe" TO "type";
+  check:
+    - SELECT "name" FROM pragma_table_info('swipes')
+  explanation: ""
+  source:
+    - {file: lecture2, lines: "1153-1166", quote: "rename the column, ttpe to type, spelled correctly now"}
+
+- id: M2-E11
+  title: Drop a column you no longer want
+  origin: source-demo
+  concepts: [C2.8]
+  difficulty: 1
+  skills: [DROP COLUMN]
+  db: null
+  kind: modify
+  setup: |
+    CREATE TABLE "swipes" ("rider_id" INTEGER, "station_id" INTEGER, "type" TEXT);
+  prompt: You changed your mind. Remove the `type` column from `swipes`.
+  hints:
+    - Removing one column is still an `ALTER TABLE` job.
+    - "`ALTER TABLE ... DROP COLUMN ...;`"
+    - "`ALTER TABLE \"swipes\" DROP COLUMN \"type\";`"
+  solution: |
+    ALTER TABLE "swipes" DROP COLUMN "type";
+  check:
+    - SELECT "name" FROM pragma_table_info('swipes')
+  explanation: SQLite has supported DROP COLUMN since version 3.35 (2021).
+  source:
+    - {file: lecture2, lines: "1168-1176", quote: "drop column type, semicolon"}
+
+- id: M2-E12
+  title: "Capstone: the full CharlieCard schema"
+  origin: generated
+  concepts: [C2.2, C2.3, C2.4, C2.6, C2.7]
+  difficulty: 4
+  skills: [schema design]
+  db: null
+  kind: modify
+  prompt: |
+    From a blank database, write the complete final schema of Lecture 2: `cards`, `stations`, `swipes`.
+    Use the same constraints the lecture ends with: unique, required station names; a required line;
+    the swipe-type list; the timestamp default; a non-zero amount; and all keys.
+    (This combines M2-E07 and M2-E08, so try it without looking.)
+  hints:
+    - Create the tables that are referenced (`cards`, `stations`) before the table that references them.
+    - "`cards` has only an `id`. `stations` and `swipes` are as in the previous exercises."
+    - Check your answer against `database/mbta/schema.sql`.
+  solution: |
+    CREATE TABLE "cards" (
+        "id" INTEGER,
+        PRIMARY KEY("id")
+    );
+    CREATE TABLE "stations" (
+        "id" INTEGER,
+        "name" TEXT NOT NULL UNIQUE,
+        "line" TEXT NOT NULL,
+        PRIMARY KEY("id")
+    );
+    CREATE TABLE "swipes" (
+        "id" INTEGER,
+        "card_id" INTEGER,
+        "station_id" INTEGER,
+        "type" TEXT NOT NULL CHECK("type" IN ('enter', 'exit', 'deposit')),
+        "datetime" NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "amount" NUMERIC NOT NULL CHECK("amount" != 0),
+        PRIMARY KEY("id"),
+        FOREIGN KEY("card_id") REFERENCES "cards"("id"),
+        FOREIGN KEY("station_id") REFERENCES "stations"("id")
+    );
+  probes:
+    - INSERT INTO "cards" ("id") VALUES (1)
+    - INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red')
+    - INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red')
+    - INSERT INTO "stations" ("name") VALUES ('Alewife')
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'enter', -2.40)
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (2, 1, 'enter', -2.40)
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'board', -2.40)
+    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'exit', 0)
+  check:
+    - SELECT "name" FROM sqlite_master WHERE "type" = 'table' ORDER BY "name"
+    - SELECT COUNT(*) FROM "swipes" WHERE "datetime" IS NOT NULL
+  explanation: |
+    Riders were dropped from the design because the MBTA tracks CharlieCards, not people (L1033-1061).
+  source:
+    - {file: lecture2, lines: "1189-1230", quote: "So let's now say visits becomes swipes."}
+    - {file: lecture2, lines: "1299-1305", quote: "So let me say that this is now a card ID"}
+
+- id: M2-E13
+  title: "Lab: rebuild a database from schema.sql"
   origin: source-demo
   concepts: [C2.1]
   difficulty: 1
-  skills: [INSERT INTO, implicit primary key]
-  db: mfa
-  kind: modify
-  setup: |
-    DELETE FROM "created"; DELETE FROM "collections";
-    INSERT INTO "collections" VALUES (1, 'Profusion of Flowers', '56.257', '1956-04-12');
-    INSERT INTO "collections" VALUES (2, 'Farmers Working at Dawn', '11.6152', '1911-08-03');
+  skills: [sqlite3 shell, .read, .schema]
+  db: null
+  kind: selfcheck
   prompt: |
-    Insert **Spring Outing** (accession `14.76`, acquired `1914-01-08`) **without** giving an id.
-    Then check: what id did it receive?
-  hints:
-    - Simply leave `id` out of the column list.
-    - An `INTEGER` primary key is filled in automatically.
-    - "`INSERT INTO \"collections\" (\"title\", \"accession_number\", \"acquired\") VALUES (...);`"
-  solution: |
-    INSERT INTO "collections" ("title", "accession_number", "acquired")
-    VALUES ('Spring Outing', '14.76', '1914-01-08');
-  check:
-    - SELECT * FROM "collections"
-  explanation: |
-    SQLite takes the current highest id (2) and adds 1, giving 3. Choosing ids yourself risks reusing one that is already taken.
-    For what changes with `AUTOINCREMENT`, see errata #2: the lecture states it backwards.
-  source:
-    - {file: lecture3, lines: "206-232", quote: "So it seems like SQLite actually increments the primary key for me."}
+    In a terminal (not in the browser):
+    1. Save your M2-E12 answer as `schema.sql`.
+    2. `sqlite3 mbta.db`, then `.read schema.sql`, then `.schema`, then `.quit`.
+    3. Change something in `schema.sql` (e.g. add a column), then `DROP TABLE` the tables and `.read` the file again.
 
-- id: M2-E03
-  title: Break the UNIQUE constraint
-  origin: source-demo
-  concepts: [C2.2]
-  difficulty: 1
-  skills: [UNIQUE]
-  db: mfa
-  kind: error
-  expect_error: UNIQUE constraint failed
-  prompt: |
-    *Spring Outing* (accession `14.76`) is already in `collections`. Try inserting it **again** with the same accession number, and read the error.
+    Compare with `database/mbta/schema.sql`, which is exactly this workflow, and with `python3 tools/build_db.py`, which rebuilds every practice database from such files.
   hints:
-    - "`accession_number` was declared `UNIQUE`."
-    - Write a normal INSERT with the duplicate value.
-    - "`INSERT INTO \"collections\" (\"title\", \"accession_number\", \"acquired\") VALUES ('Spring Outing', '14.76', '1914-01-08');`"
+    - Dot-commands belong to the sqlite3 shell, not to SQL. They take no semicolon.
+    - "`.read FILE` runs every statement in FILE; `.schema [TABLE]` prints the CREATE statements."
+    - "Order matters when re-running: drop referencing tables (swipes) before referenced ones (cards, stations)."
   solution: |
-    INSERT INTO "collections" ("title", "accession_number", "acquired")
-    VALUES ('Spring Outing', '14.76', '1914-01-08');
-  explanation: The constraint protected the table from a duplicate record. Nothing was inserted.
+    -- shell session
+    sqlite3 mbta.db
+    .read schema.sql
+    .schema
+    .quit
+    -- after editing schema.sql:
+    DROP TABLE "swipes"; DROP TABLE "stations"; DROP TABLE "cards";
+    .read schema.sql
+  explanation: A schema file you can re-run is documentation, a backup, and an undo button in one.
   source:
-    - {file: lecture3, lines: "262-284", quote: "Runtime error-- UNIQUE constraint failed."}
+    - {file: lecture2, lines: "659-720", quote: "I could say dot read schema.sql"}
 
-- id: M2-E04
-  title: Break the NOT NULL constraint
-  origin: source-demo
-  concepts: [C2.2]
-  difficulty: 1
-  skills: [NOT NULL, "NULL"]
-  db: mfa
-  kind: error
-  expect_error: NOT NULL constraint failed
-  prompt: Try to insert an artwork whose `title` and `accession_number` are both `NULL` (acquired `1900-01-10`).
-  hints:
-    - "`NULL` is written without quotes. `'NULL'` would be a four-letter string."
-    - Both columns were declared NOT NULL.
-    - "`INSERT INTO \"collections\" (\"title\", \"accession_number\", \"acquired\") VALUES (NULL, NULL, '1900-01-10');`"
-  solution: |
-    INSERT INTO "collections" ("title", "accession_number", "acquired")
-    VALUES (NULL, NULL, '1900-01-10');
-  explanation: ""
-  source:
-    - {file: lecture3, lines: "286-307", quote: "the NOT NULL constraint"}
-
-- id: M2-E05
-  title: Insert two rows in one statement
-  origin: source-demo
-  concepts: [C2.3]
-  difficulty: 1
-  skills: [multi-row INSERT, "NULL"]
-  db: mfa
-  kind: modify
-  setup: |
-    DELETE FROM "created"; DELETE FROM "collections";
-    INSERT INTO "collections" ("title", "accession_number", "acquired") VALUES
-      ('Profusion of Flowers', '56.257', '1956-04-12'),
-      ('Farmers Working at Dawn', '11.6152', '1911-08-03'),
-      ('Spring Outing', '14.76', '1914-01-08');
-  prompt: |
-    With **one** INSERT statement, add:
-    * **Imaginative Landscape**, accession `56.496`. The museum doesn't know when it was acquired.
-    * **Peonies and Butterfly**, accession `06.1899`, acquired `1906-01-01`
-  hints:
-    - One VALUES keyword, then several parenthesized rows separated by commas.
-    - An unknown date is `NULL`. Quote `'06.1899'`, or the leading zero disappears (errata #5).
-    - "`INSERT INTO ... (...) VALUES ('Imaginative Landscape', '56.496', NULL), ('Peonies and Butterfly', '06.1899', '1906-01-01');`"
-  solution: |
-    INSERT INTO "collections" ("title", "accession_number", "acquired")
-    VALUES
-    ('Imaginative Landscape', '56.496', NULL),
-    ('Peonies and Butterfly', '06.1899', '1906-01-01');
-  check:
-    - SELECT "title", "accession_number", "acquired" FROM "collections"
-  explanation: |
-    One multi-row INSERT is both more convenient and faster than many single inserts. It is also all-or-nothing:
-    if one row violates a constraint, none are inserted (L632-638).
-  source:
-    - {file: lecture3, lines: "334-364", quote: "So a handy way to insert more than one value."}
-
-- id: M2-E06
-  title: From an imported CSV into the real table
-  origin: source-demo
-  concepts: [C2.3, C2.4]
-  difficulty: 3
-  skills: [INSERT INTO ... SELECT, NULLIF, DROP TABLE]
-  db: mfa
-  kind: modify
-  setup: |
-    DELETE FROM "created"; DELETE FROM "collections";
-    -- What `.import --csv mfa_noid.csv temp` produces: every value is TEXT, and blanks are '' (not NULL)
-    CREATE TABLE "temp" ("title" TEXT, "accession_number" TEXT, "acquired" TEXT);
-    INSERT INTO "temp" VALUES
-      ('Profusion of Flowers', '56.257', '1956-04-12'),
-      ('Farmers Working at Dawn', '11.6152', '1911-08-03'),
-      ('Spring Outing', '14.76', '1914-01-08'),
-      ('Imaginative Landscape', '56.496', ''),
-      ('Peonies and Butterfly', '06.1899', '1906-01-01');
-  prompt: |
-    You imported `database/csv/mfa_noid.csv` (no id column) into a new table `temp`, as in the lecture.
-    1. Copy all of its rows into `collections` so that SQLite generates the ids. Turn the empty-string acquisition date into a real `NULL` while copying.
-    2. Drop `temp`.
-  hints:
-    - "`INSERT INTO table (cols) SELECT cols FROM other;` inserts a query's result. The columns must line up."
-    - "`NULLIF(x, '')` returns NULL when x is the empty string, otherwise x."
-    - "`INSERT INTO \"collections\" (\"title\", \"accession_number\", \"acquired\") SELECT \"title\", \"accession_number\", NULLIF(\"acquired\", '') FROM \"temp\"; DROP TABLE \"temp\";`"
-  solution: |
-    INSERT INTO "collections" ("title", "accession_number", "acquired")
-    SELECT "title", "accession_number", NULLIF("acquired", '') FROM "temp";
-    DROP TABLE "temp";
-  check:
-    - SELECT "title", "accession_number", "acquired" FROM "collections"
-    - SELECT COUNT(*) FROM sqlite_master WHERE "name" = 'temp'
-    - SELECT COUNT(*) FROM "collections" WHERE "acquired" IS NULL
-  explanation: |
-    The lecture moves the rows with `INSERT INTO ... SELECT` (L570-595) and notes that CSV blanks import as empty text, not NULL (L640-663).
-    `NULLIF` is one way to do the clean-up it recommends. The lecture suggests a later UPDATE instead, and either works.
-  source:
-    - {file: lecture3, lines: "570-603", quote: "I actually have a way to dynamically select all the values I want to insert"}
-    - {file: lecture3, lines: "644-663", quote: "it won't be converted to"}
-
-- id: M2-E07
-  title: Delete everything acquired before 1909
-  origin: source-question
-  concepts: [C2.5]
-  difficulty: 2
-  skills: [DELETE, date comparison]
-  db: mfa
-  kind: modify
-  setup: |
-    INSERT INTO "collections" ("title", "accession_number", "acquired") VALUES
-      ('Peonies and Butterfly', '06.1899', '1906-01-01');
-  prompt: |
-    The MFA moved to a new building in 1909, and pieces acquired *before* 1909 stayed behind.
-    Delete every item with an acquisition date earlier than 1 January 1909.
-    Think first: what happens to *Imaginative Landscape*, whose date is NULL?
-  hints:
-    - Which column expresses "before 1909"? Ids are a fragile proxy (L787-792).
-    - "Dates in `YYYY-MM-DD` text compare correctly with `<`."
-    - "`DELETE FROM \"collections\" WHERE \"acquired\" < '1909-01-01';`"
-  solution: |
-    DELETE FROM "collections" WHERE "acquired" < '1909-01-01';
-  check:
-    - SELECT "title" FROM "collections"
-  explanation: |
-    `NULL < '1909-01-01'` is NULL (unknown), not true, so the undated artwork is **kept**.
-  source:
-    - {file: lecture3, lines: "750-813", quote: "WHERE the \"acquired\" column is less than some date"}
-
-- id: M2-E08
-  title: Delete the undated artwork
-  origin: source-demo
-  concepts: [C2.5]
-  difficulty: 1
-  skills: [DELETE, IS NULL]
-  db: mfa
-  kind: modify
-  prompt: The museum sells *Imaginative Landscape*. Delete it by selecting the row whose acquisition date is unknown.
-  hints:
-    - Never run a DELETE without a WHERE, unless you really mean every row.
-    - "`= NULL` never matches anything."
-    - "`DELETE FROM \"collections\" WHERE \"acquired\" IS NULL;`"
-  solution: |
-    DELETE FROM "collections" WHERE "acquired" IS NULL;
-  check:
-    - SELECT "title" FROM "collections"
-    - SELECT * FROM "created"
-  explanation: |
-    Its row in `created` disappears too, because this schema has `ON DELETE CASCADE` (see M2-E11).
-  source:
-    - {file: lecture3, lines: "727-745", quote: "the \"acquired\" date IS NULL semicolon"}
-
-- id: M2-E09
-  title: Delete an artist the two-step way
-  origin: source-demo
-  concepts: [C2.5, C2.6, C0.5]
-  difficulty: 3
-  skills: [DELETE, subquery, FOREIGN KEY]
-  db: mfa
-  kind: modify
-  setup: |
-    -- rebuild "created" WITHOUT ON DELETE CASCADE (the first version in the lecture)
-    DROP TABLE "created";
-    CREATE TABLE "created" (
-        "artist_id" INTEGER, "collection_id" INTEGER,
-        FOREIGN KEY("artist_id") REFERENCES "artists"("id"),
-        FOREIGN KEY("collection_id") REFERENCES "collections"("id")
-    );
-    INSERT INTO "created" VALUES (1, 2), (3, 1), (2, 3), (2, 4);
-  prompt: |
-    Remove **Unidentified artist** completely. `created` has no ON DELETE action here, so deleting the artist first fails.
-    Do it in the right order, and **don't hard-code the artist's id**.
-  hints:
-    - First remove what *references* the artist, then the artist.
-    - Find the id with a subquery on `artists`.
-    - "`DELETE FROM \"created\" WHERE \"artist_id\" = (SELECT \"id\" FROM \"artists\" WHERE \"name\" = 'Unidentified artist');` then `DELETE FROM \"artists\" WHERE ...;`"
-  solution: |
-    DELETE FROM "created" WHERE "artist_id" = (
-        SELECT "id" FROM "artists" WHERE "name" = 'Unidentified artist'
-    );
-    DELETE FROM "artists" WHERE "name" = 'Unidentified artist';
-  check:
-    - SELECT * FROM "artists"
-    - SELECT * FROM "created"
-  explanation: The order matters. Delete the referencing rows first, then the row they reference.
-  source:
-    - {file: lecture3, lines: "954-979", quote: "First delete their affiliation, then delete their name."}
-
-- id: M2-E10
-  title: Hit the FOREIGN KEY constraint
-  origin: source-demo
-  concepts: [C2.6]
-  difficulty: 1
-  skills: [FOREIGN KEY]
-  db: mfa
-  kind: error
-  expect_error: FOREIGN KEY constraint failed
-  setup: |
-    DROP TABLE "created";
-    CREATE TABLE "created" (
-        "artist_id" INTEGER, "collection_id" INTEGER,
-        FOREIGN KEY("artist_id") REFERENCES "artists"("id"),
-        FOREIGN KEY("collection_id") REFERENCES "collections"("id")
-    );
-    INSERT INTO "created" VALUES (1, 2), (3, 1), (2, 3), (2, 4);
-  prompt: Delete *Unidentified artist* directly from `artists` and read the error.
-  hints:
-    - The artist's id is still referenced in `created`.
-    - A plain DELETE with a WHERE on the name.
-    - "`DELETE FROM \"artists\" WHERE \"name\" = 'Unidentified artist';`"
-  solution: |
-    DELETE FROM "artists" WHERE "name" = 'Unidentified artist';
-  explanation: |
-    The default action is effectively RESTRICT. SQLite refuses to leave `created` pointing at nothing.
-    (This only happens with `PRAGMA foreign_keys = ON`.)
-  source:
-    - {file: lecture3, lines: "885-896", quote: "I do get that FOREIGN KEY constraint error"}
-
-- id: M2-E11
-  title: Let ON DELETE CASCADE do both steps
-  origin: source-demo
-  concepts: [C2.6]
-  difficulty: 2
-  skills: [ON DELETE CASCADE]
-  db: mfa
-  kind: modify
-  prompt: |
-    In this version of the schema, `created`'s foreign keys say `ON DELETE CASCADE` (check with `.schema` or `SELECT sql FROM sqlite_master`).
-    Delete *Unidentified artist* with **one** statement and confirm their row in `created` is gone too.
-  hints:
-    - With CASCADE, deleting the referenced row also deletes the referencing rows.
-    - Just delete from `artists`.
-    - "`DELETE FROM \"artists\" WHERE \"name\" = 'Unidentified artist';`"
-  solution: |
-    DELETE FROM "artists" WHERE "name" = 'Unidentified artist';
-  check:
-    - SELECT * FROM "artists"
-    - SELECT * FROM "created"
-  explanation: |
-    The other ON DELETE choices: RESTRICT (refuse), NO ACTION (allow, leaving dangling ids), SET NULL, SET DEFAULT, and CASCADE.
-  source:
-    - {file: lecture3, lines: "988-1013", quote: "This converts our 2-step process into a 1-step process."}
-    - {file: lecture3, lines: "1044-1052", quote: "I've also deleted the artist's affiliation with their work"}
-
-- id: M2-E12
-  title: Re-attribute an artwork with UPDATE
-  origin: source-demo
-  concepts: [C2.7, C0.5]
-  difficulty: 2
-  skills: [UPDATE, subquery]
-  db: mfa
-  kind: modify
-  prompt: |
-    Research shows *Farmers Working at Dawn* was painted by **Li Yin**, not by "Unidentified artist".
-    Update `created` accordingly, using subqueries for both ids.
-  hints:
-    - The fact to change lives in the junction table `created`, not in `artists`.
-    - "`SET \"artist_id\" = (subquery for Li Yin)` and `WHERE \"collection_id\" = (subquery for the painting)`."
-    - "`UPDATE \"created\" SET \"artist_id\" = (SELECT \"id\" FROM \"artists\" WHERE \"name\" = 'Li Yin') WHERE \"collection_id\" = (SELECT \"id\" FROM \"collections\" WHERE \"title\" = 'Farmers Working at Dawn');`"
-  solution: |
-    UPDATE "created" SET "artist_id" = (
-        SELECT "id" FROM "artists" WHERE "name" = 'Li Yin'
-    )
-    WHERE "collection_id" = (
-        SELECT "id" FROM "collections" WHERE "title" = 'Farmers Working at Dawn'
-    );
-  check:
-    - SELECT * FROM "created"
-  explanation: Without the WHERE, every artwork would be attributed to Li Yin (debugging D2-03).
-  source:
-    - {file: lecture3, lines: "1146-1176", quote: "So I have Li Yin associated with now two paintings overall."}
-
-- id: M2-E13
-  title: Clean the votes and get four groups
-  origin: source-demo
-  concepts: [C2.8]
-  difficulty: 3
-  skills: [UPDATE, trim, upper, LIKE]
-  db: votes
-  kind: modify
-  prompt: |
-    The `votes` table holds 20 typed-in votes with stray spaces, inconsistent capitals and typos.
-    Write UPDATE statements so that `SELECT "title", COUNT(*) FROM "votes" GROUP BY "title";` returns exactly four groups:
-    *Farmers Working at Dawn*, *Imaginative Landscape*, *Profusion of Flowers*, *Spring Outing*.
-    Capitalization is up to you; the checker compares case-insensitively but requires no leading or trailing spaces.
-  hints:
-    - "Fix the systematic problems first, for all rows (no WHERE): whitespace with `trim()`, case with `upper()`."
-    - "Then fix families of typos with `LIKE` patterns (`%` = any characters; LIKE ignores case), and fix the one-off typos with `=`."
-    - "Run the GROUP BY after each step. For example `UPDATE \"votes\" SET \"title\" = 'FARMERS WORKING AT DAWN' WHERE \"title\" LIKE 'Fa%';` Then do Imaginative, the `Imagintive` typo, and Profusion."
-  solution: |
-    UPDATE "votes" SET "title" = trim("title");
-    UPDATE "votes" SET "title" = upper("title");
-    UPDATE "votes" SET "title" = 'FARMERS WORKING AT DAWN' WHERE "title" LIKE 'Fa%';
-    UPDATE "votes" SET "title" = 'IMAGINATIVE LANDSCAPE' WHERE "title" LIKE 'Imaginative %';
-    UPDATE "votes" SET "title" = 'IMAGINATIVE LANDSCAPE' WHERE "title" = 'IMAGINTIVE LANDSCAPE';
-    UPDATE "votes" SET "title" = 'PROFUSION OF FLOWERS' WHERE "title" LIKE 'Profusion%';
-  check:
-    - SELECT upper("title"), COUNT(*) FROM "votes" GROUP BY upper("title")
-    - SELECT COUNT(*) FROM "votes" WHERE "title" != trim("title")
-  explanation: |
-    The final tally is Farmers 6, Imaginative 5, Profusion 5, Spring Outing 4. The lecture reports 6 and 5 for the first two.
-    `LIKE 'Fa%'` is fine for this tiny data set, but in real data it could also match other titles (see debugging D2-06).
-  source:
-    - {file: lecture3, lines: "1281-1299", quote: "takes a string and just removes leading and trailing"}
-    - {file: lecture3, lines: "1384-1394", quote: "so be careful with this"}
-    - {file: lecture3, lines: "1444-1448", quote: "Farmers Working At Dawn has six votes."}
-
-- id: M2-E14
-  title: Triggers that log sales and purchases
-  origin: source-demo
-  concepts: [C2.9]
-  difficulty: 3
-  skills: [CREATE TRIGGER, OLD, NEW]
-  db: mfa
-  kind: modify
-  prompt: |
-    1. Create `transactions(id INTEGER primary key, title TEXT, action TEXT)`.
-    2. Create trigger **sell**: *before* a row is deleted from `collections`, insert its title with action `'sold'`.
-    3. Create trigger **buy**: *after* a row is inserted into `collections`, insert its title with action `'bought'`.
-
-    The checker then deletes *Profusion of Flowers* and re-inserts it, and inspects `transactions`.
-  hints:
-    - "Shape: `CREATE TRIGGER name BEFORE DELETE ON table FOR EACH ROW BEGIN ...; END;`"
-    - "In a DELETE trigger the row being removed is `OLD`. In an INSERT trigger the new row is `NEW`."
-    - "Body of sell: `INSERT INTO \"transactions\" (\"title\", \"action\") VALUES (OLD.\"title\", 'sold');`"
-  solution: |
-    CREATE TABLE "transactions" (
-        "id" INTEGER,
-        "title" TEXT,
-        "action" TEXT,
-        PRIMARY KEY("id")
-    );
-    CREATE TRIGGER "sell"
-    BEFORE DELETE ON "collections"
-    FOR EACH ROW
-    BEGIN
-        INSERT INTO "transactions" ("title", "action")
-        VALUES (OLD."title", 'sold');
-    END;
-    CREATE TRIGGER "buy"
-    AFTER INSERT ON "collections"
-    FOR EACH ROW
-    BEGIN
-        INSERT INTO "transactions" ("title", "action")
-        VALUES (NEW."title", 'bought');
-    END;
-  probes:
-    - DELETE FROM "collections" WHERE "title" = 'Profusion of Flowers'
-    - INSERT INTO "collections" ("title", "accession_number", "acquired") VALUES ('Profusion of Flowers', '56.257', '1956-04-12')
-  check:
-    - SELECT "title", "action" FROM "transactions" ORDER BY "id"
-  explanation: |
-    You never typed an INSERT into `transactions`. The triggers ran it for you. `FOR EACH ROW` means a DELETE of 3 rows logs 3 sales.
-  source:
-    - {file: lecture3, lines: "1588-1631", quote: "So automatically, I added \"Profusion of Flowers\""}
-    - {file: lecture3, lines: "1638-1678", quote: "So this is the power of triggers."}
-
-- id: M2-E15
-  title: Soft-delete instead of delete
-  origin: source-demo
-  concepts: [C2.10, C1.8]
-  difficulty: 2
-  skills: [ALTER TABLE ADD COLUMN DEFAULT, UPDATE]
-  db: mfa
-  kind: modify
-  prompt: |
-    1. Add a `deleted` column (INTEGER, default 0) to `collections`.
-    2. "Delete" *Farmers Working at Dawn* by marking it, so the row stays in the table.
-  hints:
-    - "`ALTER TABLE ... ADD COLUMN \"deleted\" INTEGER DEFAULT 0;`"
-    - "A soft delete is an UPDATE, not a DELETE."
-    - "`UPDATE \"collections\" SET \"deleted\" = 1 WHERE \"title\" = 'Farmers Working at Dawn';`"
-  solution: |
-    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
-    UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Farmers Working at Dawn';
-  check:
-    - SELECT "title", "deleted" FROM "collections"
-  explanation: |
-    Now every query must filter on `"deleted" = 0` (or `!= 1`), which is why Lecture 4 wraps that filter in a view.
-    Ethics: for personal data, a soft delete may not honour a request to be forgotten (GDPR, L1774-1784).
-  source:
-    - {file: lecture3, lines: "1737-1757", quote: "but technically-- at least we marked it as deleted"}

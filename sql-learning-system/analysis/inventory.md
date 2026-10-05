@@ -1,19 +1,58 @@
 # Phase 1: Document inventory
 
-All five files are **English lecture transcripts** (plain text, one spoken line per text line, no headings or page numbers) of Carter Zenke's *CS50's Introduction to Databases with SQL* (Harvard, 2023).
+All seven files are **English lecture transcripts** (plain text, one spoken line per text line, no headings or page numbers) of Carter Zenke's *CS50's Introduction to Databases with SQL* (Harvard, 2023).
 Because there are no pages, **every reference in this system is `file:line`**, using the copies in [`../sources/`](../sources/), which are byte-identical to the uploads. Line numbers are 1-based, as shown by any editor.
 
 | Short name | Uploaded file | Lines | Lecture (CS50 SQL week) | Datasets used |
 |---|---|---|---|---|
+| `lecture0` | `cs50_sql_lecture0-720p-en.txt` | 1436 | Week 0: **Querying** | `longlist.db` (single table) |
+| `lecture1` | `cs50_sql_lecture1-720p_resize-en.txt` | 1839 | Week 1: **Relating** | `longlist.db` (relational), `sea_lions.db` |
 | `lecture2` | `cs50_sql_lecture2-720p-en.txt` | 1391 | Week 2: **Designing** | `longlist.db` (glimpse), `mbta.db` (built from scratch) |
 | `lecture3` | `cs50_sql_lecture3-720p-en.txt` | 1793 | Week 3: **Writing** | `mfa.db`, `mfa.csv`, `votes.csv` |
 | `lecture4` | `cs50_sql_lecture4-720p-en.txt` | 1336 | Week 4: **Viewing** | `longlist.db`, `rideshare.db`, `mfa.db` |
 | `lecture5` | `cs50_sql_lecture5-720p_MBR-en.txt` | 1562 | Week 5: **Optimizing** | `movies.db` (IMDb), `bank.db` |
 | `lecture6` | `cs50_sql_lecture6-720p_MBR-en.txt` | 2169 | Week 6: **Scaling** | MySQL `mbta`, `mfa`, `rideshare`, `bank`; PostgreSQL `mbta` |
 
-**Not in the material set:** weeks 0 (*Querying*) and 1 (*Relating*). The five lectures constantly *use* `SELECT`, `WHERE`, `LIKE`, `ORDER BY`, `LIMIT`, `GROUP BY`, aggregates, `IN`, subqueries and `JOIN`, but never *teach* them. This system therefore adds Module 0, a prerequisite toolkit. It is built only from queries that appear in these five transcripts, and every Module 0 exercise is labeled GENERATED.
+**Upload batches.** Batch 1 brought lectures 2-6. Batch 2 brought lectures 0, 1, 2 and 4. The batch-2 copies of lectures 2 and 4 were byte-identical to batch 1 (same MD5: `231a5ea4…` and `93432b0f…`), so they were **dropped as duplicates**. Only lectures 0 and 1 were added. With them the set covers the whole course, weeks 0-6. The earlier stand-in "query toolkit" module, built from queries the later lectures used, has been replaced by the two real modules M0 and M1.
 
 ---
+
+## lecture0: Querying (1436 lines)
+
+| Lines | Section (inferred from speech) | Content |
+|---|---|---|
+| 3-101 | Why databases | tables since antiquity; spreadsheets vs databases (scale, update frequency, speed) |
+| 102-169 | Databases, DBMSs, SQL | CRUD; MySQL / Oracle / PostgreSQL / SQLite; proprietary vs open source; "Structured Query Language" |
+| 185-250 | The longlist dataset | 78 International Booker longlisted books, 2018-2023; VS Code + `sqlite3 longlist.db` |
+| 251-361 | SELECT | `SELECT *`, columns; double quotes for identifiers, single for strings; keyword capitalization |
+| 362-396 | LIMIT | peeking at the first rows |
+| 397-516 | WHERE | `=`, `!=`, `<>`, `NOT`; ANSI SQL vs dialect subsets (Q&A) |
+| 517-583 | AND / OR / parentheses | compound conditions |
+| 584-637 | NULL | `IS NULL`, `IS NOT NULL` (translators) |
+| 638-830 | LIKE | `%`, `_`; 'love', 'The %', 'P_re', 'T___' |
+| 831-972 | Ranges | `>=`, `<=`, `BETWEEN … AND`; rating > 4.0 AND votes > 10000; pages < 300; LIKE vs = case sensitivity |
+| 973-1130 | ORDER BY | ASC default, DESC, multiple keys (tie on 4.14), text ordering |
+| 1131-1343 | Aggregates | AVG, ROUND, AS, MAX, MIN, SUM, COUNT(*) vs COUNT(col); MAX/MIN on text |
+| 1344-1436 | DISTINCT + recap | misspelled column demo; `COUNT(DISTINCT publisher)` = 33; `.quit` |
+
+Audience questions used as exercises: L700-707 (quote style), L846-851 (OR chain design), L1004-1009 (default sort), L1097-1130 (DESC on text), L1290-1343 (78 vs 76), L1349-1357 (distinct publishers).
+
+## lecture1: Relating (1839 lines)
+
+| Lines | Section | Content |
+|---|---|---|
+| 15-55 | Relational databases | `.tables`; authors, books, publishers, translators, ratings |
+| 56-146 | Relationships | honor system vs one table vs related tables; one-to-one, one-to-many, many-to-many |
+| 147-246 | ER diagrams | crow's-foot notation; reading the longlist diagram |
+| 247-482 | Keys | librarian role-play; ISBN as primary key; foreign keys; surrogate ids; junction table `authored` |
+| 487-861 | Subqueries | Fitzcarraldo (id 5) / MacLehose (id 12) books; In Memory of Memory (id 33) ratings; author of Flights / The Birthday Party |
+| 862-1021 | IN | Fernanda Melchor's two books; `=` vs `IN`; repeated foreign keys |
+| 1022-1207 | JOIN | sea lions & migrations; INNER JOIN |
+| 1208-1404 | OUTER / NATURAL JOIN | LEFT, RIGHT, FULL; result sets are temporary; NATURAL JOIN |
+| 1408-1663 | Sets | UNION (with a profession column), INTERSECT (Ngũgĩ; Hughes ∩ Jull Costa), EXCEPT; **homework** L1461-1466 |
+| 1664-1839 | Groups | AVG per book, GROUP BY, HAVING > 4.0, COUNT per book, ORDER BY |
+
+Audience questions used as exercises: L340-355 (ISBN as key), L393-401 (meaning of (23, 1)), L505-526 (Fitzcarraldo), L742-746 (who wrote Flights), L1777-1800 (count ratings). Assigned: L1461-1466 (symmetric difference), L1597-1600 (title of the shared book).
 
 ## lecture2: Designing (1391 lines)
 
@@ -101,11 +140,13 @@ Audience questions used as exercises: L199-221 (redundancies), L307-327 (same id
 
 | Concept | Appears in |
 |---|---|
+| International Booker longlist | lecture0 (one table) → lecture1 (relational) → lecture2 L13-110 (`.schema` of both) → lecture4 (views) |
+| Subqueries and JOIN | taught in lecture1 L487-1404; reused in lecture3 L938-961, L1151-1165, lecture4 L139-240, lecture5 L376-394 |
+| GROUP BY / aggregates | lecture0 L1131-1401, lecture1 L1664-1839 → lecture3 L1229-1256 (votes) → lecture4 L371-433 (aggregate views) |
 | MFA collections + soft delete | lecture3 L1694-1793 → lecture4 L974-1336 (view + triggers) → lecture6 L955-1100 (stored procedure) |
 | MBTA cards/stations/swipes | lecture2 (SQLite design) → lecture6 L57-852 (MySQL), L1288-1477 (Postgres) |
 | Rideshare PII | lecture4 L863-968 (view; SQLite cannot restrict) → lecture6 L1840-1900 (MySQL GRANT finally restricts it) |
 | Bank accounts | lecture5 (transactions, race conditions, locks) → lecture6 (injection, prepared statements) |
-| Subqueries vs JOIN | lecture3 L938-961, L1151-1165; lecture4 L139-192 vs L202-240; lecture5 L376-394 |
 | Constraints as guardrails | lecture2 L777-1022, L1231-1305; lecture3 L247-312; lecture5 L1153 (CHECK balance ≥ 0 drives ROLLBACK) |
 | Transactions | promised in lecture3 L634-638, delivered in lecture5 L1049-1330 |
 | Triggers | lecture3 L1494-1683 (BEFORE/AFTER) → lecture4 L1103-1330 (INSTEAD OF, WHEN) |

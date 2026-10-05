@@ -20,7 +20,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 DB_DIR = ROOT / "database"
-DATASETS = ["longlist", "mbta", "charlie", "mfa", "votes", "rideshare", "movies", "bank"]
+DATASETS = ["longlist0", "longlist", "sea_lions", "mbta", "charlie", "mfa", "votes", "rideshare", "movies", "bank"]
 
 
 def dataset_sql(name: str) -> str:

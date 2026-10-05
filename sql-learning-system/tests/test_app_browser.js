@@ -25,12 +25,12 @@ const shots = process.argv[2];
   if (shots) await page.screenshot({ path: shots + "/home.png", fullPage: true });
 
   // Lesson tab renders markdown tables / code
-  await page.goto(url + "#M2");
+  await page.goto(url + "#M3");
   await page.waitForSelector("#tabbody article h2");
   ok(await page.$("#tabbody article table"), "lesson table rendered");
 
   // Solve an exercise through the UI: wrong first, then right
-  await page.goto(url + "#M3-E02");
+  await page.goto(url + "#M4-E02");
   await page.waitForSelector("#ed");
   ok(await page.isDisabled("#solution"), "solution locked before any attempt");
   await page.fill("#ed", `SELECT "title" FROM "longlist";`);
@@ -45,9 +45,9 @@ const shots = process.argv[2];
   if (shots) await page.screenshot({ path: shots + "/exercise.png", fullPage: true });
 
   // modify-type exercise with probes, plus solution reveal (two clicks)
-  await page.goto(url + "#M2-E14");
+  await page.goto(url + "#M3-E14");
   await page.waitForSelector("#ed");
-  const sol = await page.evaluate(() => DATA.exercises.find(e => e.id === "M2-E14").solution);
+  const sol = await page.evaluate(() => DATA.exercises.find(e => e.id === "M3-E14").solution);
   await page.fill("#ed", sol);
   await page.click("#check");
   ok((await page.textContent("#fb")).includes("✔"), "trigger exercise accepted");
@@ -55,14 +55,14 @@ const shots = process.argv[2];
   ok((await page.textContent("#out")).includes("CREATE TRIGGER"), "solution revealed after two clicks");
 
   // injection exercise
-  await page.goto(url + "#M5-E08");
+  await page.goto(url + "#M6-E08");
   await page.waitForSelector("#ed");
   await page.fill("#ed", "1 OR 1 = 1");
   await page.click("#check");
   ok((await page.textContent("#fb")).includes("✔"), "injection accepted");
 
   // debugging item starts with the broken query pre-loaded
-  await page.goto(url + "#D0-05");
+  await page.goto(url + "#D1-04");
   await page.waitForSelector("#ed");
   ok((await page.inputValue("#ed")).includes('"id" = ('), "broken query pre-loaded");
 
@@ -84,11 +84,11 @@ const shots = process.argv[2];
   await page.waitForSelector("#sbx");
   await page.fill("#sbx", `SELECT COUNT(*) AS "n" FROM "books";`);
   await page.click("#srun");
-  ok((await page.textContent("#sout")).includes("75"), "sandbox runs");
+  ok((await page.textContent("#sout")).includes("78"), "sandbox runs");
 
   // progress persisted
   const prog = await page.evaluate(() => JSON.parse(localStorage.getItem("sqlline:progress")));
-  ok(prog.items["M3-E02"].passed && prog.items["M3-E02"].attempts === 2 && prog.items["M3-E02"].hints === 1, "progress saved");
+  ok(prog.items["M4-E02"].passed && prog.items["M4-E02"].attempts === 2 && prog.items["M4-E02"].hints === 1, "progress saved");
 
   // every item page renders without throwing
   const ids = await page.evaluate(() => Object.keys(ITEMS).concat(MODS.map(m => m.id), ["debug", "sources", "errata", "roadmap", "backup"]));
@@ -96,7 +96,7 @@ const shots = process.argv[2];
 
   // phone width + dark mode screenshots, and no horizontal page scroll
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const id of ["home", "M1-E08", "M2"]) {
+  for (const id of ["home", "M2-E08", "M3"]) {
     await page.goto(url + "#" + id); await page.waitForTimeout(150);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     ok(overflow <= 1, `no horizontal scroll on phone (${id}): ${overflow}px`);
@@ -104,7 +104,7 @@ const shots = process.argv[2];
   if (shots) await page.screenshot({ path: shots + "/phone.png", fullPage: false });
   await page.emulateMedia({ colorScheme: "dark" });
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto(url + "#M4-E03"); await page.waitForSelector("#ed");
+  await page.goto(url + "#M5-E03"); await page.waitForSelector("#ed");
   if (shots) await page.screenshot({ path: shots + "/dark.png", fullPage: true });
 
   await browser.close();

@@ -1,84 +1,82 @@
 - id: R2-01
   type: quick
-  front: Syntax of a multi-row INSERT, and its two advantages?
-  back: "`INSERT INTO t (a, b) VALUES (1, 2), (3, 4);`. It is more convenient and usually faster than many single INSERTs, and it is all-or-nothing if a row breaks a constraint."
-  source: {file: lecture3, lines: "324-330", quote: "this is not just a manner of convenience"}
+  front: What does it mean to *normalize* a database?
+  back: Reduce redundancy by putting each entity (riders, stations, …) in its own table, so that every column of a table describes only that entity.
+  source: {file: lecture2, lines: "245-262", quote: "To normalize means to reduce redundancies"}
 - id: R2-02
-  type: predict
-  db: mfa
-  sql: |
-    INSERT INTO "collections" ("title", "accession_number") VALUES ('A', 'x1'), ('B', '56.257');
-    SELECT COUNT(*) FROM "collections";
-  choices: ["4", "5", "6", "ERROR: UNIQUE constraint failed"]
-  answer: 3
-  why: The second row duplicates an accession number. The statement fails, and neither row is inserted.
-  source: {file: lecture3, lines: "632-638", quote: "then we won't actually insert any of those rows"}
+  type: concept
+  question: Riders visit many stations and stations have many riders. What implements this relationship?
+  choices: ["A rider_ids column in stations", "A junction table such as visits(rider_id, station_id)", "A UNIQUE constraint", "A composite primary key on riders"]
+  answer: 1
+  why: Many-to-many relationships need an associative (junction) table holding pairs of ids.
+  source: {file: lecture2, lines: "425-438", quote: "a junction table, an associative entity, a join table"}
 - id: R2-03
   type: quick
-  front: Two ways to import a CSV with `.import`, and when to use each?
-  back: "`.import --csv --skip 1 file.csv existing_table` when the columns match the table. `.import --csv file.csv new_table` (the header names the columns), then `INSERT INTO real (...) SELECT ... FROM new_table;` and `DROP TABLE new_table;` when they don't (e.g. no id column)."
-  source: {file: lecture3, lines: "604-605", quote: "one to import into an existing table and one to import into a brand new table"}
+  front: Name SQLite's 5 storage classes and its 5 type affinities.
+  back: "Storage classes (values): NULL, INTEGER, REAL, TEXT, BLOB. Affinities (columns): TEXT, NUMERIC, INTEGER, REAL, BLOB."
+  source: {file: lecture2, lines: "599-611", quote: "type affinities are now associated with individual columns"}
 - id: R2-04
-  type: concept
-  question: "`id INTEGER PRIMARY KEY AUTOINCREMENT`; rows 1, 2, 3 exist; you delete row 3 and insert a new row. Its id?"
-  choices: ["3", "4", "1", "NULL"]
+  type: predict
+  db: null
+  setup: |
+    CREATE TABLE "t" ("amount" INTEGER);
+    INSERT INTO "t" VALUES ('25');
+  sql: SELECT typeof("amount") FROM "t";
+  choices: ["text", "integer", "real", "ERROR: datatype mismatch"]
   answer: 1
-  why: AUTOINCREMENT never reuses an id, not even the deleted maximum. Without AUTOINCREMENT you would get 3 (max + 1). Lecture 3 states this backwards (errata #2).
-  source: {file: lecture3, lines: "1077-1087", quote: "autoincrement"}
+  why: The INTEGER affinity converts the text '25' to the integer 25.
+  source: {file: lecture2, lines: "632-634", quote: "Now I'll have 25 as an integer."}
 - id: R2-05
   type: predict
-  db: mfa
-  sql: |
-    DELETE FROM "collections" WHERE "acquired" < '1912-01-01';
-    SELECT "title" FROM "collections" ORDER BY "id";
-  choices: ["Profusion of Flowers; Spring Outing", "Imaginative Landscape; Profusion of Flowers; Spring Outing", "Spring Outing", "(no rows)"]
-  answer: 1
-  why: Farmers (1911) is deleted. `NULL < date` is not true, so Imaginative Landscape stays.
-  source: {file: lecture3, lines: "798-808", quote: "And I can use these same operators with dates."}
+  db: null
+  setup: |
+    CREATE TABLE "t" ("amount" INTEGER);
+    INSERT INTO "t" VALUES ('red line');
+  sql: SELECT typeof("amount") FROM "t";
+  choices: ["text", "integer", "null", "ERROR: datatype mismatch"]
+  answer: 0
+  why: An affinity is a preference, not a rule. Text that can't be converted is stored as TEXT. (MySQL would reject it, lecture6 L844-852.)
+  source: {file: lecture6, lines: "844-852", quote: "But if it couldn't, it would actually just store text."}
 - id: R2-06
   type: concept
-  question: Which ON DELETE action turns "delete the artist, then their links" into one step?
-  choices: ["RESTRICT", "NO ACTION", "SET NULL", "CASCADE"]
-  answer: 3
-  why: CASCADE deletes the referencing rows automatically. SET NULL would keep them with artist_id = NULL.
-  source: {file: lecture3, lines: "1010-1013", quote: "Or perhaps, most compellingly, I could try to CASCADE the deletion."}
+  question: Why did the class favour INTEGER (cents) over REAL for fares?
+  choices: ["REAL uses more disk", "Integers are represented exactly, so sums stay exact", "REAL can't be negative", "SQLite has no REAL"]
+  answer: 1
+  why: Floating-point values like 0.10 are stored approximately, and the errors add up over many fares.
+  source: {file: lecture2, lines: "563-571", quote: "you know you can precisely represent integers"}
 - id: R2-07
-  type: predict
-  db: votes
-  sql: |
-    UPDATE "votes" SET "title" = upper(trim("title"));
-    SELECT COUNT(DISTINCT "title") FROM "votes";
-  choices: ["4", "9", "12", "20"]
-  answer: 1
-  why: |
-    trim and upper merge the whitespace and case variants, but the typos remain as their own groups: FAMERS…, FARMESR…, FARMERS WORKING, IMAGINTIVE…, and PROFUSION. That gives 4 + 5 = 9.
-  source: {file: lecture3, lines: "1330-1339", quote: "But there's still some typos"}
-- id: R2-08
   type: concept
-  question: In a `BEFORE DELETE` trigger, how do you refer to the title of the row being deleted?
-  choices: ["NEW.title", "OLD.title", "DELETED.title", "title"]
+  question: Which constraints does `PRIMARY KEY("id")` already imply (for an INTEGER id)?
+  choices: ["UNIQUE only", "NOT NULL only", "UNIQUE and NOT NULL", "CHECK and DEFAULT"]
+  answer: 2
+  why: A primary key must be unique and present, so adding them again is redundant.
+  source: {file: lecture2, lines: "1016-1022", quote: "A primary key, for instance, must not be null, it must be unique"}
+- id: R2-08
+  type: predict
+  db: null
+  setup: |
+    CREATE TABLE "t" ("x");
+    INSERT INTO "t" VALUES ('10');
+  sql: SELECT typeof("x") FROM "t";
+  choices: ["integer", "text", "numeric", "blob"]
   answer: 1
-  why: OLD is the row being removed. NEW exists only for INSERT and UPDATE.
-  source: {file: lecture3, lines: "1604-1608", quote: "So old.title gives me access to the old row"}
+  why: A column with no declared type has BLOB ("no") affinity, so nothing is converted. Lecture 2 says NUMERIC, which is errata #1.
+  source: {file: lecture2, lines: "1338-1347", quote: "the default type affinity is numeric in this case"}
 - id: R2-09
   type: predict
   db: null
   setup: |
-    CREATE TABLE "c" ("accession_number" TEXT);
-    INSERT INTO "c" VALUES (06.1899);
-  sql: SELECT "accession_number" FROM "c";
-  choices: ["06.1899", "6.1899", "ERROR: syntax error", "6"]
+    CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));
+    CREATE TABLE "swipes" ("card_id" INTEGER, FOREIGN KEY("card_id") REFERENCES "cards"("id"));
+    INSERT INTO "swipes" VALUES (NULL);
+  sql: SELECT COUNT(*) FROM "swipes";
+  choices: ["0", "1", "ERROR: FOREIGN KEY constraint failed", "ERROR: NOT NULL constraint failed"]
   answer: 1
-  why: Unquoted, 06.1899 is a number. The TEXT column stores its text form, and the leading zero is gone. Quote identifiers that look numeric (errata #5).
-  source: {file: lecture3, lines: "357-359", quote: "Now, I'll say the"}
+  why: A NULL foreign key references nothing and is accepted. Add NOT NULL if the link is mandatory (errata #3).
+  source: {file: lecture2, lines: "968-978", quote: "This would be in this case, redundant."}
 - id: R2-10
-  type: quick
-  front: What is a soft delete, and one ethical concern?
-  back: Marking a row as deleted (e.g. deleted = 1) instead of removing it. For personal data it may not honour a user's request to be forgotten (GDPR).
-  source: {file: lecture3, lines: "1774-1784", quote: "and the right to be forgotten"}
-- id: R2-11
   type: debug
-  ref: D2-06
-- id: R2-12
+  ref: D2-02
+- id: R2-11
   type: write
-  ref: M2-E14
+  ref: M2-E12

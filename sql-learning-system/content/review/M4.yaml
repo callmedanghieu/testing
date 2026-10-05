@@ -1,74 +1,62 @@
 - id: R4-01
   type: quick
-  front: SCAN vs SEARCH in EXPLAIN QUERY PLAN?
-  back: SCAN reads every row of the table (or index) in order. SEARCH uses an index (or the primary key) to jump straight to matching rows.
-  source: {file: lecture5, lines: "328-332", quote: "The plan is to scan movies"}
+  front: Define a view, and give the four uses from the lecture.
+  back: |
+    A virtual table defined by a query. Uses: simplify, aggregate, partition, secure.
+  source: {file: lecture4, lines: "97-105", quote: "You could use it to simplify your data"}
 - id: R4-02
-  type: predict
-  db: movies
-  sql: EXPLAIN QUERY PLAN SELECT "title" FROM "movies" WHERE "id" = 114709;
-  choices: ["SCAN movies", "SEARCH movies USING INTEGER PRIMARY KEY (rowid=?)", "SEARCH movies USING INDEX title_index (title=?)"]
-  answer: 1
-  why: Primary keys are indexed automatically, so no CREATE INDEX is needed.
-  source: {file: lecture5, lines: "427-430", quote: "using integer primary key"}
+  type: concept
+  question: Lifetimes. Which construct exists only for the duration of one query?
+  choices: ["VIEW", "TEMPORARY VIEW", "CTE (WITH …)", "INDEX"]
+  answer: 2
+  why: A view lasts until dropped, a temporary view lasts until the connection closes, and a CTE lasts for one statement.
+  source: {file: lecture4, lines: "636-638", quote: "But a CTE exists for a single query."}
 - id: R4-03
-  type: concept
-  question: What makes an index *covering* for a query?
-  choices: ["It has more than one column", "It contains every column the query needs from that table, so no table lookup", "It is on the primary key", "It has a WHERE clause"]
-  answer: 1
-  why: Multi-column is common but not sufficient. What matters is that the query never has to go back to the table.
-  source: {file: lecture5, lines: "483-488", quote: "It's one in which the query data can be found only by searching the index."}
-- id: R4-04
-  type: concept
-  question: Two costs of an index (lecture's B-tree discussion)?
-  choices: ["More disk space and slower INSERT/UPDATE/DELETE", "Slower SELECTs and less space", "It locks the table forever", "It disables foreign keys"]
-  answer: 0
-  why: An index is a sorted copy plus pointers, which costs space, and every write must also update the tree.
-  source: {file: lecture5, lines: "852-857", quote: "if I want to insert something into this structure, it'll take me more time"}
-- id: R4-05
   type: predict
-  db: movies
+  db: longlist
   setup: |
-    CREATE INDEX "recents" ON "movies" ("title") WHERE "year" = 2023;
-  sql: EXPLAIN QUERY PLAN SELECT "title" FROM "movies" WHERE "year" = 1998;
-  choices: ["SCAN movies", "SCAN movies USING COVERING INDEX recents", "SEARCH movies USING INDEX recents"]
-  answer: 0
-  why: 1998 rows aren't in the partial index, so it can't be used.
-  source: {file: lecture5, lines: "917-924", quote: "Now I'm only back to scanning movies."}
-- id: R4-06
-  type: concept
-  question: You DROP three large indexes. What happens to the database file size?
-  choices: ["Shrinks immediately", "Unchanged until VACUUM", "Grows", "The file is deleted"]
+    CREATE VIEW "v" AS SELECT COUNT(*) AS "n" FROM "ratings" WHERE "book_id" = 2;
+    INSERT INTO "ratings" ("book_id", "rating") VALUES (2, 5);
+  sql: SELECT "n" FROM "v";
+  choices: ["176", "177", "ERROR: view is stale"]
   answer: 1
-  why: Freed pages are only marked reusable. VACUUM returns them to the OS.
-  source: {file: lecture5, lines: "996-999", quote: "we don't actually shrink our database file"}
-- id: R4-07
-  type: quick
-  front: Spell out ACID in one line each.
-  back: Atomicity, all or nothing. Consistency, never violate constraints. Isolation, concurrent transactions don't interfere. Durability, committed data survives crashes.
-  source: {file: lecture5, lines: "1110-1127", quote: "A stands for atomicity"}
-- id: R4-08
+  why: A view re-runs its query every time, so it always reflects the current data.
+  source: {file: lecture4, lines: "519-526", quote: "Every time I query this view"}
+- id: R4-04
   type: predict
-  db: bank
-  sql: |
-    BEGIN TRANSACTION;
-    UPDATE "accounts" SET "balance" = "balance" + 10 WHERE "id" = 2;
-    ROLLBACK;
-    SELECT "balance" FROM "accounts" WHERE "id" = 2;
-  choices: ["20", "30", "ERROR: cannot rollback"]
-  answer: 0
-  why: ROLLBACK undoes everything since BEGIN.
-  source: {file: lecture5, lines: "1263-1267", quote: "think about it as if this transaction never even"}
-- id: R4-09
-  type: concept
-  question: Which SQLite lock lets many connections read at once?
-  choices: ["EXCLUSIVE", "SHARED", "UNLOCKED"]
+  db: longlist
+  setup: |
+    CREATE VIEW "2021" AS SELECT "id", "title" FROM "books" WHERE "year" = 2021;
+  sql: DELETE FROM "2021" WHERE "id" = 34;
+  choices: ["(no rows)", "ERROR: cannot modify 2021 because it is a view"]
   answer: 1
-  why: SHARED is for readers. A writer needs EXCLUSIVE, which blocks everyone else.
-  source: {file: lecture5, lines: "1476-1479", quote: "A shared lock means I'm only reading."}
-- id: R4-10
+  why: SQLite views are read-only unless an INSTEAD OF trigger handles the write.
+  source: {file: lecture4, lines: "837-838", quote: "cannot modify 2021 because it is"}
+- id: R4-05
+  type: concept
+  question: You give an analyst the rideshare.db file with an anonymizing view. What stops them reading rider names?
+  choices: ["The view hides the base table", "Nothing. SQLite has no per-user access control", "PRAGMA secure_delete", "Temporary views"]
+  answer: 1
+  why: In SQLite you give access to the whole file or nothing. Real access control needs MySQL/PostgreSQL GRANT.
+  source: {file: lecture4, lines: "962-968", quote: "I either give you"}
+- id: R4-06
+  type: quick
+  front: How does an INSTEAD OF INSERT trigger choose between "re-activate" and "insert new"?
+  back: "Two triggers with complementary WHEN conditions: `WHEN NEW.accession_number IN (SELECT …)` updates deleted = 0, and `WHEN … NOT IN (…)` inserts a new row."
+  source: {file: lecture4, lines: "1236-1242", quote: "one that runs when the item is already in our table"}
+- id: R4-07
+  type: predict
+  db: longlist
+  sql: |
+    WITH "a" AS (SELECT 1 AS "x"), "b" AS (SELECT "x" + 1 AS "y" FROM "a")
+    SELECT "y" FROM "b";
+  choices: ["1", "2", "ERROR: no such table: a"]
+  answer: 1
+  why: A later CTE can use an earlier one. Separate CTEs with commas, with no comma after the last.
+  source: {file: lecture4, lines: "642-646", quote: "I could then optionally follow it up with more CTEs"}
+- id: R4-08
   type: debug
-  ref: D4-01
-- id: R4-11
+  ref: D4-02
+- id: R4-09
   type: write
-  ref: M4-E03
+  ref: M4-E13

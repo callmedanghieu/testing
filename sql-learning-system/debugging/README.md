@@ -8,27 +8,34 @@ No window-function items exist: window functions are not in the source material.
 | ID | Module | Title | Bug type | Origin |
 |---|---|---|---|---|
 | [D0-01](M0.md#d0-01) | M0 | The NULL that never matches | null | GENERATED |
-| [D0-02](M0.md#d0-02) | M0 | Joined on the wrong column | join | GENERATED |
-| [D0-03](M0.md#d0-03) | M0 | Duplicate rows from a one-to-many join | duplicates | GENERATED |
-| [D0-04](M0.md#d0-04) | M0 | One average instead of one per book | aggregation | GENERATED |
-| [D0-05](M0.md#d0-05) | M0 | `=` with a subquery that returns many rows | subquery | GENERATED |
-| [D0-06](M0.md#d0-06) | M0 | Grouped by the wrong column | aggregation | GENERATED |
-| [D1-01](M1.md#d1-01) | M1 | A comma too many | syntax | SOURCE |
-| [D1-02](M1.md#d1-02) | M1 | A CHECK that checks nothing | logic | GENERATED |
-| [D1-03](M1.md#d1-03) | M1 | A foreign key that allows "no card" | design | GENERATED |
-| [D1-04](M1.md#d1-04) | M1 | A primary key that forbids repeat visits | design | SOURCE |
-| [D2-01](M2.md#d2-01) | M2 | The DELETE that emptied the table | logic | SOURCE |
-| [D2-02](M2.md#d2-02) | M2 | Deleting from the wrong table | logic | SOURCE |
-| [D2-03](M2.md#d2-03) | M2 | An UPDATE that re-attributed everything | logic | GENERATED |
-| [D2-04](M2.md#d2-04) | M2 | Missing dates that aren't NULL | null | SOURCE |
-| [D2-05](M2.md#d2-05) | M2 | NEW in a DELETE trigger | trigger | GENERATED |
-| [D2-06](M2.md#d2-06) | M2 | An over-eager LIKE | logic | SOURCE |
-| [D3-01](M3.md#d3-01) | M3 | A trailing comma after the CTE | syntax | GENERATED |
-| [D3-02](M3.md#d3-02) | M3 | The soft-delete trigger that hid everything | trigger | SOURCE |
-| [D3-03](M3.md#d3-03) | M3 | A view name made of digits | syntax | GENERATED |
-| [D4-01](M4.md#d4-01) | M4 | An index with the columns backwards | performance | GENERATED |
-| [D4-02](M4.md#d4-02) | M4 | An index nobody uses | performance | GENERATED |
-| [D4-03](M4.md#d4-03) | M4 | A partial index that doesn't match the query | performance | GENERATED |
-| [D4-04](M4.md#d4-04) | M4 | A transfer that created money | transaction | SOURCE |
-| [D5-01](M5.md#d5-01) | M5 | Query built by string formatting | security | SOURCE |
-| [D5-02](M5.md#d5-02) | M5 | A procedure cut short by the delimiter | syntax | SOURCE |
+| [D0-02](M0.md#d0-02) | M0 | AND without parentheses | logic | GENERATED |
+| [D0-03](M0.md#d0-03) | M0 | A column that doesn't exist, but no error | syntax | SOURCE |
+| [D0-04](M0.md#d0-04) | M0 | Counting publishers twice | aggregation | SOURCE |
+| [D1-01](M1.md#d1-01) | M1 | Joined on the wrong column | join | GENERATED |
+| [D1-02](M1.md#d1-02) | M1 | Duplicate rows from a one-to-many join | duplicates | GENERATED |
+| [D1-03](M1.md#d1-03) | M1 | One average instead of one per book | aggregation | GENERATED |
+| [D1-04](M1.md#d1-04) | M1 | `=` with a subquery that returns many rows | subquery | GENERATED |
+| [D1-05](M1.md#d1-05) | M1 | Grouped by the wrong column | aggregation | GENERATED |
+| [D1-06](M1.md#d1-06) | M1 | no such table | syntax | SOURCE |
+| [D1-07](M1.md#d1-07) | M1 | WHERE on an aggregate | aggregation | SOURCE |
+| [D1-08](M1.md#d1-08) | M1 | LEFT JOIN wanted, INNER JOIN written | join | GENERATED |
+| [D1-09](M1.md#d1-09) | M1 | UNION of mismatched columns | syntax | SOURCE |
+| [D2-01](M2.md#d2-01) | M2 | A comma too many | syntax | SOURCE |
+| [D2-02](M2.md#d2-02) | M2 | A CHECK that checks nothing | logic | GENERATED |
+| [D2-03](M2.md#d2-03) | M2 | A foreign key that allows "no card" | design | GENERATED |
+| [D2-04](M2.md#d2-04) | M2 | A primary key that forbids repeat visits | design | SOURCE |
+| [D3-01](M3.md#d3-01) | M3 | The DELETE that emptied the table | logic | SOURCE |
+| [D3-02](M3.md#d3-02) | M3 | Deleting from the wrong table | logic | SOURCE |
+| [D3-03](M3.md#d3-03) | M3 | An UPDATE that re-attributed everything | logic | GENERATED |
+| [D3-04](M3.md#d3-04) | M3 | Missing dates that aren't NULL | null | SOURCE |
+| [D3-05](M3.md#d3-05) | M3 | NEW in a DELETE trigger | trigger | GENERATED |
+| [D3-06](M3.md#d3-06) | M3 | An over-eager LIKE | logic | SOURCE |
+| [D4-01](M4.md#d4-01) | M4 | A trailing comma after the CTE | syntax | GENERATED |
+| [D4-02](M4.md#d4-02) | M4 | The soft-delete trigger that hid everything | trigger | SOURCE |
+| [D4-03](M4.md#d4-03) | M4 | A view name made of digits | syntax | GENERATED |
+| [D5-01](M5.md#d5-01) | M5 | An index with the columns backwards | performance | GENERATED |
+| [D5-02](M5.md#d5-02) | M5 | An index nobody uses | performance | GENERATED |
+| [D5-03](M5.md#d5-03) | M5 | A partial index that doesn't match the query | performance | GENERATED |
+| [D5-04](M5.md#d5-04) | M5 | A transfer that created money | transaction | SOURCE |
+| [D6-01](M6.md#d6-01) | M6 | Query built by string formatting | security | SOURCE |
+| [D6-02](M6.md#d6-02) | M6 | A procedure cut short by the delimiter | syntax | SOURCE |

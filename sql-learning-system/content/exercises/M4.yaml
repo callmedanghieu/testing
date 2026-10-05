@@ -1,345 +1,410 @@
-# Module 4: Optimizing (sources/lecture5.txt)
+# Module 3: Viewing (sources/lecture4.txt)
 - id: M4-E01
-  title: Index the title column
+  title: A view that hides the joins
   origin: source-demo
   concepts: [C4.1, C4.2]
-  difficulty: 1
-  skills: [CREATE INDEX, EXPLAIN QUERY PLAN]
-  db: movies
+  difficulty: 2
+  skills: [CREATE VIEW, JOIN]
+  db: longlist
   kind: modify
   prompt: |
-    First run `EXPLAIN QUERY PLAN SELECT * FROM "movies" WHERE "title" = 'Cars';` and note the word **SCAN**.
-    Then create an index named `title_index` so that the plan becomes a **SEARCH** using that index.
+    Create a view named `longlist` with two columns, `name` (author) and `title` (book), one row per authorship.
   hints:
-    - An index is built on the column(s) your WHERE clause filters on.
-    - "`CREATE INDEX name ON table (column);`"
-    - "`CREATE INDEX \"title_index\" ON \"movies\" (\"title\");`"
+    - A view is `CREATE VIEW name AS <any SELECT>;`
+    - Reuse the three-table JOIN from M1-E13.
+    - "`CREATE VIEW \"longlist\" AS SELECT \"name\", \"title\" FROM \"authors\" JOIN \"authored\" ON ... JOIN \"books\" ON ...;`"
   solution: |
-    CREATE INDEX "title_index" ON "movies" ("title");
+    CREATE VIEW "longlist" AS
+    SELECT "name", "title" FROM "authors"
+    JOIN "authored" ON "authors"."id" = "authored"."author_id"
+    JOIN "books" ON "books"."id" = "authored"."book_id";
   check:
-    - plan: SELECT * FROM "movies" WHERE "title" = 'Cars'
-      contains: ["SEARCH movies USING INDEX title_index"]
+    - SELECT "name", "title" FROM "longlist"
+    - SELECT "type" FROM sqlite_master WHERE "name" = 'longlist'
   explanation: |
-    SCAN means reading every row top to bottom. SEARCH means using a structure to jump to matching rows.
-    On the full 400k-row IMDb file the lecture measured 0.084 s before the index and 0.01 s after.
+    The view stores the *query*, not a copy of the rows, so it costs almost no disk space and is always up to date.
   source:
-    - {file: lecture5, lines: "273-286", quote: "That's a savings of almost eight times."}
-    - {file: lecture5, lines: "297-316", quote: "using the index that we called title_index"}
+    - {file: lecture4, lines: "255-278", quote: "I'll say create a view and call it longlist"}
+    - {file: lecture4, lines: "77-80", quote: "a virtual table"}
 
 - id: M4-E02
-  title: Which columns should be indexed for the Tom Hanks query?
+  title: Fernanda's books, now in one line
   origin: source-question
   concepts: [C4.2]
-  difficulty: 3
-  skills: [EXPLAIN QUERY PLAN, choosing index columns]
-  db: movies
-  kind: modify
+  difficulty: 1
+  skills: [querying a view]
+  db: longlist
+  kind: query
+  setup: |
+    CREATE VIEW "longlist" AS
+    SELECT "name", "title" FROM "authors"
+    JOIN "authored" ON "authors"."id" = "authored"."author_id"
+    JOIN "books" ON "books"."id" = "authored"."book_id";
   prompt: |
-    Run `EXPLAIN QUERY PLAN` on the Tom Hanks query (M0-E10). Two tables are **scanned**.
-    Create one index per scanned table (`name_index` on people, `person_index` on stars) so that **neither table is scanned**.
+    The `longlist` view exists. Using **only the view**, return the titles Fernanda Melchor wrote.
+    Compare this with your three-level subquery from M1-E08.
   hints:
-    - Read the plan from the innermost subquery outward. Which tables say SCAN?
-    - Index the column each WHERE clause filters on, `people.name` and `stars.person_id`.
-    - "`CREATE INDEX \"person_index\" ON \"stars\" (\"person_id\"); CREATE INDEX \"name_index\" ON \"people\" (\"name\");`"
+    - You can query a view exactly like a table.
+    - It already has a `name` and a `title` column.
+    - "`SELECT \"title\" FROM \"longlist\" WHERE \"name\" = 'Fernanda Melchor';`"
   solution: |
-    CREATE INDEX "person_index" ON "stars" ("person_id");
-    CREATE INDEX "name_index" ON "people" ("name");
-  check:
-    - plan: SELECT "title" FROM "movies" WHERE "id" IN (SELECT "movie_id" FROM "stars" WHERE "person_id" = (SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'))
-      contains: ["USING INDEX person_index", "COVERING INDEX name_index"]
-      not_contains: ["SCAN people", "SCAN stars"]
-  explanation: |
-    `movies` is searched by `id`, its INTEGER PRIMARY KEY, which is always indexed for free.
-    Note that `name_index` is reported as a *covering* index: the query needs only `people.id`, which every index entry already carries (rowid).
+    SELECT "title" FROM "longlist" WHERE "name" = 'Fernanda Melchor';
+  expected_known: [["Hurricane Season"], ["Paradais"]]
+  explanation: The view did the simplifying. The complexity is written once, inside the view definition.
   source:
-    - {file: lecture5, lines: "405-447", quote: "Perhaps two separate indexes."}
-    - {file: lecture5, lines: "338-348", quote: "will automatically create an index via which I can search for a primary key"}
+    - {file: lecture4, lines: "280-304", quote: "SELECT title FROM longlist WHERE the name equals Fernanda."}
 
 - id: M4-E03
-  title: Make the stars index covering
+  title: The average_book_ratings view
   origin: source-demo
-  concepts: [C4.3]
+  concepts: [C4.3, C1.10, C1.6]
   difficulty: 3
-  skills: [multi-column index, covering index]
-  db: movies
+  skills: [CREATE VIEW, AVG, ROUND, JOIN, GROUP BY]
+  db: longlist
   kind: modify
-  setup: |
-    CREATE INDEX "person_index" ON "stars" ("person_id");
-    CREATE INDEX "name_index" ON "people" ("name");
   prompt: |
-    The plan still says `SEARCH stars USING INDEX person_index`, which means SQLite looks up each matching row in the table to get `movie_id`.
-    Replace `person_index` with a two-column index so that `stars` is searched with a **covering index**.
+    Create a view `average_book_ratings` with columns `book_id`, `title`, `year`, `rating`.
+    `rating` is the book's average rating rounded to 2 decimals.
   hints:
-    - A covering index contains every column the query reads from that table.
-    - "Drop the old index, then create it on (`person_id`, `movie_id`). The filter column comes first."
-    - "`DROP INDEX \"person_index\"; CREATE INDEX \"person_index\" ON \"stars\" (\"person_id\", \"movie_id\");`"
+    - Ratings live in `ratings`, but title and year live in `books`, so you need a JOIN.
+    - Group by the book so each book becomes one row.
+    - "`SELECT \"book_id\", \"title\", \"year\", ROUND(AVG(\"rating\"), 2) AS \"rating\" FROM \"ratings\" JOIN \"books\" ON \"ratings\".\"book_id\" = \"books\".\"id\" GROUP BY \"book_id\"`"
   solution: |
-    DROP INDEX "person_index";
-    CREATE INDEX "person_index" ON "stars" ("person_id", "movie_id");
+    CREATE VIEW "average_book_ratings" AS
+    SELECT "book_id", "title", "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "ratings"
+    JOIN "books" ON "ratings"."book_id" = "books"."id"
+    GROUP BY "book_id";
+  probes:
+    - INSERT INTO "ratings" ("book_id", "rating") VALUES (1, 5), (1, 5)
   check:
-    - plan: SELECT "title" FROM "movies" WHERE "id" IN (SELECT "movie_id" FROM "stars" WHERE "person_id" = (SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'))
-      contains: ["SEARCH stars USING COVERING INDEX person_index"]
+    - SELECT * FROM "average_book_ratings"
   explanation: |
-    On the full data the lecture measured 0.197 s with no indexes and 0.004 s with two covering indexes.
+    The probe adds two new 5-star ratings to book 1 after the view exists. The view shows the new average immediately, with no refresh.
   source:
-    - {file: lecture5, lines: "499-542", quote: "Now I have two covering indexes."}
-    - {file: lecture5, lines: "482-496", quote: "It's one in which the query data can be found only by searching the index."}
+    - {file: lecture4, lines: "471-495", quote: "create a view called maybe average book ratings"}
+    - {file: lecture4, lines: "514-526", quote: "Every time I query this view, I'll rerun essentially that query from before."}
 
 - id: M4-E04
-  title: A partial index for recent movies
+  title: A temporary view built on a view
+  origin: source-demo
+  concepts: [C4.3, C4.4]
+  difficulty: 2
+  skills: [CREATE TEMPORARY VIEW, view on view]
+  db: longlist
+  kind: modify
+  setup: |
+    CREATE VIEW "average_book_ratings" AS
+    SELECT "book_id", "title", "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "ratings" JOIN "books" ON "ratings"."book_id" = "books"."id"
+    GROUP BY "book_id";
+  prompt: |
+    Using `average_book_ratings`, create a **temporary** view `average_ratings_by_year` with columns
+    `year` and `rating` (the average of the books' averages for that year, rounded to 2 decimals).
+  hints:
+    - A view can be built on top of another view.
+    - "`CREATE TEMPORARY VIEW name AS <query>;` The query aggregates per year with AVG and ROUND."
+    - "`SELECT \"year\", ROUND(AVG(\"rating\"), 2) AS \"rating\" FROM \"average_book_ratings\" GROUP BY \"year\"`, wrapped in the CREATE TEMPORARY VIEW."
+  solution: |
+    CREATE TEMPORARY VIEW "average_ratings_by_year" AS
+    SELECT "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "average_book_ratings"
+    GROUP BY "year";
+  check:
+    - SELECT * FROM "average_ratings_by_year"
+    - SELECT COUNT(*) FROM sqlite_temp_master WHERE "name" = 'average_ratings_by_year'
+  explanation: |
+    A TEMPORARY view lives in the `temp` schema and disappears when the connection closes (`.quit`), which suits a one-day analysis.
+    The ratings are synthetic but engineered to the lecture's results, so you should see the lecture's numbers: 2018 3.75, 2019 3.64, 2021 3.69, 2022 3.87, 2023 3.78 (L581-586).
+  source:
+    - {file: lecture4, lines: "588-612", quote: "I'll say create a temporary view."}
+
+- id: M4-E05
+  title: The same analysis with a CTE
   origin: source-demo
   concepts: [C4.5]
   difficulty: 3
-  skills: [partial index, WHERE in CREATE INDEX]
-  db: movies
-  kind: modify
+  skills: [WITH (CTE)]
+  db: longlist
+  kind: query
   prompt: |
-    Users mostly search this year's movies. Create a **partial** index named `recents` on `movies(title)` that only includes rows from **2023**.
-    The checker confirms it is used for `year = 2023` and **not** for `year = 1998`.
+    Without creating any view, return `year` and the rounded average of the per-book average ratings (`rating`), one row per year.
+    Use a common table expression named `average_book_ratings` for the per-book step.
   hints:
-    - A partial index is a normal CREATE INDEX with a WHERE clause at the end.
-    - Only rows matching that WHERE are stored in the index, so it is smaller.
-    - "`CREATE INDEX \"recents\" ON \"movies\" (\"title\") WHERE \"year\" = 2023;`"
+    - "`WITH name AS ( query ) SELECT ... FROM name ...;`"
+    - The CTE body is the per-book average query from M4-E03, without CREATE VIEW.
+    - "`WITH \"average_book_ratings\" AS (SELECT ... GROUP BY \"book_id\") SELECT \"year\", ROUND(AVG(\"rating\"), 2) AS \"rating\" FROM \"average_book_ratings\" GROUP BY \"year\";`"
   solution: |
-    CREATE INDEX "recents" ON "movies" ("title") WHERE "year" = 2023;
-  check:
-    - plan: SELECT "title" FROM "movies" WHERE "year" = 2023
-      contains: ["recents"]
-    - plan: SELECT "title" FROM "movies" WHERE "year" = 1998
-      not_contains: ["recents"]
+    WITH "average_book_ratings" AS (
+        SELECT "book_id", "title", "year", ROUND(AVG("rating"), 2) AS "rating"
+        FROM "ratings"
+        JOIN "books" ON "ratings"."book_id" = "books"."id"
+        GROUP BY "book_id"
+    )
+    SELECT "year", ROUND(AVG("rating"), 2) AS "rating"
+    FROM "average_book_ratings"
+    GROUP BY "year";
   explanation: |
-    The trade-off is a smaller index (less space and cheaper writes) that helps only the queries its condition covers.
+    Lifetimes: a view lasts forever, a temporary view lasts for one connection, and a CTE lasts for one query.
   source:
-    - {file: lecture5, lines: "892-924", quote: "Now though I'm using 1998, which were rows that were not"}
-
-- id: M4-E05
-  title: Drop an index
-  origin: source-demo
-  concepts: [C4.2]
-  difficulty: 1
-  skills: [DROP INDEX]
-  db: movies
-  kind: modify
-  setup: |
-    CREATE INDEX "title_index" ON "movies" ("title");
-  prompt: Remove `title_index` and confirm that the 'Cars' lookup goes back to a SCAN.
-  hints:
-    - Indexes are dropped like tables and views.
-    - "`DROP INDEX name;`"
-    - "`DROP INDEX \"title_index\";`"
-  solution: |
-    DROP INDEX "title_index";
-  check:
-    - plan: SELECT * FROM "movies" WHERE "title" = 'Cars'
-      contains: ["SCAN movies"]
-    - SELECT COUNT(*) FROM sqlite_master WHERE "type" = 'index' AND "name" = 'title_index'
-  explanation: Dropping an index doesn't shrink the database file until you VACUUM (M4-E10).
-  source:
-    - {file: lecture5, lines: "322-332", quote: "I can say DROP INDEX \"title_index\" semicolon."}
+    - {file: lecture4, lines: "633-648", quote: "a CTE exists for a single query"}
+    - {file: lecture4, lines: "664-696", quote: "I'll use a CTE."}
 
 - id: M4-E06
-  title: Alice pays Bob $10, atomically
-  origin: source-demo
-  concepts: [C4.7]
-  difficulty: 2
-  skills: [BEGIN TRANSACTION, COMMIT]
-  db: bank
-  kind: modify
-  require: [BEGIN, COMMIT]
-  prompt: |
-    Move $10 from Alice (id 1) to Bob (id 2) inside a single transaction so that no other connection can ever see Bob credited before Alice is debited.
-  hints:
-    - Wrap both UPDATEs between `BEGIN TRANSACTION;` and `COMMIT;`
-    - "Update relative to the current value: `SET \"balance\" = \"balance\" + 10`."
-    - "`BEGIN TRANSACTION; UPDATE \"accounts\" SET \"balance\" = \"balance\" + 10 WHERE \"id\" = 2; UPDATE ... - 10 WHERE \"id\" = 1; COMMIT;`"
-  solution: |
-    BEGIN TRANSACTION;
-    UPDATE "accounts" SET "balance" = "balance" + 10 WHERE "id" = 2;
-    UPDATE "accounts" SET "balance" = "balance" - 10 WHERE "id" = 1;
-    COMMIT;
-  check:
-    - SELECT * FROM "accounts"
-  explanation: |
-    Atomicity: a second terminal sees the old balances until COMMIT, then both changes at once (L1201-1230).
-    The checker also fails your answer if you leave the transaction open.
-  source:
-    - {file: lecture5, lines: "1201-1230", quote: "So this is the atomicity part of transactions."}
-
-- id: M4-E07
-  title: Roll back a transfer that breaks a constraint
-  origin: source-demo
-  concepts: [C4.7]
-  difficulty: 3
-  skills: [ROLLBACK, CHECK constraint]
-  db: bank
-  kind: modify
-  continue_on_error: true
-  require: [BEGIN, ROLLBACK]
-  setup: |
-    UPDATE "accounts" SET "balance" = 0 WHERE "id" = 1;
-    UPDATE "accounts" SET "balance" = 30 WHERE "id" = 2;
-  prompt: |
-    Alice now has $0 and Bob has $30. Run the same transfer of $10 from Alice to Bob in a transaction.
-    The debit violates `CHECK("balance" >= 0)`, so undo the whole transaction so that nobody ever sees Bob at $40.
-    (In this exercise, statements keep running after an error, just like typing them one by one in the shell.)
-  hints:
-    - Credit Bob, then try to debit Alice. Which statement fails?
-    - After a failure inside a transaction, the earlier statements are *still pending*, not undone.
-    - "`BEGIN TRANSACTION; UPDATE ... + 10 WHERE \"id\" = 2; UPDATE ... - 10 WHERE \"id\" = 1; ROLLBACK;`"
-  solution: |
-    BEGIN TRANSACTION;
-    UPDATE "accounts" SET "balance" = "balance" + 10 WHERE "id" = 2;
-    UPDATE "accounts" SET "balance" = "balance" - 10 WHERE "id" = 1;
-    ROLLBACK;
-  check:
-    - SELECT * FROM "accounts"
-  explanation: |
-    ROLLBACK only works inside a transaction. Without BEGIN, the lecturer had to "undo" Bob's credit by hand with another UPDATE (L1289-1305).
-    This is Consistency in ACID: the database never ends in a state that violates its constraints.
-  source:
-    - {file: lecture5, lines: "1309-1325", quote: "ROLLBACK like this, hit Enter"}
-    - {file: lecture5, lines: "1292-1296", quote: "A rollback only works while we're inside of a transaction."}
-
-- id: M4-E08
-  title: Defuse the race condition
-  origin: source-question
-  concepts: [C4.8]
-  difficulty: 4
-  skills: [isolation, transaction design]
-  db: bank
-  kind: selfcheck
-  prompt: |
-    Charlie ($30) clicks "transfer $30 to Alice" on two laptops at the same moment, while Alice waits at an ATM to withdraw $60.
-    1. Using the lecture's timeline, explain how the bank loses $30.
-    2. Rewrite each transfer so the attack fails, and say which ACID property is at work.
-  hints:
-    - The danger is checking the balance in one step and spending it in a later step that runs concurrently.
-    - Each transfer (check + credit + debit) must run as one isolated unit, one after another.
-    - Put the balance check and both updates in one transaction; the second transfer then sees $0 and rolls back.
-  solution: |
-    -- Model answer:
-    -- 1. Both transfers read Charlie's balance (30) before either one subtracts. Both credit Alice $30,
-    --    so Alice sees $60 and withdraws it before the bank notices Charlie couldn't cover the second.
-    -- 2. Make each transfer one transaction and process transactions sequentially (isolated):
-    BEGIN TRANSACTION;
-    -- (application checks: SELECT "balance" FROM "accounts" WHERE "id" = 3;  -> must be >= 30)
-    UPDATE "accounts" SET "balance" = "balance" + 30 WHERE "id" = 1;
-    UPDATE "accounts" SET "balance" = "balance" - 30 WHERE "id" = 3;
-    COMMIT;
-    -- The second transfer starts after the first committed, sees Charlie at $0, and its debit violates
-    -- CHECK("balance" >= 0), so it is rolled back. Property: Isolation (with Consistency enforced by the CHECK).
-  explanation: The exclusive lock taken by a writing transaction is what makes the transactions happen one after another (see M4-E09).
-  source:
-    - {file: lecture5, lines: "1337-1388", quote: "Charlie opened up his bank account"}
-    - {file: lecture5, lines: "1397-1430", quote: "and the word for this"}
-
-- id: M4-E09
-  title: "Lab: see an exclusive lock block a reader"
-  origin: source-demo
-  concepts: [C4.9]
-  difficulty: 2
-  skills: [BEGIN EXCLUSIVE, locks]
-  db: bank
-  kind: selfcheck
-  prompt: |
-    This needs two connections, so it runs as a lab: `python3 tools/labs.py locks`
-    (or open `database/bank.db` in two terminals with `sqlite3`).
-    In connection A run `BEGIN EXCLUSIVE TRANSACTION;`. In connection B run `SELECT * FROM "accounts";`.
-    What happens in B, and what happens after A runs `COMMIT;`?
-  hints:
-    - Which lock kinds exist in SQLite? Which one allows other readers?
-    - EXCLUSIVE means nobody else may read or write.
-    - B gets an error until A ends its transaction.
-  solution: |
-    -- connection A
-    BEGIN EXCLUSIVE TRANSACTION;
-    -- connection B
-    SELECT * FROM "accounts";   -- Runtime error: database is locked
-    -- connection A
-    COMMIT;
-    -- connection B
-    SELECT * FROM "accounts";   -- works again
-  explanation: |
-    SHARED locks let many readers in at once. An EXCLUSIVE lock blocks everyone else. In SQLite the lock covers the whole database file (the coarsest granularity).
-  source:
-    - {file: lecture5, lines: "1534-1546", quote: "Runtime error--"}
-    - {file: lecture5, lines: "1464-1494", quote: "unlocked, shared, and exclusive"}
-
-- id: M4-E10
-  title: "Lab: VACUUM gives space back"
+  title: Partition the books by year
   origin: source-demo
   concepts: [C4.6]
   difficulty: 1
-  skills: [VACUUM]
-  db: movies
-  kind: selfcheck
+  skills: [CREATE VIEW, WHERE, quoted identifiers]
+  db: longlist
+  kind: modify
   prompt: |
-    Run `python3 tools/labs.py vacuum`. It builds a big movies file, creates indexes, drops them, and prints the file size after each step.
-    Before running it, predict: does the file shrink after `DROP INDEX`? After `VACUUM`?
+    Create two views, `"2022"` and `"2021"`, each with the `id` and `title` of the books longlisted in that year.
   hints:
-    - What does SQLite do with the pages an index used to occupy?
-    - It marks them free for reuse and keeps them in the file.
-    - Only VACUUM rebuilds the file and returns those pages to the operating system.
+    - A partition is a filtered SELECT saved as a view.
+    - A name that is just digits must be quoted, as `"2022"`.
+    - "`CREATE VIEW \"2022\" AS SELECT \"id\", \"title\" FROM \"books\" WHERE \"year\" = 2022;`"
   solution: |
-    DROP INDEX "title_index";   -- file size unchanged (pages only marked as free)
-    VACUUM;                     -- file shrinks
-  explanation: The lecture saw 158 MB → 158 MB after dropping three indexes, then 100 MB after VACUUM.
+    CREATE VIEW "2022" AS SELECT "id", "title" FROM "books" WHERE "year" = 2022;
+    CREATE VIEW "2021" AS SELECT "id", "title" FROM "books" WHERE "year" = 2021;
+  check:
+    - SELECT * FROM "2022"
+    - SELECT * FROM "2021"
+  explanation: |
+    Naming trade-off from the lecture: `"2021"` is short but ambiguous, and `books_nominated_in_2021` is clear but long.
   source:
-    - {file: lecture5, lines: "991-1010", quote: "We're down to in this case 100 million after dropping our indexes"}
+    - {file: lecture4, lines: "749-790", quote: "I'll say create view 2021 as select ID, title from books."}
+
+- id: M4-E07
+  title: Try to update a view
+  origin: source-demo
+  concepts: [C4.1, C4.6]
+  difficulty: 1
+  skills: [read-only views]
+  db: longlist
+  kind: error
+  expect_error: is a view
+  setup: |
+    CREATE VIEW "2021" AS SELECT "id", "title" FROM "books" WHERE "year" = 2021;
+  prompt: |
+    Through the `"2021"` view, try to rename *Minor Detail* to *The Minor Detail* with an UPDATE. Read the error.
+  hints:
+    - Write the UPDATE against the view's name.
+    - "`UPDATE \"2021\" SET ... WHERE ...;`"
+    - "`UPDATE \"2021\" SET \"title\" = 'The Minor Detail' WHERE \"title\" = 'Minor Detail';`"
+  solution: |
+    UPDATE "2021" SET "title" = 'The Minor Detail' WHERE "title" = 'Minor Detail';
+  explanation: |
+    In SQLite a view holds no data of its own, so it cannot be modified directly (MySQL and PostgreSQL allow it for simple views, errata #11).
+  source:
+    - {file: lecture4, lines: "827-838", quote: "cannot modify 2021 because it is"}
+
+- id: M4-E08
+  title: Fix the typo where the data lives
+  origin: source-question
+  concepts: [C4.1, C3.7]
+  difficulty: 1
+  skills: [UPDATE]
+  db: longlist
+  kind: modify
+  setup: |
+    CREATE VIEW "2021" AS SELECT "id", "title" FROM "books" WHERE "year" = 2021;
+  prompt: Make the `"2021"` view show *The Minor Detail* instead of *Minor Detail*.
+  hints:
+    - The view only *reads* from another table.
+    - Change the underlying `books` row.
+    - "`UPDATE \"books\" SET \"title\" = 'The Minor Detail' WHERE \"title\" = 'Minor Detail';`"
+  solution: |
+    UPDATE "books" SET "title" = 'The Minor Detail' WHERE "title" = 'Minor Detail';
+  check:
+    - SELECT * FROM "2021"
+  explanation: Update the base table, and every view built on it reflects the change.
+  source:
+    - {file: lecture4, lines: "839-848", quote: "What I should instead do is try to update"}
+
+- id: M4-E09
+  title: An anonymized view for analysts
+  origin: source-demo
+  concepts: [C4.7]
+  difficulty: 2
+  skills: [CREATE VIEW, constant column, AS]
+  db: rideshare
+  kind: modify
+  prompt: |
+    Create a view `analysis` with `id`, `origin`, `destination`, and a `rider` column that always contains the text `anonymous`.
+  hints:
+    - Leave out the real `rider` column, which is personally identifiable information (PII).
+    - "A literal in the SELECT list produces that value on every row: `'anonymous' AS \"rider\"`."
+    - "`CREATE VIEW \"analysis\" AS SELECT \"id\", \"origin\", \"destination\", 'anonymous' AS \"rider\" FROM \"rides\";`"
+  solution: |
+    CREATE VIEW "analysis" AS
+    SELECT "id", "origin", "destination", 'anonymous' AS "rider"
+    FROM "rides";
+  check:
+    - SELECT * FROM "analysis"
+  explanation: |
+    In SQLite anyone who can open the file can still run `SELECT * FROM "rides"`. There are no per-user permissions.
+    MySQL/PostgreSQL fix this with GRANT (M6-E10).
+  source:
+    - {file: lecture4, lines: "916-942", quote: "I'll say quote unquote \"anonymous\" as this column name called rider."}
+    - {file: lecture4, lines: "962-968", quote: "In SQLite we can't set access controls"}
+
+- id: M4-E10
+  title: current_collections, a view over soft deletes
+  origin: source-demo
+  concepts: [C4.1, C3.10]
+  difficulty: 2
+  skills: [CREATE VIEW, soft delete]
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Farmers Working at Dawn';
+  prompt: |
+    `collections` now has a `deleted` flag. Create a view `current_collections` with `id`, `title`, `accession_number` and `acquired`
+    (no `deleted` column) that contains only items **not** marked deleted.
+  hints:
+    - Filter on the flag, and don't expose it.
+    - "`WHERE \"deleted\" = 0`"
+    - "`CREATE VIEW \"current_collections\" AS SELECT \"id\", \"title\", \"accession_number\", \"acquired\" FROM \"collections\" WHERE \"deleted\" = 0;`"
+  solution: |
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired"
+    FROM "collections"
+    WHERE "deleted" = 0;
+  probes:
+    - UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Spring Outing'
+  check:
+    - SELECT * FROM "current_collections"
+  explanation: Soft-deleting another item (the probe) removes it from the view at once.
+  source:
+    - {file: lecture4, lines: "1065-1077", quote: "And now I'll see only those items that have not been deleted."}
 
 - id: M4-E11
-  title: "Lab: time a query before and after an index"
+  title: INSTEAD OF DELETE, turning a delete into a soft delete
   origin: source-demo
-  concepts: [C4.1, C4.2]
-  difficulty: 1
-  skills: [.timer]
-  db: movies
-  kind: selfcheck
+  concepts: [C4.8]
+  difficulty: 3
+  skills: [INSTEAD OF trigger, OLD]
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired" FROM "collections" WHERE "deleted" = 0;
   prompt: |
-    Run `python3 tools/build_db.py --big`, then `sqlite3 database/movies_big.db`, then `.timer on`.
-    Time `SELECT * FROM "movies" WHERE "title" = 'Cars';` before and after `CREATE INDEX "title_index" ON "movies" ("title");`.
-    `python3 tools/labs.py timer` does the same automatically.
+    Make `DELETE FROM "current_collections" WHERE ...` work: instead of deleting, set `deleted = 1` on the matching base row.
+    Name the trigger `"delete"` (quoted, because it is a keyword).
   hints:
-    - "`.timer on` is a sqlite3 shell command (no semicolon)."
-    - Look at the "real" figure, the wall-clock time.
-    - Creating the index takes a while, but you pay that cost only once.
+    - "`CREATE TRIGGER \"delete\" INSTEAD OF DELETE ON \"current_collections\" FOR EACH ROW BEGIN ... END;`"
+    - "`OLD.\"id\"` is the id of the view row being deleted."
+    - "Body: `UPDATE \"collections\" SET \"deleted\" = 1 WHERE \"id\" = OLD.\"id\";` Don't forget the WHERE."
   solution: |
-    .timer on
-    SELECT * FROM "movies" WHERE "title" = 'Cars';      -- e.g. Run Time: real 0.03x
-    CREATE INDEX "title_index" ON "movies" ("title");
-    SELECT * FROM "movies" WHERE "title" = 'Cars';      -- e.g. Run Time: real 0.000x
-  explanation: "real = stopwatch time, user = CPU time spent on the query, sys = time spent in the operating system (the lecture loosely calls it waiting for other processes)."
+    CREATE TRIGGER "delete"
+    INSTEAD OF DELETE ON "current_collections"
+    FOR EACH ROW
+    BEGIN
+        UPDATE "collections" SET "deleted" = 1
+        WHERE "id" = OLD."id";
+    END;
+  probes:
+    - DELETE FROM "current_collections" WHERE "title" = 'Imaginative Landscape'
+  check:
+    - SELECT "title", "deleted" FROM "collections"
+    - SELECT "title" FROM "current_collections"
+  explanation: |
+    Without `WHERE "id" = OLD."id"` the UPDATE would soft-delete every artwork (L1148-1153, debugging D4-02).
   source:
-    - {file: lecture5, lines: "127-148", quote: "I'll say .timer on to make sure that I time my future queries."}
+    - {file: lecture4, lines: "1133-1170", quote: "where, in this case, the ID column is equal to the old ID"}
+    - {file: lecture4, lines: "1178-1194", quote: "So a good way of trying to use triggers here"}
 
 - id: M4-E12
-  title: Walk the B-tree to find Turning Red
-  origin: source-question
-  concepts: [C4.4]
-  difficulty: 2
-  skills: [B-tree search, index trade-offs]
-  db: movies
-  kind: selfcheck
+  title: INSTEAD OF INSERT ... WHEN, re-acquiring a deleted item
+  origin: source-demo
+  concepts: [C4.8]
+  difficulty: 4
+  skills: [INSTEAD OF trigger, WHEN, NEW, subquery]
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Imaginative Landscape';
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired" FROM "collections" WHERE "deleted" = 0;
   prompt: |
-    The lecture's index on `title` is a small B-tree: the root node holds **Frozen | Soul**,
-    and its three leaf nodes hold *Cars, Cars 3, Frozen* · *Luca, Ratatouille, Soul* · *Toy Story, Turning Red, WALL-E*.
-    1. List the comparisons SQLite makes to find **Turning Red**, and say what it gets back from the index.
-    2. Why can't SQLite simply sort the `title` column of the table itself?
-    3. Name the two costs you pay for this index.
+    *Imaginative Landscape* (accession `56.496`) was soft-deleted. When someone inserts into `current_collections`
+    an item whose **accession number already exists** in `collections`, flip its `deleted` back to 0 instead of adding a row.
+    Name the trigger `"insert_when_exists"`.
   hints:
-    - At each node, ask "does my value come before this key?" to pick the child to follow.
-    - Turning Red comes after Frozen and after Soul, so which child does that leave?
-    - "Costs: think about pages in a printed book, and about where a new title has to be inserted."
+    - "Triggers can be conditional: `FOR EACH ROW WHEN <condition> BEGIN ... END;`"
+    - "The condition: `NEW.\"accession_number\" IN (SELECT \"accession_number\" FROM \"collections\")`."
+    - "Body: `UPDATE \"collections\" SET \"deleted\" = 0 WHERE \"accession_number\" = NEW.\"accession_number\";`"
   solution: |
-    -- Model answer:
-    -- 1. Root: is "Turning Red" before "Frozen"? No. Before "Soul"? No, so follow the third child.
-    --    Leaf: Toy Story, then Turning Red, found. The index returns the ROW NUMBER (pointer) of Turning Red in the table,
-    --    which SQLite then uses to fetch the other columns (unless the index is covering).
-    -- 2. Sorting the table would change which title sits next to which id. Other tables reference those ids, so the
-    --    primary key would no longer identify the same movie. The index is a sorted COPY instead.
-    -- 3. Space (the copy plus pointers) and slower writes (every INSERT/UPDATE/DELETE must also update the tree).
-  explanation: Each comparison discards most of the remaining candidates, which is why the search stays fast even with millions of rows.
+    CREATE TRIGGER "insert_when_exists"
+    INSTEAD OF INSERT ON "current_collections"
+    FOR EACH ROW
+    WHEN NEW."accession_number" IN (
+        SELECT "accession_number" FROM "collections"
+    )
+    BEGIN
+        UPDATE "collections" SET "deleted" = 0
+        WHERE "accession_number" = NEW."accession_number";
+    END;
+  probes:
+    - INSERT INTO "current_collections" ("title", "accession_number", "acquired") VALUES ('Imaginative Landscape', '56.496', NULL)
+  check:
+    - SELECT "id", "title", "deleted" FROM "collections"
+  explanation: |
+    The accession number is the museum's own unique id, which makes it the right thing to match on (not `id`, which an INSERT doesn't supply).
   source:
-    - {file: lecture5, lines: "782-809", quote: "How could I find Turning Red?"}
-    - {file: lecture5, lines: "624-648", quote: "I've broken that relationship"}
-    - {file: lecture5, lines: "848-861", quote: "So these trade-offs are something you should"}
+    - {file: lecture4, lines: "1246-1278", quote: "I'll say create trigger insert when exists."}
+    - {file: lecture4, lines: "1311-1330", quote: "I only flipped that deleted value from a 1 back down to a 0."}
+
+- id: M4-E13
+  title: "Assigned: INSTEAD OF INSERT for genuinely new items"
+  origin: source-assigned
+  concepts: [C4.8]
+  difficulty: 4
+  skills: [INSTEAD OF trigger, WHEN NOT IN]
+  db: mfa
+  kind: modify
+  setup: |
+    ALTER TABLE "collections" ADD COLUMN "deleted" INTEGER DEFAULT 0;
+    UPDATE "collections" SET "deleted" = 1 WHERE "title" = 'Imaginative Landscape';
+    CREATE VIEW "current_collections" AS
+    SELECT "id", "title", "accession_number", "acquired" FROM "collections" WHERE "deleted" = 0;
+    CREATE TRIGGER "insert_when_exists" INSTEAD OF INSERT ON "current_collections" FOR EACH ROW
+    WHEN NEW."accession_number" IN (SELECT "accession_number" FROM "collections")
+    BEGIN
+        UPDATE "collections" SET "deleted" = 0 WHERE "accession_number" = NEW."accession_number";
+    END;
+  prompt: |
+    The lecture ends: *"I could write a trigger to actually add a brand new row to this table here … we leave all that up to you."*
+    Write `"insert_when_new"`: when the inserted accession number does **not** exist yet, insert a real new row into `collections`.
+    The checker inserts one brand-new artwork and one re-acquired artwork.
+  hints:
+    - Same shape as `insert_when_exists`, with the opposite condition.
+    - "`WHEN NEW.\"accession_number\" NOT IN (SELECT \"accession_number\" FROM \"collections\")`"
+    - "Body: `INSERT INTO \"collections\" (\"title\", \"accession_number\", \"acquired\") VALUES (NEW.\"title\", NEW.\"accession_number\", NEW.\"acquired\");`"
+  solution: |
+    CREATE TRIGGER "insert_when_new"
+    INSTEAD OF INSERT ON "current_collections"
+    FOR EACH ROW
+    WHEN NEW."accession_number" NOT IN (
+        SELECT "accession_number" FROM "collections"
+    )
+    BEGIN
+        INSERT INTO "collections" ("title", "accession_number", "acquired")
+        VALUES (NEW."title", NEW."accession_number", NEW."acquired");
+    END;
+  probes:
+    - INSERT INTO "current_collections" ("title", "accession_number", "acquired") VALUES ('Peonies and Butterfly', '06.1899', '1906-01-01')
+    - INSERT INTO "current_collections" ("title", "accession_number", "acquired") VALUES ('Imaginative Landscape', '56.496', NULL)
+  check:
+    - SELECT "title", "accession_number", "deleted" FROM "collections"
+  explanation: |
+    Two complementary conditional triggers cover both cases. The lecture also suggests a follow-up you can try on your own:
+    an INSTEAD OF UPDATE trigger, for example to fill in the unknown acquired date (L1333-1334).
+  source:
+    - {file: lecture4, lines: "1331-1336", quote: "For now though, we leave all that up to you."}
+    - {file: lecture4, lines: "1236-1242", quote: "In that case, actually inserting a brand new row"}

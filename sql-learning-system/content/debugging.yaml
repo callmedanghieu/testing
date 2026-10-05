@@ -10,29 +10,100 @@
   title: The NULL that never matches
   bug_type: "null"
   origin: generated
-  concepts: [C0.2]
+  concepts: [C0.6]
   difficulty: 1
-  db: mfa
+  db: longlist0
   kind: query
-  prompt: This should list artworks whose acquisition date is unknown. It returns nothing.
+  prompt: This should list the books that have no translator. It returns nothing.
   broken: |
-    SELECT "title" FROM "collections" WHERE "acquired" = NULL;
+    SELECT "title" FROM "longlist" WHERE "translator" = NULL;
   hints:
     - What is the result of `NULL = NULL` in SQL? Is it true?
     - Comparisons with NULL produce NULL (unknown), and WHERE keeps only rows where the condition is true.
     - Use the operator built for NULL tests.
   solution: |
-    SELECT "title" FROM "collections" WHERE "acquired" IS NULL;
+    SELECT "title" FROM "longlist" WHERE "translator" IS NULL;
   diagnosis: "`= NULL` is never true. NULL means unknown, so use `IS NULL` / `IS NOT NULL`."
   source:
-    - {file: lecture3, lines: "734-741", quote: "WHERE \"acquired\" IS NOT NULL"}
+    - {file: lecture0, lines: "596-633", quote: "We could use IS NULL to figure out if a value is null."}
 
 - id: D0-02
   module: M0
+  title: AND without parentheses
+  bug_type: logic
+  origin: generated
+  concepts: [C0.5]
+  difficulty: 2
+  db: longlist0
+  kind: query
+  prompt: Meant to list 2022 and 2023 books that are not hardcover, but hardcovers from 2022 slip through.
+  broken: |
+    SELECT "title", "format" FROM "longlist"
+    WHERE "year" = 2022 OR "year" = 2023 AND "format" != 'hardcover';
+  hints:
+    - Which operator binds more tightly, AND or OR?
+    - The condition is read as `year = 2022 OR (year = 2023 AND format != 'hardcover')`.
+    - Put parentheses around the OR.
+  solution: |
+    SELECT "title", "format" FROM "longlist"
+    WHERE ("year" = 2022 OR "year" = 2023) AND "format" != 'hardcover';
+  diagnosis: AND is evaluated before OR. Parentheses make the grouping you mean explicit (lecture0 L528-530).
+  source:
+    - {file: lecture0, lines: "524-530", quote: "So here, we have these called AND, OR, and these parentheses here too."}
+
+- id: D0-03
+  module: M0
+  title: A column that doesn't exist, but no error
+  bug_type: syntax
+  origin: source-demo
+  concepts: [C0.2]
+  difficulty: 2
+  db: longlist0
+  kind: query
+  prompt: |
+    This should list every book's publisher. Instead it prints the word `pubsliher` 78 times, with no error. Explain and fix it.
+  broken: |
+    SELECT "pubsliher" FROM "longlist";
+  hints:
+    - Read the identifier letter by letter.
+    - When a double-quoted name matches no column, SQLite quietly treats it as a string literal.
+    - Spell the column correctly.
+  solution: |
+    SELECT "publisher" FROM "longlist";
+  diagnosis: |
+    SQLite's legacy rule: a double-quoted identifier that matches no column becomes a string. The typo therefore returns the text 'pubsliher' on every row instead of an error.
+    Other DBMSs would fail with "unknown column".
+  source:
+    - {file: lecture0, lines: "1363-1377", quote: "But that column doesn't exist so it creates this data for me."}
+
+- id: D0-04
+  module: M0
+  title: Counting publishers twice
+  bug_type: aggregation
+  origin: source-question
+  concepts: [C0.10, C0.11]
+  difficulty: 1
+  db: longlist0
+  kind: query
+  prompt: Meant to report how many **different** publishers there are. It reports one per book.
+  broken: |
+    SELECT COUNT("publisher") FROM "longlist";
+  hints:
+    - Does Fitzcarraldo Editions appear once or many times in the column?
+    - Remove the duplicates before counting.
+    - "`COUNT(DISTINCT \"publisher\")`"
+  solution: |
+    SELECT COUNT(DISTINCT "publisher") FROM "longlist";
+  diagnosis: COUNT counts values (non-NULL), not distinct values. Add DISTINCT inside the parentheses.
+  source:
+    - {file: lecture0, lines: "1349-1357", quote: "I might double count the publisher along the way."}
+
+- id: D1-01
+  module: M1
   title: Joined on the wrong column
   bug_type: join
   origin: generated
-  concepts: [C0.6]
+  concepts: [C1.6]
   difficulty: 2
   db: longlist
   kind: query
@@ -55,14 +126,15 @@
     The broken query matched author id 24 with **book** id 24, which is a coincidence of numbers, not a relationship.
     Ids from different tables share values (lecture2 L310-326), so the database can't catch this. Only you can.
   source:
+    - {file: lecture1, lines: "1119-1132", quote: "I have to tell SQL which two columns to try to JOIN these tables by."}
     - {file: lecture4, lines: "207-219", quote: "linking it up by looking at the authors dot ID column"}
 
-- id: D0-03
-  module: M0
+- id: D1-02
+  module: M1
   title: Duplicate rows from a one-to-many join
   bug_type: duplicates
   origin: generated
-  concepts: [C0.6, C0.4]
+  concepts: [C1.6, C1.10]
   difficulty: 2
   db: longlist
   kind: query
@@ -83,14 +155,14 @@
     AND "id" IN (SELECT "book_id" FROM "ratings");
   diagnosis: Joining to the "many" side of a one-to-many relationship multiplies rows.
   source:
-    - {file: lecture4, lines: "344-351", quote: "books had individual ratings from individual people"}
+    - {file: lecture1, lines: "320-334", quote: "So this is an example of how we could represent"}
 
-- id: D0-04
-  module: M0
+- id: D1-03
+  module: M1
   title: One average instead of one per book
   bug_type: aggregation
   origin: generated
-  concepts: [C0.4]
+  concepts: [C1.10]
   difficulty: 1
   db: longlist
   kind: query
@@ -106,14 +178,14 @@
   diagnosis: |
     SQLite even let you select the bare `book_id` next to the aggregate (it picks an arbitrary row's value). Most other DBMSs reject that query outright.
   source:
-    - {file: lecture4, lines: "403-407", quote: "That means I'll calculate the average rating for each book ID."}
+    - {file: lecture1, lines: "1683-1703", quote: "I'm getting the average of all of these ratings not grouped by book_id."}
 
-- id: D0-05
-  module: M0
+- id: D1-04
+  module: M1
   title: "`=` with a subquery that returns many rows"
   bug_type: subquery
   origin: generated
-  concepts: [C0.5]
+  concepts: [C1.4, C1.5]
   difficulty: 2
   db: movies
   kind: query
@@ -136,14 +208,14 @@
     );
   diagnosis: Use `IN` when a subquery can return several rows. `=` is fine for the innermost one, since there is one Tom Hanks.
   source:
-    - {file: lecture5, lines: "376-379", quote: "I'll say WHERE the \"id\" of that movie is IN some list of movie IDs"}
+    - {file: lecture1, lines: "969-984", quote: "if you're looking to see if some id is part of a list of ids"}
 
-- id: D0-06
-  module: M0
+- id: D1-05
+  module: M1
   title: Grouped by the wrong column
   bug_type: aggregation
   origin: generated
-  concepts: [C0.4]
+  concepts: [C1.10]
   difficulty: 1
   db: longlist
   kind: query
@@ -158,14 +230,115 @@
     SELECT "year", COUNT(*) FROM "books" GROUP BY "year";
   diagnosis: GROUP BY decides the grain of the result.
   source:
-    - {file: lecture4, lines: "577-583", quote: "Now, I'll say I want to group by the year column."}
+    - {file: lecture1, lines: "1704-1713", quote: "I could say, take all the books with id 1 and all the books with id 2"}
 
-- id: D1-01
+- id: D1-06
   module: M1
+  title: no such table
+  bug_type: syntax
+  origin: source-demo
+  concepts: [C1.4]
+  difficulty: 1
+  db: longlist
+  kind: query
+  prompt: The lecturer's first attempt to find MacLehose Press's id fails. Read the error and fix it.
+  broken: |
+    SELECT "id" FROM "publisher" WHERE "publisher" = 'MacLehose Press';
+  hints:
+    - The error message names the problem precisely.
+    - Run `SELECT "name" FROM sqlite_master WHERE "type" = 'table';` to list the table names.
+    - The table is plural.
+  solution: |
+    SELECT "id" FROM "publishers" WHERE "publisher" = 'MacLehose Press';
+  diagnosis: "`Parse error: no such table: publisher`. The column is `publisher`, but the table is `publishers`."
+  source:
+    - {file: lecture1, lines: "623-646", quote: "There is no table called publisher."}
+
+- id: D1-07
+  module: M1
+  title: WHERE on an aggregate
+  bug_type: aggregation
+  origin: source-question
+  concepts: [C1.10]
+  difficulty: 2
+  db: longlist
+  kind: query
+  prompt: Meant to keep only books whose rounded average rating is above 4.0. It errors.
+  broken: |
+    SELECT "book_id", ROUND(AVG("rating"), 2) AS "average rating"
+    FROM "ratings"
+    WHERE "average rating" > 4.0
+    GROUP BY "book_id";
+  hints:
+    - WHERE runs before rows are grouped. Does the average exist at that point?
+    - Conditions on groups use a different keyword.
+    - Move the condition into `HAVING`, after GROUP BY.
+  solution: |
+    SELECT "book_id", ROUND(AVG("rating"), 2) AS "average rating"
+    FROM "ratings"
+    GROUP BY "book_id"
+    HAVING "average rating" > 4.0;
+  diagnosis: WHERE filters individual rows and HAVING filters groups after aggregation.
+  source:
+    - {file: lecture1, lines: "1755-1764", quote: "But I can't because these are now not individual rows."}
+
+- id: D1-08
+  module: M1
+  title: LEFT JOIN wanted, INNER JOIN written
+  bug_type: join
+  origin: generated
+  concepts: [C1.7]
+  difficulty: 2
+  db: sea_lions
+  kind: query
+  prompt: The research report must list **every tracked sea lion**, with its distance if known. Jolee is missing.
+  broken: |
+    SELECT "name", "distance" FROM "sea_lions"
+    JOIN "migrations" ON "migrations"."id" = "sea_lions"."id";
+  hints:
+    - What happens to a row with no match in an INNER JOIN?
+    - You want every row of the table written first.
+    - "`LEFT JOIN`"
+  solution: |
+    SELECT "name", "distance" FROM "sea_lions"
+    LEFT JOIN "migrations" ON "migrations"."id" = "sea_lions"."id";
+  diagnosis: An INNER JOIN silently drops unmatched rows. Choose the join from the question ("every sea lion" means LEFT).
+  source:
+    - {file: lecture1, lines: "1149-1162", quote: "well, let's sadly just get rid of the row."}
+
+- id: D1-09
+  module: M1
+  title: UNION of mismatched columns
+  bug_type: syntax
+  origin: source-question
+  concepts: [C1.9]
+  difficulty: 1
+  db: longlist
+  kind: query
+  prompt: Meant to list everyone who is an author or a translator, but it fails.
+  broken: |
+    SELECT "id", "name" FROM "authors"
+    UNION
+    SELECT "name" FROM "translators";
+  hints:
+    - Compare the number of columns on each side.
+    - Set operators stack rows, so every row must have the same shape.
+    - Select the same columns on both sides, here just `"name"`.
+  solution: |
+    SELECT "name" FROM "authors"
+    UNION
+    SELECT "name" FROM "translators";
+  diagnosis: |
+    "SELECTs to the left and right of UNION do not have the same number of result columns". Both sides need the same number of columns, and they should hold the same kind of data (L1652-1662).
+  source:
+    - {file: lecture1, lines: "1652-1662", quote: "you always have to have the same number"}
+
+- id: D2-01
+  module: M2
   title: A comma too many
   bug_type: syntax
   origin: source-question
-  concepts: [C1.4]
+  concepts: [C2.4]
   difficulty: 1
   db: null
   kind: modify
@@ -192,12 +365,12 @@
   source:
     - {file: lecture2, lines: "883-895", quote: "So whatever is the last portion, I should not have a comma after"}
 
-- id: D1-02
-  module: M1
+- id: D2-02
+  module: M2
   title: A CHECK that checks nothing
   bug_type: logic
   origin: generated
-  concepts: [C1.7]
+  concepts: [C2.7]
   difficulty: 3
   db: null
   kind: modify
@@ -237,12 +410,12 @@
   source:
     - {file: lecture2, lines: "1280-1287", quote: "I could say check that type is in some list of values."}
 
-- id: D1-03
-  module: M1
+- id: D2-03
+  module: M2
   title: A foreign key that allows "no card"
   bug_type: design
   origin: generated
-  concepts: [C1.6, C1.7]
+  concepts: [C2.6, C2.7]
   difficulty: 3
   db: null
   kind: modify
@@ -282,12 +455,12 @@
   source:
     - {file: lecture2, lines: "968-978", quote: "This would be in this case, redundant."}
 
-- id: D1-04
-  module: M1
+- id: D2-04
+  module: M2
   title: A primary key that forbids repeat visits
   bug_type: design
   origin: source-question
-  concepts: [C1.6]
+  concepts: [C2.6]
   difficulty: 2
   db: null
   kind: modify
@@ -318,12 +491,12 @@
   source:
     - {file: lecture2, lines: "829-839", quote: "I want people to able to visit a station more than once."}
 
-- id: D2-01
-  module: M2
+- id: D3-01
+  module: M3
   title: The DELETE that emptied the table
   bug_type: logic
   origin: source-question
-  concepts: [C2.5]
+  concepts: [C3.5]
   difficulty: 1
   db: mfa
   kind: modify
@@ -342,12 +515,12 @@
   source:
     - {file: lecture3, lines: "693-698", quote: "If I say DELETE FROM table with no WHERE"}
 
-- id: D2-02
-  module: M2
+- id: D3-02
+  module: M3
   title: Deleting from the wrong table
   bug_type: logic
   origin: source-demo
-  concepts: [C2.5, C2.6]
+  concepts: [C3.5, C3.6]
   difficulty: 2
   db: mfa
   kind: modify
@@ -379,12 +552,12 @@
   source:
     - {file: lecture3, lines: "947-961", quote: "What I should do instead is delete from the created table."}
 
-- id: D2-03
-  module: M2
+- id: D3-03
+  module: M3
   title: An UPDATE that re-attributed everything
   bug_type: logic
   origin: generated
-  concepts: [C2.7]
+  concepts: [C3.7]
   difficulty: 2
   db: mfa
   kind: modify
@@ -410,12 +583,12 @@
   source:
     - {file: lecture3, lines: "1155-1162", quote: "but what I've forgotten"}
 
-- id: D2-04
-  module: M2
+- id: D3-04
+  module: M3
   title: Missing dates that aren't NULL
   bug_type: "null"
   origin: source-question
-  concepts: [C2.4, C2.7]
+  concepts: [C3.4, C3.7]
   difficulty: 2
   db: mfa
   kind: modify
@@ -438,12 +611,12 @@
   source:
     - {file: lecture3, lines: "653-663", quote: "it won't be converted to"}
 
-- id: D2-05
-  module: M2
+- id: D3-05
+  module: M3
   title: NEW in a DELETE trigger
   bug_type: trigger
   origin: generated
-  concepts: [C2.9]
+  concepts: [C3.9]
   difficulty: 2
   db: mfa
   kind: modify
@@ -476,12 +649,12 @@
   source:
     - {file: lecture3, lines: "1603-1608", quote: "you get access to this keyword called old"}
 
-- id: D2-06
-  module: M2
+- id: D3-06
+  module: M3
   title: An over-eager LIKE
   bug_type: logic
   origin: source-question
-  concepts: [C2.8]
+  concepts: [C3.8]
   difficulty: 3
   db: votes
   kind: modify
@@ -504,12 +677,12 @@
   source:
     - {file: lecture3, lines: "1388-1394", quote: "because you could match much more than Farmers Working At Dawn"}
 
-- id: D3-01
-  module: M3
+- id: D4-01
+  module: M4
   title: A trailing comma after the CTE
   bug_type: syntax
   origin: generated
-  concepts: [C3.5]
+  concepts: [C4.5]
   difficulty: 1
   db: longlist
   kind: query
@@ -538,12 +711,12 @@
   source:
     - {file: lecture4, lines: "644-646", quote: "Or I could omit the comma"}
 
-- id: D3-02
-  module: M3
+- id: D4-02
+  module: M4
   title: The soft-delete trigger that hid everything
   bug_type: trigger
   origin: source-question
-  concepts: [C3.8]
+  concepts: [C4.8]
   difficulty: 3
   db: mfa
   kind: modify
@@ -577,12 +750,12 @@
   source:
     - {file: lecture4, lines: "1147-1153", quote: "with no condition it'll update all the columns here"}
 
-- id: D3-03
-  module: M3
+- id: D4-03
+  module: M4
   title: A view name made of digits
   bug_type: syntax
   origin: generated
-  concepts: [C3.6]
+  concepts: [C4.6]
   difficulty: 1
   db: longlist
   kind: modify
@@ -601,12 +774,12 @@
   source:
     - {file: lecture4, lines: "751-756", quote: "I could say select star from 2022 quote and then semicolon"}
 
-- id: D4-01
-  module: M4
+- id: D5-01
+  module: M5
   title: An index with the columns backwards
   bug_type: performance
   origin: generated
-  concepts: [C4.3]
+  concepts: [C5.3]
   difficulty: 3
   db: movies
   kind: modify
@@ -629,12 +802,12 @@
   source:
     - {file: lecture5, lines: "507-517", quote: "Let's also include in this case, the movie ID column like this."}
 
-- id: D4-02
-  module: M4
+- id: D5-02
+  module: M5
   title: An index nobody uses
   bug_type: performance
   origin: generated
-  concepts: [C4.2]
+  concepts: [C5.2]
   difficulty: 2
   db: movies
   kind: modify
@@ -654,12 +827,12 @@
   source:
     - {file: lecture5, lines: "273-278", quote: "I should probably include the Title column in this index"}
 
-- id: D4-03
-  module: M4
+- id: D5-03
+  module: M5
   title: A partial index that doesn't match the query
   bug_type: performance
   origin: generated
-  concepts: [C4.5]
+  concepts: [C5.5]
   difficulty: 3
   db: movies
   kind: modify
@@ -681,12 +854,12 @@
   source:
     - {file: lecture5, lines: "917-924", quote: "because my WHERE clause included 2023"}
 
-- id: D4-04
-  module: M4
+- id: D5-04
+  module: M5
   title: A transfer that created money
   bug_type: transaction
   origin: source-demo
-  concepts: [C4.7]
+  concepts: [C5.7]
   difficulty: 3
   db: bank
   kind: modify
@@ -716,12 +889,12 @@
   source:
     - {file: lecture5, lines: "1285-1296", quote: "So I need to undo this but I don't have a transaction here."}
 
-- id: D5-01
-  module: M5
+- id: D6-01
+  module: M6
   title: Query built by string formatting
   bug_type: security
   origin: source-question
-  concepts: [C5.8]
+  concepts: [C6.8]
   difficulty: 2
   db: bank
   kind: selfcheck
@@ -749,12 +922,12 @@
   source:
     - {file: lecture6, lines: "2138-2147", quote: "So is this the same reason why we"}
 
-- id: D5-02
-  module: M5
+- id: D6-02
+  module: M6
   title: A procedure cut short by the delimiter
   bug_type: syntax
   origin: source-question
-  concepts: [C5.4]
+  concepts: [C6.4]
   difficulty: 2
   db: null
   kind: selfcheck

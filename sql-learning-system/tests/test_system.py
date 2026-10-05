@@ -39,6 +39,7 @@ class TestDatabases(unittest.TestCase):
 
     def test_relationships_declared(self):
         expected = {("longlist", "authored"): {"authors", "books"}, ("longlist", "ratings"): {"books"},
+                    ("longlist", "translated"): {"translators", "books"}, ("longlist", "books"): {"publishers"},
                     ("mbta", "swipes"): {"cards", "stations"}, ("mfa", "created"): {"artists", "collections"},
                     ("movies", "stars"): {"movies", "people"}, ("movies", "ratings"): {"movies"}}
         for (db, table), parents in expected.items():
@@ -58,7 +59,21 @@ class TestDatabases(unittest.TestCase):
         self.assertEqual(q(L, "SELECT year FROM books WHERE id=34 AND title='Minor Detail'"), [(2021,)])  # L827-834
         self.assertEqual(q(L, "SELECT COUNT(*) FROM books WHERE year=2023"), [(13,)])                    # L732
         self.assertEqual(q(L, "SELECT ROUND(AVG(rating),2) FROM ratings GROUP BY book_id HAVING book_id IN (1,2) ORDER BY book_id"),
-                         [(3.67,), (2.5,)])                                                              # L383-384
+                         [(3.77,), (3.97,)])                       # real data, not the slides (errata #23)
+        self.assertEqual(q(L, "SELECT id FROM publishers WHERE publisher='Fitzcarraldo Editions'"), [(5,)])  # lecture1 L504-560
+        self.assertEqual(q(L, "SELECT name FROM authors INTERSECT SELECT name FROM translators"), [("Ngũgĩ wa Thiong'o",)])
+        L0 = S.fresh_db("longlist0")
+        self.assertEqual(q(L0, "SELECT COUNT(*), COUNT(translator), ROUND(AVG(rating), 2), MAX(rating), MIN(rating) FROM longlist"),
+                         [(78, 76, 3.75, 4.52, 3.05)])                                                    # lecture0
+        self.assertGreater(q(L0, "SELECT SUM(votes) FROM longlist")[0][0], 600000)
+        self.assertEqual(q(L0, "SELECT title FROM longlist WHERE title LIKE 'P_re' OR title LIKE 'T___' ORDER BY title"),
+                         [("Pyre",), ("Tyll",)])
+        self.assertEqual(q(L0, "SELECT title FROM longlist ORDER BY rating DESC, votes DESC LIMIT 1"), [("The Eighth Life",)])
+        self.assertEqual(q(L0, "SELECT COUNT(*) FROM longlist WHERE rating > 4.0 AND votes > 10000"), [(4,)])
+        SL = S.fresh_db("sea_lions")
+        counts = [q(SL, f"SELECT COUNT(*) FROM sea_lions {j} JOIN migrations ON migrations.id = sea_lions.id")[0][0]
+                  for j in ("", "LEFT", "FULL")]
+        self.assertEqual(counts, [5, 6, 8])                                                              # lecture1 L1022-1379
         M = S.fresh_db("movies")
         self.assertEqual(q(M, "SELECT id, year FROM movies WHERE title='Cars'"), [(317219, 2006)])         # lecture5 L123
         self.assertEqual(q(M, "SELECT id FROM people WHERE name='Tom Hanks'"), [(158,)])                  # L56
@@ -128,7 +143,7 @@ class TestContent(unittest.TestCase):
             self.assertNotIn(f"### {e['id']} ", other, f"{e['id']} leaked onto the wrong page")
 
     def test_source_origins_cite_the_lecture_of_their_module(self):
-        lecture_of = {"M1": "lecture2", "M2": "lecture3", "M3": "lecture4", "M4": "lecture5", "M5": "lecture6"}
+        lecture_of = {"M0": "lecture0", "M1": "lecture1", "M2": "lecture2", "M3": "lecture3", "M4": "lecture4", "M5": "lecture5", "M6": "lecture6"}
         for x in ALL:
             if x["origin"] != "generated" and x["module"] in lecture_of:
                 self.assertIn(lecture_of[x["module"]], {r["file"] for r in x["source"]}, x["id"])
@@ -153,7 +168,7 @@ class TestContent(unittest.TestCase):
     def test_concept_coverage(self):
         import build
         concepts = build.concept_sources()
-        self.assertEqual(len(concepts), 49)
+        self.assertEqual(len(concepts), 64)
         used = {c for x in ALL for c in x["concepts"]}
         self.assertEqual(sorted(set(concepts) - used), [], "concepts without any practice item")
         for cid, c in concepts.items():
@@ -279,9 +294,22 @@ class TestErrata(unittest.TestCase):
                    "INSERT INTO a VALUES (1); INSERT INTO c VALUES (1); DELETE FROM a WHERE id = 1;")
         self.assertIn("FOREIGN KEY constraint failed", r.error)
 
+    def test_19_max_on_text_is_alphabetical(self):
+        self.assertEqual(S.fresh_db("longlist0").execute("SELECT MAX(title), MIN(title) FROM longlist").fetchone()[0], "Wretchedness")
+
+    def test_21_like_ignores_case_only_for_ascii(self):
+        self.assertEqual(self.q("SELECT 'A' LIKE 'a', 'Ä' LIKE 'ä';").rows, [(1, 0)])
+
+    def test_22_misspelled_double_quoted_column_becomes_string(self):
+        self.assertEqual(self.q('CREATE TABLE t(publisher); INSERT INTO t VALUES (1); SELECT "pubsliher" FROM t;').rows, [("pubsliher",)])
+
+    def test_26_full_join_supported(self):
+        self.assertEqual(self.q("CREATE TABLE a(x); CREATE TABLE b(x); INSERT INTO a VALUES (1); INSERT INTO b VALUES (2);"
+                                "SELECT COUNT(*) FROM a FULL JOIN b ON a.x = b.x;").rows, [(2,)])
+
     def test_errata_numbers_exist(self):
         text = (ROOT / "analysis/source-issues.md").read_text()
-        for n in (1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 18):
+        for n in (1, 2, 3, 4, 5, 6, 7, 8, 11, 12, 18, 19, 20, 21, 22, 23, 24, 25, 26):
             self.assertIn(f"| {n} |", text)
 
 

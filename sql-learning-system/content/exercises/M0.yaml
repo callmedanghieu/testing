@@ -1,241 +1,373 @@
-# Module 0: Query toolkit (prerequisite).
-# The five lectures USE these queries but never teach them (weeks 0-1 are not in the material set).
-# Where the exact query is performed in a lecture, the exercise is SOURCE-DEMO; otherwise GENERATED.
+# Module 0: Querying (sources/lecture0.txt). Dataset: longlist0, the single "longlist" table of week 0.
 - id: M0-E01
-  title: Peek at the first five books
+  title: Titles and authors
   origin: source-demo
-  concepts: [C0.1, C0.3]
+  concepts: [C0.1, C0.2]
   difficulty: 1
-  skills: [SELECT, LIMIT, ORDER BY]
-  db: longlist
+  skills: [SELECT, identifiers]
+  db: longlist0
   kind: query
-  ordered: true
   prompt: |
-    The lecture peeks at a table with `LIMIT 5` instead of printing every row.
-    Return the **title** and **year** of the first five books in `books`, ordered by `id`.
+    The `longlist` table holds the 78 books longlisted for the International Booker Prize, 2018-2023.
+    Return two columns from it: `title` and `author`.
   hints:
-    - You only want a few rows. Which clause caps the number of rows returned?
-    - "`SELECT ... FROM ... ORDER BY ... LIMIT n`. ORDER BY makes \"first\" well-defined."
-    - "`SELECT \"title\", \"year\" FROM \"books\" ORDER BY \"id\" LIMIT ...;`"
+    - SELECT names the columns you want, and FROM names the table.
+    - Separate several columns with commas. Column and table names go in double quotes.
+    - "`SELECT \"title\", \"author\" FROM ...;`"
   solution: |
-    SELECT "title", "year" FROM "books" ORDER BY "id" LIMIT 5;
+    SELECT "title", "author" FROM "longlist";
   explanation: |
-    `LIMIT` caps the rows. Without `ORDER BY`, "the first five" is whatever order SQLite happens to read the table in.
-    That is usually rowid order, but it is not guaranteed, so we make it explicit.
+    `SELECT *` would return every column, which floods a small terminal (L272-276). Ask only for what you need.
   source:
-    - {file: lecture2, lines: "42-48", quote: "but limit now to the first five rows"}
+    - {file: lecture0, lines: "286-298", quote: "I'll select also the authors from this table."}
 
 - id: M0-E02
-  title: Search for a movie by title
+  title: Peek with LIMIT
   origin: source-demo
-  concepts: [C0.2]
+  concepts: [C0.3]
   difficulty: 1
-  skills: [WHERE, "="]
-  db: movies
+  skills: [LIMIT]
+  db: longlist0
   kind: query
-  prompt: |
-    You are searching IMDb for your favourite movie, *Cars*. Return every column of every movie whose title is exactly `Cars`.
+  ordered: true
+  prompt: Return only the first 5 titles of `longlist`, in the order they were added to the table.
   hints:
-    - Filter rows with a condition on the `title` column.
-    - Use `WHERE` with `=` and a quoted string.
-    - "`SELECT * FROM \"movies\" WHERE \"title\" = '...';`"
+    - You want to cap the number of rows, not filter them.
+    - "`LIMIT n` goes at the end of the query."
+    - "`SELECT \"title\" FROM \"longlist\" LIMIT ...;`"
   solution: |
-    SELECT * FROM "movies" WHERE "title" = 'Cars';
-  expected_known: [[317219, "Cars", 2006]]
+    SELECT "title" FROM "longlist" LIMIT 5;
   explanation: |
-    `=` is an exact match, so *Cars 3* is not returned. The lecture's answer: id 317219, released 2006.
+    Without ORDER BY you get the rows "in whatever order they were added to my table" (L391-392). That is fine for peeking, but don't rely on it for anything else.
   source:
-    - {file: lecture5, lines: "116-123", quote: "Came out in 2006 and the ID is 317219."}
+    - {file: lecture0, lines: "370-392", quote: "Just in whatever order they were added to my table"}
 
 - id: M0-E03
-  title: Artworks with no acquisition date
-  origin: generated
-  concepts: [C0.2]
+  title: The 2023 longlist
+  origin: source-demo
+  concepts: [C0.4]
   difficulty: 1
-  skills: [IS NULL]
-  db: mfa
+  skills: [WHERE, "="]
+  db: longlist0
   kind: query
-  prompt: |
-    Return the **title** of every item in `collections` whose `acquired` date is unknown (NULL).
+  prompt: Return the `title` and `author` of every book longlisted in **2023**.
   hints:
-    - NULL means "no value". Comparing anything to NULL with `=` never yields true.
-    - SQL has a special operator for testing NULL.
-    - "`... WHERE \"acquired\" IS NULL;`"
+    - Keep only the rows where a condition is true.
+    - "`WHERE \"year\" = ...`. A number needs no quotes."
+    - "`SELECT \"title\", \"author\" FROM \"longlist\" WHERE \"year\" = 2023;`"
   solution: |
-    SELECT "title" FROM "collections" WHERE "acquired" IS NULL;
-  expected_known: [["Imaginative Landscape"]]
-  explanation: |
-    Lecture 3 uses exactly this condition, but in a DELETE. Writing the SELECT first is a good habit before any DELETE.
+    SELECT "title", "author" FROM "longlist" WHERE "year" = 2023;
+  explanation: 2023 is an integer, so it is not quoted. Text values like `'hardcover'` take single quotes.
   source:
-    - {file: lecture3, lines: "734-741", quote: "IS NULL semicolon"}
+    - {file: lecture0, lines: "410-426", quote: "I'll say WHERE the \"year\" column is equal to 2023."}
 
 - id: M0-E04
-  title: 2023 longlist, alphabetically
-  origin: generated
-  concepts: [C0.2, C0.3]
+  title: Everything that isn't hardcover
+  origin: source-demo
+  concepts: [C0.4]
   difficulty: 1
-  skills: [WHERE, ORDER BY]
-  db: longlist
+  skills: ["!=", "<>", NOT]
+  db: longlist0
+  kind: query
+  prompt: |
+    Hardcovers are expensive. Return the `title` and `format` of every book that is **not** a hardcover.
+    Try it three ways: `!=`, `<>`, and `NOT`.
+  hints:
+    - The format column holds the strings 'hardcover' and 'paperback'.
+    - "`!=` and `<>` both mean \"not equal\". `NOT` negates a whole condition."
+    - "`... WHERE \"format\" != 'hardcover';` or `... WHERE NOT \"format\" = 'hardcover';`"
+  solution: |
+    SELECT "title", "format" FROM "longlist" WHERE "format" != 'hardcover';
+  explanation: "`'hardcover'` is in single quotes because it is a string, not a column name (L481-487)."
+  source:
+    - {file: lecture0, lines: "471-515", quote: "I could also negate a condition using NOT."}
+
+- id: M0-E05
+  title: Recent paperbacks with AND, OR and parentheses
+  origin: source-demo
+  concepts: [C0.5]
+  difficulty: 2
+  skills: [AND, OR, parentheses]
+  db: longlist0
+  kind: query
+  prompt: Return the `title` and `format` of books from **2022 or 2023** that are **not** hardcover.
+  hints:
+    - Two conditions must hold. One of them is itself an "either/or".
+    - Without parentheses, AND binds tighter than OR, so group the OR.
+    - "`WHERE (\"year\" = 2022 OR \"year\" = 2023) AND \"format\" != 'hardcover'`"
+  solution: |
+    SELECT "title", "format" FROM "longlist"
+    WHERE ("year" = 2022 OR "year" = 2023) AND "format" != 'hardcover';
+  explanation: Debugging item D0-02 shows the wrong answer you get when you leave the parentheses out.
+  source:
+    - {file: lecture0, lines: "547-564", quote: "And I can denote that with a single set of parentheses here."}
+
+- id: M0-E06
+  title: Books without a translator
+  origin: source-demo
+  concepts: [C0.6]
+  difficulty: 1
+  skills: [IS NULL]
+  db: longlist0
+  kind: query
+  prompt: Some books have no separate translator. Return the `title` and `translator` of those books.
+  hints:
+    - A missing value is NULL.
+    - "`= NULL` never matches. SQL has its own operator for NULL."
+    - "`... WHERE \"translator\" IS NULL;`"
+  solution: |
+    SELECT "title", "translator" FROM "longlist" WHERE "translator" IS NULL;
+  expected_known: [["The Perfect Nine", null], ["The Enlightenment of the Greengage Tree", null]]
+  explanation: |
+    The lecture finds these same two books. Ngũgĩ wa Thiong'o translated *The Perfect Nine* himself, and the translator of *The Enlightenment of the Greengage Tree* is anonymous.
+    The opposite query is `IS NOT NULL`.
+  source:
+    - {file: lecture0, lines: "610-622", quote: "I'll say WHERE \"translator\" IS NULL Semicolon."}
+
+- id: M0-E07
+  title: "\"love\" anywhere in the title"
+  origin: source-demo
+  concepts: [C0.7]
+  difficulty: 1
+  skills: [LIKE, "%"]
+  db: longlist0
+  kind: query
+  prompt: Return every title that contains the word "love" anywhere.
+  hints:
+    - An exact `=` won't work. You need a pattern.
+    - "`%` stands for any run of characters (including none)."
+    - "`... WHERE \"title\" LIKE '%love%';`"
+  solution: |
+    SELECT "title" FROM "longlist" WHERE "title" LIKE '%love%';
+  explanation: |
+    Four books, as in the lecture (L678). LIKE ignores case, which is why `'%love%'` also matches *Love in the Big City*.
+  source:
+    - {file: lecture0, lines: "659-686", quote: "And I'll see I get back four books"}
+
+- id: M0-E08
+  title: Titles that start with the word "The"
+  origin: source-question
+  concepts: [C0.7]
+  difficulty: 2
+  skills: [LIKE, pattern design]
+  db: longlist0
+  kind: query
+  prompt: |
+    Return the titles that begin with the **word** "The". The lecturer first wrote `LIKE 'The%'` and then asked what else that could match.
+    Write the better pattern.
+  hints:
+    - Which other English words start with the letters T-H-E?
+    - Make the pattern require a space after "The".
+    - "`... WHERE \"title\" LIKE 'The %';`"
+  solution: |
+    SELECT "title" FROM "longlist" WHERE "title" LIKE 'The %';
+  explanation: |
+    `'The%'` would also match "There…", "They…", "Theory…". In this data both patterns happen to return the same rows, but only `'The %'` says what you mean.
+  source:
+    - {file: lecture0, lines: "710-730", quote: "There are many words beginning with T-H-E."}
+
+- id: M0-E09
+  title: Was it Pyre or Pire?
+  origin: source-demo
+  concepts: [C0.7]
+  difficulty: 1
+  skills: [LIKE, "_"]
+  db: longlist0
+  kind: query
+  prompt: You remember a title of four letters, *P?re*, but not whether the second letter is I or Y. Find it.
+  hints:
+    - You don't know exactly one character.
+    - "`_` matches exactly one character, while `%` matches any number."
+    - "`... WHERE \"title\" LIKE 'P_re';`"
+  solution: |
+    SELECT "title" FROM "longlist" WHERE "title" LIKE 'P_re';
+  expected_known: [["Pyre"]]
+  explanation: "`'T___'` (T plus three underscores) finds *Tyll* the same way (L801-814)."
+  source:
+    - {file: lecture0, lines: "765-780", quote: "So notice in this case that the underscore is matching"}
+
+- id: M0-E10
+  title: Books from 2019 to 2022
+  origin: source-question
+  concepts: [C0.8]
+  difficulty: 1
+  skills: [BETWEEN, ">=", "<="]
+  db: longlist0
+  kind: query
+  prompt: |
+    Return the `title` and `year` of books from 2019 through 2022 **inclusive**, without chaining four `OR`s (the lecturer asked what was badly designed about that version).
+  hints:
+    - A range has a lower and an upper bound.
+    - Use `>=` together with `<=`, or the shorter `BETWEEN … AND …`.
+    - "`... WHERE \"year\" BETWEEN 2019 AND 2022;`"
+  solution: |
+    SELECT "title", "year" FROM "longlist" WHERE "year" BETWEEN 2019 AND 2022;
+  explanation: "`BETWEEN` includes both ends (L882-883)."
+  source:
+    - {file: lecture0, lines: "846-888", quote: "This is inclusive."}
+
+- id: M0-E11
+  title: Highly rated and widely rated
+  origin: source-demo
+  concepts: [C0.5, C0.8]
+  difficulty: 2
+  skills: [">", AND]
+  db: longlist0
+  kind: query
+  prompt: Return the `title`, `rating` and `votes` of books rated above 4.0 that also have more than 10,000 votes.
+  hints:
+    - Two numeric conditions must both hold.
+    - "`>` combined with AND."
+    - "`... WHERE \"rating\" > 4.0 AND \"votes\" > 10000;`"
+  solution: |
+    SELECT "title", "rating", "votes" FROM "longlist" WHERE "rating" > 4.0 AND "votes" > 10000;
+  explanation: Four books, as in the lecture (L917-918). The vote condition filters out ratings that rest on very few votes.
+  source:
+    - {file: lecture0, lines: "905-920", quote: "And now I'll see we're only down to a few books"}
+
+- id: M0-E12
+  title: Short reads
+  origin: source-demo
+  concepts: [C0.8]
+  difficulty: 1
+  skills: ["<"]
+  db: longlist0
+  kind: query
+  prompt: Return the `title` and `pages` of every book shorter than 300 pages.
+  hints:
+    - "Compare the `pages` column with a number."
+    - "`<` means strictly less than."
+    - "`... WHERE \"pages\" < 300;`"
+  solution: |
+    SELECT "title", "pages" FROM "longlist" WHERE "pages" < 300;
+  explanation: Page counts here are synthetic, so your rows differ from the lecture's screen. The query is the same.
+  source:
+    - {file: lecture0, lines: "923-930", quote: "I'll say WHERE \"pages\" is less than 300."}
+
+- id: M0-E13
+  title: The top 10, ties broken by votes
+  origin: source-demo
+  concepts: [C0.9]
+  difficulty: 2
+  skills: [ORDER BY, DESC, multiple sort keys, LIMIT]
+  db: longlist0
   kind: query
   ordered: true
   prompt: |
-    Return the **titles** of the books longlisted in 2023, sorted A→Z.
+    Return the `title`, `rating` and `votes` of the 10 best-rated books, best first.
+    When two books have the same rating, the one with **more votes** must come first.
   hints:
-    - Two jobs, filtering and sorting. Which clauses do each?
-    - "`WHERE \"year\" = 2023` plus `ORDER BY \"title\"`."
-    - "`SELECT \"title\" FROM \"books\" WHERE ... ORDER BY ...;`"
+    - ORDER BY sorts ascending by default, and you want the biggest first.
+    - "Add a second sort key after a comma. It only matters when the first key ties."
+    - "`ORDER BY \"rating\" DESC, \"votes\" DESC LIMIT 10`"
   solution: |
-    SELECT "title" FROM "books" WHERE "year" = 2023 ORDER BY "title";
+    SELECT "title", "rating", "votes" FROM "longlist"
+    ORDER BY "rating" DESC, "votes" DESC
+    LIMIT 10;
   explanation: |
-    Lecture 4 combines these two ideas: partitioning by year (L728) and ordering by title (L317-323).
+    As in the lecture, *The Eighth Life* (4.52) leads and *The Books of Jacob* (4.06) is 10th.
+    *When We Cease to Understand the World* and *Still Born* tie at 4.14, and votes decide their order.
   source:
-    - {file: lecture4, lines: "726-732", quote: "where, in this case, the year is 2023"}
-    - {file: lecture4, lines: "317-323", quote: "And now let me try to ORDER BY the title column"}
+    - {file: lecture0, lines: "1030-1076", quote: "But here, this book has more votes and so is higher in our order"}
 
-- id: M0-E05
-  title: Tally raw votes
-  origin: source-demo
-  concepts: [C0.4]
-  difficulty: 2
-  skills: [GROUP BY, COUNT]
-  db: votes
-  kind: query
-  prompt: |
-    Count the votes for each `title` in the raw `votes` table (no cleaning yet). Return the title and its count.
-    Look at the output. Why are there far more than four groups?
-  hints:
-    - You want one row per distinct title, with a count.
-    - "`GROUP BY \"title\"` with `COUNT(\"title\")`."
-    - "`SELECT \"title\", COUNT(\"title\") FROM \"votes\" GROUP BY \"title\";`"
-  solution: |
-    SELECT "title", COUNT("title") FROM "votes" GROUP BY "title";
-  explanation: |
-    GROUP BY compares text exactly. `'Farmers Working at Dawn'` and `'farmers working at dawn'` and `' Spring outing'` (leading space) are all different groups.
-    Fixing this is exercise M2-E13.
-  source:
-    - {file: lecture3, lines: "1229-1246", quote: "Why do I have so many?"}
-
-- id: M0-E06
-  title: Average rating per book
-  origin: source-demo
-  concepts: [C0.4]
-  difficulty: 2
-  skills: [AVG, ROUND, GROUP BY, AS]
-  db: longlist
-  kind: query
-  prompt: |
-    For each `book_id` in `ratings`, return the book id and its average rating rounded to 2 decimal places, as a column named `rating`.
-  hints:
-    - Many ratings per book become one row per book, so you need a grouping.
-    - "`AVG(...)` inside `ROUND(..., 2)`, then `AS \"rating\"`, then `GROUP BY \"book_id\"`."
-    - "`SELECT \"book_id\", ROUND(AVG(\"rating\"), 2) AS \"rating\" FROM \"ratings\" GROUP BY ...;`"
-  solution: |
-    SELECT "book_id", ROUND(AVG("rating"), 2) AS "rating"
-    FROM "ratings"
-    GROUP BY "book_id";
-  explanation: |
-    Book 1 has ratings 4, 3, 4, so its average is 3.67. Book 2 has 2 and 3, so 2.5. These are the two values on the lecture's slide.
-  source:
-    - {file: lecture4, lines: "423-433", quote: "I should see I have rounded ratings now"}
-    - {file: lecture4, lines: "374-386", quote: "3.67 book 1 and 2.5 for book 2"}
-
-- id: M0-E07
-  title: Look up an author's id
-  origin: source-demo
-  concepts: [C0.2]
+- id: M0-E14
+  title: Reverse alphabetical order
+  origin: source-question
+  concepts: [C0.9]
   difficulty: 1
-  skills: [WHERE]
-  db: longlist
+  skills: [ORDER BY on text]
+  db: longlist0
   kind: query
-  prompt: |
-    Return the `id` of the author named **Fernanda Melchor**.
+  ordered: true
+  prompt: Does DESC work on text? Return every title in reverse alphabetical order.
   hints:
-    - Authors live in the `authors` table.
-    - Filter by `name`.
-    - "`SELECT \"id\" FROM \"authors\" WHERE \"name\" = '...';`"
+    - ORDER BY works on text too.
+    - The default for text is A→Z.
+    - "`ORDER BY \"title\" DESC`"
   solution: |
-    SELECT "id" FROM "authors" WHERE "name" = 'Fernanda Melchor';
-  expected_known: [[24]]
-  explanation: The lecture finds id 24. This value is the input to the next two exercises.
+    SELECT "title" FROM "longlist" ORDER BY "title" DESC;
+  explanation: Yes. ASC sorts text A→Z and DESC sorts Z→A.
   source:
-    - {file: lecture4, lines: "131-136", quote: "So it seems Fernanda's ID is 24."}
+    - {file: lecture0, lines: "1097-1130", quote: "Will descend work on a string on an alphabetic basis?"}
 
-- id: M0-E08
-  title: Fernanda Melchor's books, with nested subqueries
+- id: M0-E15
+  title: A presentable average
   origin: source-demo
-  concepts: [C0.5]
+  concepts: [C0.10]
   difficulty: 2
-  skills: [subquery, IN]
-  db: longlist
+  skills: [AVG, ROUND, AS]
+  db: longlist0
   kind: query
-  prompt: |
-    Return the **titles** of every book written by Fernanda Melchor.
-    Use **nested subqueries** only (no JOIN) and do not hard-code her id.
+  prompt: Return a single value, the average rating rounded to 2 decimal places, in a column named `average rating`.
   hints:
-    - Work inside-out. First her id (authors), then her book ids (authored), then their titles (books).
-    - The middle step can return several rows, so the outer filter needs `IN (...)`.
-    - "`SELECT \"title\" FROM \"books\" WHERE \"id\" IN (SELECT \"book_id\" FROM \"authored\" WHERE \"author_id\" = (SELECT \"id\" FROM \"authors\" WHERE ...));`"
+    - An aggregate function turns many rows into one value.
+    - "`ROUND(x, 2)` keeps two decimals. `AS` renames the column (the name contains a space, so quote it)."
+    - "`SELECT ROUND(AVG(\"rating\"), 2) AS \"average rating\" FROM ...;`"
   solution: |
-    SELECT "title" FROM "books"
-    WHERE "id" IN (
-        SELECT "book_id" FROM "authored"
-        WHERE "author_id" = (
-            SELECT "id" FROM "authors"
-            WHERE "name" = 'Fernanda Melchor'
-        )
-    );
-  expected_known: [["Hurricane Season"], ["Paradais"]]
-  explanation: |
-    Three tables are needed because books and authors are linked through the junction table `authored`.
-    Lecture 4 then shows how a view collapses this to one line (M3-E02).
+    SELECT ROUND(AVG("rating"), 2) AS "average rating" FROM "longlist";
+  expected_known: [[3.75]]
+  explanation: "The unrounded value is 3.7537…, the same as in the lecture (L1166)."
   source:
-    - {file: lecture4, lines: "168-192", quote: "then find the titles associated with those book IDs themselves"}
-    - {file: lecture4, lines: "296-297", quote: "Fernanda has written Paradais and Hurricane Season"}
+    - {file: lecture0, lines: "1202-1215", quote: "just average rating as my column name"}
 
-- id: M0-E09
-  title: Author names next to book titles, with JOIN
+- id: M0-E16
+  title: Highest, lowest, total
   origin: source-demo
-  concepts: [C0.6]
-  difficulty: 2
-  skills: [JOIN]
-  db: longlist
+  concepts: [C0.10]
+  difficulty: 1
+  skills: [MAX, MIN, SUM]
+  db: longlist0
   kind: query
-  prompt: |
-    Return every author's **name** next to the **title** of each book they wrote (two columns, one row per authorship).
+  prompt: In one row, return the highest rating, the lowest rating, and the total number of votes.
   hints:
-    - "`authors` has names and `books` has titles. They connect through `authored`."
-    - Two JOINs, each matching a primary key with a foreign key.
-    - "`FROM \"authors\" JOIN \"authored\" ON \"authors\".\"id\" = \"authored\".\"author_id\" JOIN \"books\" ON ...`"
+    - You can put several aggregate functions in one SELECT.
+    - "`MAX`, `MIN`, `SUM`, separated by commas."
+    - "`SELECT MAX(\"rating\"), MIN(\"rating\"), SUM(\"votes\") FROM \"longlist\";`"
   solution: |
-    SELECT "name", "title" FROM "authors"
-    JOIN "authored" ON "authors"."id" = "authored"."author_id"
-    JOIN "books" ON "books"."id" = "authored"."book_id";
-  explanation: |
-    This is the query behind the `longlist` view in Lecture 4. Each JOIN lines up a primary key with the matching foreign key ("touching your fingertips together", L68).
+    SELECT MAX("rating"), MIN("rating"), SUM("votes") FROM "longlist";
+  expected_known: [[4.52, 3.05, 600864]]
+  explanation: The lecture also reports 4.52, 3.05 and "over 600,000" votes. On text, MAX and MIN compare alphabetically, not by length (L1300-1325).
   source:
-    - {file: lecture4, lines: "203-240", quote: "JOIN books ON books dot id equals, in this case, authored dot book_id"}
+    - {file: lecture0, lines: "1240-1269", quote: "And I'll see over 600,000 people offer to vote"}
 
-- id: M0-E10
-  title: Tom Hanks's movies
-  origin: source-demo
-  concepts: [C0.5]
+- id: M0-E17
+  title: COUNT(*) or COUNT(column)?
+  origin: source-question
+  concepts: [C0.10, C0.6]
   difficulty: 2
-  skills: [subquery, IN]
-  db: movies
+  skills: [COUNT, "NULL"]
+  db: longlist0
   kind: query
   prompt: |
-    Return the **titles** of all movies Tom Hanks starred in, using nested subqueries (people → stars → movies).
+    In one row, return the number of books and the number of `translator` values.
+    Before you run it, predict why the two numbers differ.
   hints:
-    - People and movies are many-to-many through `stars`.
-    - Find his `id` in people, then his `movie_id`s in stars, then their titles.
-    - "`SELECT \"title\" FROM \"movies\" WHERE \"id\" IN (SELECT \"movie_id\" FROM \"stars\" WHERE \"person_id\" = (SELECT ...));`"
+    - "`COUNT(*)` counts rows. What does `COUNT(column)` count?"
+    - It skips NULLs.
+    - "`SELECT COUNT(*), COUNT(\"translator\") FROM \"longlist\";`"
   solution: |
-    SELECT "title" FROM "movies" WHERE "id" IN (
-        SELECT "movie_id" FROM "stars" WHERE "person_id" = (
-            SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'
-        )
-    );
-  explanation: |
-    This exact query is the one Lecture 5 later speeds up with indexes (M4-E02, M4-E03).
+    SELECT COUNT(*), COUNT("translator") FROM "longlist";
+  expected_known: [[78, 76]]
+  explanation: There are 78 rows, but two translators are NULL (M0-E06). COUNT(column) counts only non-NULL values.
   source:
-    - {file: lecture5, lines: "364-394", quote: "I get back all of Tom Hanks's movies"}
+    - {file: lecture0, lines: "1330-1343", quote: "counts only those that"}
+
+- id: M0-E18
+  title: How many different publishers?
+  origin: source-question
+  concepts: [C0.11]
+  difficulty: 2
+  skills: [DISTINCT, COUNT]
+  db: longlist0
+  kind: query
+  prompt: How many **different** publishers appear in `longlist`? Return one number.
+  hints:
+    - "`COUNT(\"publisher\")` counts a publisher once per book. Is that what you want?"
+    - DISTINCT removes duplicates before counting.
+    - "`SELECT COUNT(DISTINCT \"publisher\") FROM \"longlist\";`"
+  solution: |
+    SELECT COUNT(DISTINCT "publisher") FROM "longlist";
+  explanation: |
+    The lecture's data gives 33 (L1401). This reconstruction gives 30, because three books' publishers were left unknown (NULL) rather than guessed.
+  source:
+    - {file: lecture0, lines: "1349-1401", quote: "And I'll see I have 33 distinct publishers."}

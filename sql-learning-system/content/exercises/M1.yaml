@@ -1,450 +1,531 @@
-# Module 1: Designing (sources/lecture2.txt)
+# Module 1: Relating (sources/lecture1.txt). Datasets: longlist (relational), sea_lions.
 - id: M1-E01
-  title: Spot the redundancy in Charlie's fare log
+  title: Read the ER diagram
   origin: source-question
-  concepts: [C1.2]
-  difficulty: 2
-  skills: [normalizing, design critique]
-  db: charlie
+  concepts: [C1.1, C1.2]
+  difficulty: 1
+  skills: [ER diagrams, crow's foot notation, cardinality]
+  db: longlist
   kind: selfcheck
   prompt: |
-    The `log` table is the first draft from Lecture 2: `id, name, station, action, fare, balance`.
-    Run `SELECT * FROM "log";`, then write down:
-    1. Which values are repeated, and why that is a problem.
-    2. Which **entities** are hiding in this one table.
-    3. Which tables you would create instead.
+    In crow's-foot notation, a circle means *zero*, a bar means *one*, and the three-pronged foot means *many*.
+    For the longlist diagram, write down:
+    1. Is author ↔ book one-to-one, one-to-many or many-to-many? Why?
+    2. Must a book have a translator? Must a translator have translated a book?
+    3. What kind of relationship is book → ratings?
   hints:
-    - Look at the `name` column. What if two different people are both called Charlie?
-    - Which columns describe a *person*, which describe a *station*, and which describe an *event*?
-    - "Entities → their own tables, each with its own id. The event table refers to them by id."
+    - Read each line in both directions: one A has … B, and one B has … A.
+    - "\"Zero to many\" (circle + crow's foot) means the relationship is optional on that side."
+    - Ratings belong to exactly one book, and a book can have many ratings.
   solution: |
-    -- Model answer (design, not executable):
-    -- 1. Names and station names repeat in every row. Two different "Charlie"s are indistinguishable,
-    --    and renaming a station means editing many rows.
-    -- 2. Entities: riders (people), stations, and the visits/swipes that relate them.
-    -- 3. riders(id, name), stations(id, name, line), visits(rider_id, station_id, ...)
-    --    -- later refined to cards / stations / swipes (exercise M1-E12).
-  explanation: |
-    Normalizing means putting each entity in its own table, and keeping every column of a table about that entity only.
+    -- Model answer:
+    -- 1. Many-to-many: an author can write many books (Olga Tokarczuk wrote three here) and a book can have several authors.
+    -- 2. A book has ZERO to many translators (some aren't translated); a translator translated at least one book.
+    -- 3. One-to-many: one book, many ratings, so book_id is stored in ratings as a foreign key.
+  explanation: These diagrams are how you communicate a design. Lecture 2 makes you draw your own (M2-E01).
   source:
-    - {file: lecture2, lines: "199-227", quote: "what redundancies or inefficiencies do you see here?"}
-    - {file: lecture2, lines: "245-263", quote: "So that is the process here of normalizing."}
+    - {file: lecture1, lines: "167-210", quote: "So here, we have what's called a crow's foot notation"}
 
 - id: M1-E02
-  title: Create the riders and stations tables
-  origin: source-demo
-  concepts: [C1.4, C1.5, C1.6]
-  difficulty: 1
-  skills: [CREATE TABLE, type affinity, PRIMARY KEY]
-  db: null
-  kind: modify
+  title: Why not use the ISBN as the primary key?
+  origin: source-question
+  concepts: [C1.3]
+  difficulty: 2
+  skills: [primary keys, foreign keys, key design]
+  db: longlist
+  kind: selfcheck
   prompt: |
-    In an empty database, create:
-    * `riders` with `id` INTEGER and `name` TEXT, where `id` is the primary key
-    * `stations` with `id` INTEGER, `name` TEXT and `line` TEXT, where `id` is the primary key
-
-    Use the table-constraint style from the lecture: `PRIMARY KEY("id")` after the columns.
+    Every book has a unique ISBN such as `978-1-80427-…`. The lecturer asks what goes wrong if you use it as the primary key everywhere,
+    including as the foreign key in other tables. Give two problems, and the alternative.
   hints:
-    - One `CREATE TABLE name (...);` per table, columns separated by commas.
-    - Each column is `"name" AFFINITY`. Put the constraint `PRIMARY KEY("id")` after the last column, preceded by a comma.
-    - "`CREATE TABLE \"riders\" (\"id\" INTEGER, \"name\" TEXT, PRIMARY KEY(\"id\"));`, then the same shape for stations."
+    - The key is copied into every table that references it, so think about size.
+    - What happens to a leading 0 when text becomes a number?
+    - The alternative is a key the database makes up for you.
   solution: |
-    CREATE TABLE "riders" (
-        "id" INTEGER,
-        "name" TEXT,
-        PRIMARY KEY("id")
-    );
-    CREATE TABLE "stations" (
-        "id" INTEGER,
-        "name" TEXT,
-        "line" TEXT,
-        PRIMARY KEY("id")
-    );
-  check:
-    - SELECT "name", upper("type"), "pk" FROM pragma_table_info('riders')
-    - SELECT "name", upper("type"), "pk" FROM pragma_table_info('stations')
-  explanation: |
-    Riders and stations are separate entities, so they get separate tables, each with its own primary key.
-    The same id value (1, 2, 3) can appear in both tables without any conflict (L319-326).
+    -- Model answer:
+    -- 1. Size: as text it is ~17 bytes, repeated in every referencing row (e.g. thousands of ratings).
+    -- 2. Stored as a number instead, an ISBN that starts with 0 loses that 0, so it no longer identifies the book.
+    -- Alternative: a surrogate integer id (1, 2, 3 …) that is unique and never reused for another row.
+    --   books.id is then the PRIMARY key; ratings.book_id and authored.book_id are FOREIGN keys to it.
+  explanation: "\"It doesn't quite matter what number we choose so long as this number uniquely identifies the book\" (L367-369)."
   source:
-    - {file: lecture2, lines: "672-695", quote: "I could say, ID has the integer type affinity."}
-    - {file: lecture2, lines: "800-811", quote: "and then say, primary key ID, just like this"}
+    - {file: lecture1, lines: "340-380", quote: "And we can actually construct our very own primary key."}
 
 - id: M1-E03
-  title: The visits junction table
-  origin: source-demo
-  concepts: [C1.3, C1.6]
-  difficulty: 2
-  skills: [junction table, FOREIGN KEY]
-  db: null
-  kind: modify
-  setup: |
-    CREATE TABLE "riders" ("id" INTEGER, "name" TEXT, PRIMARY KEY("id"));
-    CREATE TABLE "stations" ("id" INTEGER, "name" TEXT, "line" TEXT, PRIMARY KEY("id"));
-    INSERT INTO "riders" VALUES (1, 'Charlie'), (2, 'Alice');
-    INSERT INTO "stations" VALUES (1, 'Harvard', 'red'), (2, 'Kendall/MIT', 'red');
+  title: What does (23, 1) in authored mean?
+  origin: source-question
+  concepts: [C1.3, C1.4]
+  difficulty: 1
+  skills: [junction table, subquery]
+  db: longlist
+  kind: query
   prompt: |
-    Riders and stations are many-to-many. Create the junction table `visits(rider_id INTEGER, station_id INTEGER)`
-    with two foreign keys: `rider_id` → `riders(id)` and `station_id` → `stations(id)`.
+    The `authored` table contains the row `author_id = 23, book_id = 1`.
+    Return the **name** of that author and the **title** of that book, as two one-row queries joined with `UNION ALL`, or just two queries (the checker reads the last one, the title).
   hints:
-    - A junction table holds pairs of ids. Each column references another table's primary key.
-    - "Table constraint syntax: `FOREIGN KEY(\"col\") REFERENCES \"table\"(\"id\")`."
-    - "`CREATE TABLE \"visits\" (\"rider_id\" INTEGER, \"station_id\" INTEGER, FOREIGN KEY(\"rider_id\") REFERENCES \"riders\"(\"id\"), FOREIGN KEY(...) REFERENCES ...);`"
+    - "`authored` holds only ids. Names live in `authors`, and titles live in `books`."
+    - Look up id 23 in authors and id 1 in books.
+    - "`SELECT \"title\" FROM \"books\" WHERE \"id\" = 1;`"
   solution: |
-    CREATE TABLE "visits" (
-        "rider_id" INTEGER,
-        "station_id" INTEGER,
-        FOREIGN KEY("rider_id") REFERENCES "riders"("id"),
-        FOREIGN KEY("station_id") REFERENCES "stations"("id")
-    );
-  probes:
-    - INSERT INTO "visits" VALUES (1, 1)
-    - INSERT INTO "visits" VALUES (1, 1)
-    - INSERT INTO "visits" VALUES (99, 1)
-    - INSERT INTO "visits" VALUES (2, 42)
-  check:
-    - SELECT "table", "from", "to" FROM pragma_foreign_key_list('visits')
-    - SELECT COUNT(*) FROM "visits"
-  explanation: |
-    With foreign keys on, `(99, 1)` is rejected because rider 99 doesn't exist. Repeat visits `(1, 1)` are allowed.
-    Note that SQLite only enforces foreign keys after `PRAGMA foreign_keys = ON;`, which this trainer always runs (see errata #4).
+    SELECT "name" FROM "authors" WHERE "id" = 23;
+    SELECT "title" FROM "books" WHERE "id" = 1;
+  expected_known: [["Boulder"]]
+  explanation: Author 23 is Eva Baltasar and book 1 is *Boulder*, so the row says "Eva Baltasar wrote Boulder".
   source:
-    - {file: lecture2, lines: "425-444", quote: "So I'll call this table visits."}
-    - {file: lecture2, lines: "848-865", quote: "The foreign key of this table is rider ID"}
+    - {file: lecture1, lines: "393-412", quote: "has authored the book 1"}
 
 - id: M1-E04
-  title: Why a composite primary key is wrong for visits
+  title: Books from Fitzcarraldo Editions
   origin: source-question
-  concepts: [C1.6]
+  concepts: [C1.4]
   difficulty: 2
-  skills: [composite PRIMARY KEY, constraint failure]
-  db: null
-  kind: error
-  expect_error: UNIQUE constraint failed
-  setup: |
-    CREATE TABLE "visits" ("rider_id" INTEGER, "station_id" INTEGER, PRIMARY KEY("rider_id", "station_id"));
-    INSERT INTO "visits" VALUES (1, 1);
-  prompt: |
-    Here `visits` has the **joint primary key** `(rider_id, station_id)`, and rider 1 has already visited station 1 once.
-    Write the INSERT that records rider 1 visiting station 1 **again**, and observe what happens.
+  skills: [subquery]
+  db: longlist
+  kind: query
+  prompt: Return the titles published by **Fitzcarraldo Editions**. `books` stores only a `publisher_id`. Don't hard-code it.
   hints:
-    - A primary key must be unique, so what makes a row unique here?
-    - Insert the exact same pair again.
-    - "`INSERT INTO \"visits\" VALUES (1, 1);`"
+    - Two questions. What is the publisher's id? Which books have that id?
+    - Put the first query in parentheses inside the second.
+    - "`SELECT \"title\" FROM \"books\" WHERE \"publisher_id\" = (SELECT \"id\" FROM \"publishers\" WHERE \"publisher\" = '...');`"
   solution: |
-    INSERT INTO "visits" VALUES (1, 1);
+    SELECT "title" FROM "books" WHERE "publisher_id" = (
+        SELECT "id" FROM "publishers" WHERE "publisher" = 'Fitzcarraldo Editions'
+    );
   explanation: |
-    A composite PK forbids repeating a (rider, station) pair, but real riders visit the same station many times.
-    That is why the lecture prefers its own `id` primary key (or the implicit `rowid`) for visits.
+    The inner query runs first and returns 5, the id the lecture finds (L521). Hard-coding the 5 works, but the query breaks if the id ever changes.
   source:
-    - {file: lecture2, lines: "816-834", quote: "So maybe not the best design for this table"}
+    - {file: lecture1, lines: "553-584", quote: "So SQL supports this idea of writing a subquery"}
 
 - id: M1-E05
-  title: Fares in cents
-  origin: generated
-  concepts: [C1.5]
-  difficulty: 2
-  skills: [REAL vs INTEGER, CAST, ROUND, SUM]
-  db: charlie
+  title: Books from MacLehose Press
+  origin: source-demo
+  concepts: [C1.4]
+  difficulty: 1
+  skills: [subquery]
+  db: longlist
   kind: query
-  prompt: |
-    The `log.fare` column stores dollars as REAL values (0.10, 0.05, ...). Floating-point values aren't exact.
-    Return a single number: the **total of all fares in whole cents**, as an integer.
+  prompt: Same pattern. Return the titles published by **MacLehose Press**.
   hints:
-    - Convert each fare to cents *before* adding, so you add exact integers.
-    - "`fare * 100` can come out as 9.999999...; `ROUND` it, then `CAST(... AS INTEGER)`."
-    - "`SELECT SUM(CAST(ROUND(\"fare\" * 100) AS INTEGER)) FROM \"log\";`"
+    - The table is `publishers`, plural. The lecturer's first try failed with "no such table: publisher".
+    - Find the id first, then the titles.
+    - "`... WHERE \"publisher_id\" = (SELECT \"id\" FROM \"publishers\" WHERE \"publisher\" = 'MacLehose Press');`"
   solution: |
-    SELECT SUM(CAST(ROUND("fare" * 100) AS INTEGER)) FROM "log";
-  expected_known: [[50]]
-  explanation: |
-    This is the lecture's integer-vs-real trade-off for fares, made concrete. Whole cents in an INTEGER column are exact and easy to add up.
-    REAL dollars risk values like 0.10000056789 (L540-547).
+    SELECT "title" FROM "books" WHERE "publisher_id" = (
+        SELECT "id" FROM "publishers" WHERE "publisher" = 'MacLehose Press'
+    );
+  explanation: MacLehose Press has id 12, as in the lecture (L645).
   source:
-    - {file: lecture2, lines: "540-571", quote: "it can get very wonky if I really need that kind of precision"}
+    - {file: lecture1, lines: "640-680", quote: "I do see an id of 12."}
 
 - id: M1-E06
-  title: Watch type affinity convert values
+  title: Average rating of In Memory of Memory
   origin: source-demo
-  concepts: [C1.5]
+  concepts: [C1.4]
   difficulty: 2
-  skills: [type affinity, typeof]
-  db: null
+  skills: [subquery, AVG]
+  db: longlist
   kind: query
-  prompt: |
-    Recreate the lecture's demo:
-    1. Create `fares_text("amount" TEXT)` and `fares_int("amount" INTEGER)`.
-    2. Insert the **integer** `10` into `fares_text`, and the **text** `'25'` into `fares_int`.
-    3. Finish with one query returning two rows: `typeof("amount")` from each table, `fares_text` first (use `UNION ALL`).
+  prompt: Return the average of the individual ratings of the book *In Memory of Memory* (one number). Find its id with a subquery.
   hints:
-    - The column's affinity, not the literal you typed, decides how the value is stored when conversion is possible.
-    - "`typeof(x)` returns 'integer', 'text', 'real', 'blob' or 'null'."
-    - "`SELECT typeof(\"amount\") FROM \"fares_text\" UNION ALL SELECT typeof(\"amount\") FROM \"fares_int\";`"
+    - "`ratings` has one row per rating, with a `book_id`."
+    - The subquery finds the book's id (33 in the lecture).
+    - "`SELECT AVG(\"rating\") FROM \"ratings\" WHERE \"book_id\" = (SELECT \"id\" FROM \"books\" WHERE \"title\" = 'In Memory of Memory');`"
   solution: |
-    CREATE TABLE "fares_text" ("amount" TEXT);
-    CREATE TABLE "fares_int" ("amount" INTEGER);
-    INSERT INTO "fares_text" VALUES (10);
-    INSERT INTO "fares_int" VALUES ('25');
-    SELECT typeof("amount") FROM "fares_text"
-    UNION ALL
-    SELECT typeof("amount") FROM "fares_int";
-  ordered: true
-  expected_known: [["text"], ["integer"]]
-  explanation: |
-    Storage classes belong to **values**, and affinities belong to **columns**. A column converts what you insert to its preferred class when it can.
-    A value that can't be converted (e.g. `'red line'` into INTEGER) is stored as it is.
+    SELECT AVG("rating") FROM "ratings" WHERE "book_id" = (
+        SELECT "id" FROM "books" WHERE "title" = 'In Memory of Memory'
+    );
+  explanation: The ratings here are synthetic, but the book id (33) is the lecture's.
   source:
-    - {file: lecture2, lines: "613-638", quote: "I'll get back not 10, the text, but 10 the integer"}
+    - {file: lecture1, lines: "682-731", quote: "And we'll see 33."}
 
 - id: M1-E07
-  title: Stations with NOT NULL and UNIQUE
+  title: Who wrote The Birthday Party?
+  origin: source-demo
+  concepts: [C1.4]
+  difficulty: 2
+  skills: [nested subqueries, many-to-many]
+  db: longlist
+  kind: query
+  prompt: Return the `name` of the author of *The Birthday Party*, crossing books → authored → authors with nested subqueries.
+  hints:
+    - Start from what you know (the title) and walk to what you want (the name).
+    - "Three steps: book id → author_id (in authored) → name."
+    - "`SELECT \"name\" FROM \"authors\" WHERE \"id\" = (SELECT \"author_id\" FROM \"authored\" WHERE \"book_id\" = (SELECT \"id\" FROM \"books\" WHERE ...));`"
+  solution: |
+    SELECT "name" FROM "authors" WHERE "id" = (
+        SELECT "author_id" FROM "authored" WHERE "book_id" = (
+            SELECT "id" FROM "books" WHERE "title" = 'The Birthday Party'
+        )
+    );
+  expected_known: [["Laurent Mauvignier"]]
+  explanation: The ids match the lecture's walk-through. The book is 8, and the author is 44, Laurent Mauvignier.
+  source:
+    - {file: lecture1, lines: "791-835", quote: "We see our friend Laurent Mauvignier."}
+
+- id: M1-E08
+  title: Fernanda Melchor's books, with IN
+  origin: source-demo
+  concepts: [C1.4, C1.5]
+  difficulty: 2
+  skills: [subquery, IN]
+  db: longlist
+  kind: query
+  prompt: Return the titles of every book written by Fernanda Melchor, using nested subqueries (no JOIN and no hard-coded ids).
+  hints:
+    - The middle step returns *two* book ids.
+    - "`= (subquery)` is for exactly one value. For a list, use `IN (subquery)`."
+    - "`SELECT \"title\" FROM \"books\" WHERE \"id\" IN (SELECT \"book_id\" FROM \"authored\" WHERE \"author_id\" = (SELECT \"id\" FROM \"authors\" WHERE ...));`"
+  solution: |
+    SELECT "title" FROM "books"
+    WHERE "id" IN (
+        SELECT "book_id" FROM "authored"
+        WHERE "author_id" = (
+            SELECT "id" FROM "authors"
+            WHERE "name" = 'Fernanda Melchor'
+        )
+    );
+  expected_known: [["Hurricane Season"], ["Paradais"]]
+  explanation: "Rule of thumb from the lecture: use `=` when you know there is one id, and `IN` when there may be several (L975-984). Lecture 4 later collapses this into one line with a view (M4-E02)."
+  source:
+    - {file: lecture1, lines: "896-941", quote: "And now I should see, finally, Fernanda's two books."}
+
+- id: M1-E09
+  title: Join sea lions to their migrations
+  origin: source-demo
+  concepts: [C1.6]
+  difficulty: 2
+  skills: [JOIN ... ON]
+  db: sea_lions
+  kind: query
+  prompt: Return every column of `sea_lions` joined with `migrations`, matching on their `id` columns.
+  hints:
+    - JOIN puts a row of one table next to the matching row of another.
+    - "`ON` says which columns must be equal."
+    - "`SELECT * FROM \"sea_lions\" JOIN \"migrations\" ON \"migrations\".\"id\" = \"sea_lions\".\"id\";`"
+  solution: |
+    SELECT * FROM "sea_lions"
+    JOIN "migrations" ON "migrations"."id" = "sea_lions"."id";
+  explanation: |
+    A plain JOIN is an INNER JOIN. Jolee (no migration) and the two migrations of untracked sea lions disappear, because only matching rows survive.
+  source:
+    - {file: lecture1, lines: "1108-1162", quote: "So, this is our example, then, of an INNER JOIN."}
+
+- id: M1-E10
+  title: Keep every tracked sea lion (LEFT JOIN)
   origin: source-demo
   concepts: [C1.7]
   difficulty: 2
-  skills: [NOT NULL, UNIQUE]
-  db: null
-  kind: modify
-  prompt: |
-    Create `stations(id, name, line)` where:
-    * `id` is an INTEGER primary key
-    * `name` is TEXT, required and unique
-    * `line` is TEXT and required, but **not** unique (many stations share a line)
+  skills: [LEFT JOIN]
+  db: sea_lions
+  kind: query
+  prompt: Join the same tables but keep **every sea lion**, including Jolee, who has no migration yet.
   hints:
-    - Column constraints go right after the column's affinity.
-    - "`NOT NULL` makes a value required; `UNIQUE` forbids repeats."
-    - "`\"name\" TEXT NOT NULL UNIQUE, \"line\" TEXT NOT NULL, PRIMARY KEY(\"id\")`"
+    - An OUTER join keeps unmatched rows and fills the gaps with NULL.
+    - The table written first (before the JOIN keyword) is the "left" one.
+    - "`... FROM \"sea_lions\" LEFT JOIN \"migrations\" ON ...;`"
   solution: |
-    CREATE TABLE "stations" (
-        "id" INTEGER,
-        "name" TEXT NOT NULL UNIQUE,
-        "line" TEXT NOT NULL,
-        PRIMARY KEY("id")
-    );
-  probes:
-    - INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red')
-    - INSERT INTO "stations" ("name", "line") VALUES ('Kendall/MIT', 'red')
-    - INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red')
-    - INSERT INTO "stations" ("name", "line") VALUES (NULL, 'blue')
-    - INSERT INTO "stations" ("name", "line") VALUES ('Aquarium', NULL)
-  check:
-    - SELECT "name", "line" FROM "stations"
-  explanation: |
-    There is no need to add NOT NULL or UNIQUE to `id`, because `PRIMARY KEY` already implies both (L958-966, L1016-1022).
+    SELECT * FROM "sea_lions"
+    LEFT JOIN "migrations" ON "migrations"."id" = "sea_lions"."id";
+  explanation: "Jolee's distance and days come back as NULL. RIGHT JOIN keeps every row of the right table instead (L1252-1272)."
   source:
-    - {file: lecture2, lines: "940-1005", quote: "So I'll say not null and unique."}
-
-- id: M1-E08
-  title: The swipes table with CHECK and DEFAULT
-  origin: source-demo
-  concepts: [C1.6, C1.7]
-  difficulty: 3
-  skills: [CHECK, DEFAULT, CURRENT_TIMESTAMP, FOREIGN KEY]
-  db: null
-  kind: modify
-  setup: |
-    CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));
-    CREATE TABLE "stations" ("id" INTEGER, "name" TEXT NOT NULL UNIQUE, "line" TEXT NOT NULL, PRIMARY KEY("id"));
-    INSERT INTO "cards" VALUES (1);
-    INSERT INTO "stations" VALUES (1, 'Harvard', 'red');
-  prompt: |
-    Create `swipes` exactly as designed in Lecture 2:
-    * `id` INTEGER primary key; `card_id` and `station_id` INTEGER foreign keys to `cards(id)` / `stations(id)`
-    * `type` TEXT, required, only `'enter'`, `'exit'` or `'deposit'`
-    * `datetime` NUMERIC, required, defaulting to the current timestamp
-    * `amount` NUMERIC, required, never 0
-  hints:
-    - "Restricting a column to a list of values: `CHECK(\"type\" IN (...))`."
-    - "`DEFAULT CURRENT_TIMESTAMP`; `CHECK(\"amount\" != 0)`."
-    - "`\"type\" TEXT NOT NULL CHECK(\"type\" IN ('enter', 'exit', 'deposit')), \"datetime\" NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP, ...` then PRIMARY KEY and two FOREIGN KEYs."
-  solution: |
-    CREATE TABLE "swipes" (
-        "id" INTEGER,
-        "card_id" INTEGER,
-        "station_id" INTEGER,
-        "type" TEXT NOT NULL CHECK("type" IN ('enter', 'exit', 'deposit')),
-        "datetime" NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "amount" NUMERIC NOT NULL CHECK("amount" != 0),
-        PRIMARY KEY("id"),
-        FOREIGN KEY("card_id") REFERENCES "cards"("id"),
-        FOREIGN KEY("station_id") REFERENCES "stations"("id")
-    );
-  probes:
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'enter', -2.40)
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'teleport', -2.40)
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'deposit', 0)
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, NULL, 5)
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (7, 1, 'enter', -2.40)
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'deposit', NULL)
-  check:
-    - SELECT "type", "amount", "datetime" IS NOT NULL FROM "swipes"
-  explanation: |
-    Constraints are guardrails. Each rejected probe above is a bad row that could never get into this table.
-  source:
-    - {file: lecture2, lines: "1241-1290", quote: "I could say, maybe the type is in enter exit or is in deposit."}
-
-- id: M1-E09
-  title: Rename visits to swipes and add a column
-  origin: source-demo
-  concepts: [C1.8]
-  difficulty: 1
-  skills: [ALTER TABLE RENAME TO, ADD COLUMN]
-  db: null
-  kind: modify
-  setup: |
-    CREATE TABLE "visits" ("rider_id" INTEGER, "station_id" INTEGER);
-    INSERT INTO "visits" VALUES (1, 1), (2, 1);
-  prompt: |
-    Without dropping any data:
-    1. Rename table `visits` to `swipes`.
-    2. Add a column `type` with TEXT affinity to `swipes`.
-  hints:
-    - Use `ALTER TABLE`, not `DROP TABLE`, so the rows survive.
-    - "`ALTER TABLE ... RENAME TO ...;` then `ALTER TABLE ... ADD COLUMN ... TEXT;`"
-    - "`ALTER TABLE \"visits\" RENAME TO \"swipes\"; ALTER TABLE \"swipes\" ADD COLUMN \"type\" TEXT;`"
-  solution: |
-    ALTER TABLE "visits" RENAME TO "swipes";
-    ALTER TABLE "swipes" ADD COLUMN "type" TEXT;
-  check:
-    - SELECT "name" FROM sqlite_master WHERE "type" = 'table' ORDER BY "name"
-    - SELECT "name", upper("type") FROM pragma_table_info('swipes')
-    - SELECT COUNT(*) FROM "swipes"
-  explanation: Existing rows get NULL in the new column, or the column's DEFAULT if one is declared.
-  source:
-    - {file: lecture2, lines: "1128-1151", quote: "alter table, as we saw before, visits"}
-
-- id: M1-E10
-  title: Fix a typo in a column name
-  origin: source-demo
-  concepts: [C1.8]
-  difficulty: 1
-  skills: [RENAME COLUMN]
-  db: null
-  kind: modify
-  setup: |
-    CREATE TABLE "swipes" ("rider_id" INTEGER, "station_id" INTEGER, "ttpe" TEXT);
-  prompt: |
-    Like the lecturer, you made a typo: the column is called `ttpe`. Rename it to `type`.
-  hints:
-    - "`ALTER TABLE` has a sub-command for renaming one column."
-    - "`RENAME COLUMN old TO new`"
-    - "`ALTER TABLE \"swipes\" RENAME COLUMN \"ttpe\" TO \"type\";`"
-  solution: |
-    ALTER TABLE "swipes" RENAME COLUMN "ttpe" TO "type";
-  check:
-    - SELECT "name" FROM pragma_table_info('swipes')
-  explanation: ""
-  source:
-    - {file: lecture2, lines: "1153-1166", quote: "rename the column, ttpe to type, spelled correctly now"}
+    - {file: lecture1, lines: "1224-1251", quote: "Where we left off Jolee earlier, we've now"}
 
 - id: M1-E11
-  title: Drop a column you no longer want
+  title: Keep everything (FULL JOIN)
+  origin: source-demo
+  concepts: [C1.7]
+  difficulty: 2
+  skills: [FULL JOIN]
+  db: sea_lions
+  kind: query
+  prompt: Join the tables so that **both** unmatched sea lions and unmatched migrations appear.
+  hints:
+    - LEFT keeps the left side and RIGHT keeps the right side. What keeps both?
+    - Missing values on either side become NULL.
+    - "`... FROM \"sea_lions\" FULL JOIN \"migrations\" ON ...;`"
+  solution: |
+    SELECT * FROM "sea_lions"
+    FULL JOIN "migrations" ON "migrations"."id" = "sea_lions"."id";
+  explanation: RIGHT and FULL JOIN need SQLite 3.39 (2022) or newer. Older versions report a syntax error.
+  source:
+    - {file: lecture1, lines: "1274-1288", quote: "A FULL JOIN, though, allows us to see the entirety of both tables"}
+
+- id: M1-E12
+  title: Let the column names decide (NATURAL JOIN)
   origin: source-demo
   concepts: [C1.8]
   difficulty: 1
-  skills: [DROP COLUMN]
-  db: null
-  kind: modify
-  setup: |
-    CREATE TABLE "swipes" ("rider_id" INTEGER, "station_id" INTEGER, "type" TEXT);
-  prompt: You changed your mind. Remove the `type` column from `swipes`.
+  skills: [NATURAL JOIN]
+  db: sea_lions
+  kind: query
+  prompt: Join `sea_lions` and `migrations` without writing an ON clause. Notice that `id` appears only once in the result.
   hints:
-    - Removing one column is still an `ALTER TABLE` job.
-    - "`ALTER TABLE ... DROP COLUMN ...;`"
-    - "`ALTER TABLE \"swipes\" DROP COLUMN \"type\";`"
+    - A NATURAL JOIN matches every column whose name appears in both tables.
+    - Both tables have a column named `id`.
+    - "`SELECT * FROM \"sea_lions\" NATURAL JOIN \"migrations\";`"
   solution: |
-    ALTER TABLE "swipes" DROP COLUMN "type";
-  check:
-    - SELECT "name" FROM pragma_table_info('swipes')
-  explanation: SQLite has supported DROP COLUMN since version 3.35 (2021).
-  source:
-    - {file: lecture2, lines: "1168-1176", quote: "drop column type, semicolon"}
-
-- id: M1-E12
-  title: "Capstone: the full CharlieCard schema"
-  origin: generated
-  concepts: [C1.2, C1.3, C1.4, C1.6, C1.7]
-  difficulty: 4
-  skills: [schema design]
-  db: null
-  kind: modify
-  prompt: |
-    From a blank database, write the complete final schema of Lecture 2: `cards`, `stations`, `swipes`.
-    Use the same constraints the lecture ends with: unique, required station names; a required line;
-    the swipe-type list; the timestamp default; a non-zero amount; and all keys.
-    (This combines M1-E07 and M1-E08, so try it without looking.)
-  hints:
-    - Create the tables that are referenced (`cards`, `stations`) before the table that references them.
-    - "`cards` has only an `id`. `stations` and `swipes` are as in the previous exercises."
-    - Check your answer against `database/mbta/schema.sql`.
-  solution: |
-    CREATE TABLE "cards" (
-        "id" INTEGER,
-        PRIMARY KEY("id")
-    );
-    CREATE TABLE "stations" (
-        "id" INTEGER,
-        "name" TEXT NOT NULL UNIQUE,
-        "line" TEXT NOT NULL,
-        PRIMARY KEY("id")
-    );
-    CREATE TABLE "swipes" (
-        "id" INTEGER,
-        "card_id" INTEGER,
-        "station_id" INTEGER,
-        "type" TEXT NOT NULL CHECK("type" IN ('enter', 'exit', 'deposit')),
-        "datetime" NUMERIC NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "amount" NUMERIC NOT NULL CHECK("amount" != 0),
-        PRIMARY KEY("id"),
-        FOREIGN KEY("card_id") REFERENCES "cards"("id"),
-        FOREIGN KEY("station_id") REFERENCES "stations"("id")
-    );
-  probes:
-    - INSERT INTO "cards" ("id") VALUES (1)
-    - INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red')
-    - INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red')
-    - INSERT INTO "stations" ("name") VALUES ('Alewife')
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'enter', -2.40)
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (2, 1, 'enter', -2.40)
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'board', -2.40)
-    - INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'exit', 0)
-  check:
-    - SELECT "name" FROM sqlite_master WHERE "type" = 'table' ORDER BY "name"
-    - SELECT COUNT(*) FROM "swipes" WHERE "datetime" IS NOT NULL
+    SELECT * FROM "sea_lions" NATURAL JOIN "migrations";
   explanation: |
-    Riders were dropped from the design because the MBTA tracks CharlieCards, not people (L1033-1061).
+    It is convenient but fragile. If both tables later gain another same-named column (e.g. `name`), the join silently changes meaning.
   source:
-    - {file: lecture2, lines: "1189-1230", quote: "So let's now say visits becomes swipes."}
-    - {file: lecture2, lines: "1299-1305", quote: "So let me say that this is now a card ID"}
+    - {file: lecture1, lines: "1380-1399", quote: "Notice, too, we don't get a duplicate id column."}
 
 - id: M1-E13
-  title: "Lab: rebuild a database from schema.sql"
+  title: Author names next to titles, with JOIN
   origin: source-demo
-  concepts: [C1.1]
-  difficulty: 1
-  skills: [sqlite3 shell, .read, .schema]
-  db: null
-  kind: selfcheck
-  prompt: |
-    In a terminal (not in the browser):
-    1. Save your M1-E12 answer as `schema.sql`.
-    2. `sqlite3 mbta.db`, then `.read schema.sql`, then `.schema`, then `.quit`.
-    3. Change something in `schema.sql` (e.g. add a column), then `DROP TABLE` the tables and `.read` the file again.
-
-    Compare with `database/mbta/schema.sql`, which is exactly this workflow, and with `python3 tools/build_db.py`, which rebuilds every practice database from such files.
+  concepts: [C1.6]
+  difficulty: 2
+  skills: [JOIN, many-to-many]
+  db: longlist
+  kind: query
+  prompt: Return every author's **name** next to the **title** of each book they wrote (one row per authorship).
   hints:
-    - Dot-commands belong to the sqlite3 shell, not to SQL. They take no semicolon.
-    - "`.read FILE` runs every statement in FILE; `.schema [TABLE]` prints the CREATE statements."
-    - "Order matters when re-running: drop referencing tables (swipes) before referenced ones (cards, stations)."
+    - The two entities are connected through `authored`.
+    - Two JOINs, each matching a primary key with a foreign key.
+    - "`FROM \"authors\" JOIN \"authored\" ON \"authors\".\"id\" = \"authored\".\"author_id\" JOIN \"books\" ON ...`"
   solution: |
-    -- shell session
-    sqlite3 mbta.db
-    .read schema.sql
-    .schema
-    .quit
-    -- after editing schema.sql:
-    DROP TABLE "swipes"; DROP TABLE "stations"; DROP TABLE "cards";
-    .read schema.sql
-  explanation: A schema file you can re-run is documentation, a backup, and an undo button in one.
+    SELECT "name", "title" FROM "authors"
+    JOIN "authored" ON "authors"."id" = "authored"."author_id"
+    JOIN "books" ON "books"."id" = "authored"."book_id";
+  explanation: This is the query behind the `longlist` view in Lecture 4 (M4-E01).
   source:
-    - {file: lecture2, lines: "659-720", quote: "I could say dot read schema.sql"}
+    - {file: lecture1, lines: "1025-1032", quote: "And this one is going to be called a JOIN."}
+    - {file: lecture4, lines: "203-240", quote: "JOIN books ON books dot id equals, in this case, authored dot book_id"}
 
+- id: M1-E14
+  title: Authors and translators in one list, labelled
+  origin: source-demo
+  concepts: [C1.9]
+  difficulty: 2
+  skills: [UNION, constant column, AS]
+  db: longlist
+  kind: query
+  prompt: |
+    Return one list of everyone who is an author or a translator, with two columns, `profession` ('author' or 'translator') and `name`.
+  hints:
+    - Two queries with the same number of columns can be stacked with a set operator.
+    - "A literal `'author' AS \"profession\"` adds a constant column."
+    - "`SELECT 'author' AS \"profession\", \"name\" FROM \"authors\" UNION SELECT 'translator' AS \"profession\", \"name\" FROM \"translators\";`"
+  solution: |
+    SELECT 'author' AS "profession", "name" FROM "authors"
+    UNION
+    SELECT 'translator' AS "profession", "name" FROM "translators";
+  explanation: UNION removes duplicate rows (UNION ALL keeps them). Ngũgĩ appears twice here because his two rows differ in `profession`.
+  source:
+    - {file: lecture1, lines: "1504-1528", quote: "So I've combined these two sets into one that works for me here."}
+
+- id: M1-E15
+  title: Who is both an author and a translator?
+  origin: source-demo
+  concepts: [C1.9]
+  difficulty: 1
+  skills: [INTERSECT]
+  db: longlist
+  kind: query
+  prompt: Return the names that appear in **both** `authors` and `translators`.
+  hints:
+    - This is the overlap of two sets.
+    - "`INTERSECT` between two SELECTs."
+    - "`SELECT \"name\" FROM \"authors\" INTERSECT SELECT \"name\" FROM \"translators\";`"
+  solution: |
+    SELECT "name" FROM "authors"
+    INTERSECT
+    SELECT "name" FROM "translators";
+  expected_known: [["Ngũgĩ wa Thiong'o"]]
+  explanation: Ngũgĩ translated his own book into English (L1540-1542).
+  source:
+    - {file: lecture1, lines: "1530-1542", quote: "who is both an author and a translator"}
+
+- id: M1-E16
+  title: Authors who are only authors
+  origin: source-demo
+  concepts: [C1.9]
+  difficulty: 1
+  skills: [EXCEPT]
+  db: longlist
+  kind: query
+  prompt: Return the names of authors who are **not** also translators.
+  hints:
+    - Take one set and remove another.
+    - "`EXCEPT`. The order of the two queries matters."
+    - "`SELECT \"name\" FROM \"authors\" EXCEPT SELECT \"name\" FROM \"translators\";`"
+  solution: |
+    SELECT "name" FROM "authors"
+    EXCEPT
+    SELECT "name" FROM "translators";
+  explanation: Everyone except Ngũgĩ. `translators EXCEPT authors` gives the translators who are only translators.
+  source:
+    - {file: lecture1, lines: "1543-1556", quote: "I'll say EXCEPT, in this case, SELECT \"name\""}
+
+- id: M1-E17
+  title: "Finish the lecture's query: the book Hughes and Jull Costa share"
+  origin: source-assigned
+  concepts: [C1.9, C1.4]
+  difficulty: 3
+  skills: [INTERSECT, subquery, IN]
+  db: longlist
+  kind: query
+  prompt: |
+    The lecture finds the **book_id** that Sophie Hughes and Margaret Jull Costa both translated, then says:
+    *"You could imagine going beyond this to find the title of this book_id using another nested query. But I won't spend time on that."*
+    Do it. Return the **title**.
+  hints:
+    - Each translator's book ids come from `translated` with a subquery for their translator id. Intersect the two lists.
+    - Then wrap the whole INTERSECT inside `WHERE "id" IN (...)`.
+    - "`SELECT \"title\" FROM \"books\" WHERE \"id\" IN (SELECT \"book_id\" FROM \"translated\" WHERE \"translator_id\" = (...) INTERSECT SELECT \"book_id\" FROM \"translated\" WHERE \"translator_id\" = (...));`"
+  solution: |
+    SELECT "title" FROM "books" WHERE "id" IN (
+        SELECT "book_id" FROM "translated" WHERE "translator_id" = (
+            SELECT "id" FROM "translators" WHERE "name" = 'Sophie Hughes'
+        )
+        INTERSECT
+        SELECT "book_id" FROM "translated" WHERE "translator_id" = (
+            SELECT "id" FROM "translators" WHERE "name" = 'Margaret Jull Costa'
+        )
+    );
+  expected_known: [["Mac and His Problem"]]
+  explanation: A set operation can itself be the subquery inside IN.
+  source:
+    - {file: lecture1, lines: "1559-1600", quote: "But I won't spend time on that"}
+
+- id: M1-E18
+  title: "Homework: in exactly one of the two sets"
+  origin: source-assigned
+  concepts: [C1.9]
+  difficulty: 3
+  skills: [EXCEPT, UNION, parentheses/subqueries]
+  db: longlist
+  kind: query
+  prompt: |
+    The lecture's last Venn diagram shades the two outer parts: people who are an author **or** a translator, **but not both**.
+    *"I actually saved that one for you to do as homework."* Return those names.
+  hints:
+    - The two outer parts are (authors EXCEPT translators) and (translators EXCEPT authors).
+    - Combine the two parts with UNION. Wrap each part in a subquery so that the set operators apply in the right order.
+    - "`SELECT \"name\" FROM (SELECT ... EXCEPT SELECT ...) UNION SELECT \"name\" FROM (SELECT ... EXCEPT SELECT ...);`"
+  solution: |
+    SELECT "name" FROM (
+        SELECT "name" FROM "authors" EXCEPT SELECT "name" FROM "translators"
+    )
+    UNION
+    SELECT "name" FROM (
+        SELECT "name" FROM "translators" EXCEPT SELECT "name" FROM "authors"
+    );
+  explanation: |
+    Without the subqueries, chained set operators run left to right: `A EXCEPT T UNION T EXCEPT A` means `((A EXCEPT T) UNION T) EXCEPT A`, which is not the symmetric difference.
+    Equivalent: `(A UNION T) EXCEPT (A INTERSECT T)`.
+  source:
+    - {file: lecture1, lines: "1461-1466", quote: "I actually saved that one for you to do as homework"}
+
+- id: M1-E19
+  title: Average rating per book
+  origin: source-demo
+  concepts: [C1.10]
+  difficulty: 2
+  skills: [GROUP BY, AVG, ROUND, AS]
+  db: longlist
+  kind: query
+  prompt: For each `book_id` in `ratings`, return the id and its average rating rounded to 2 decimals as `average rating`.
+  hints:
+    - "`AVG(\"rating\")` on its own averages the whole table (3.84 here). You need one average per book."
+    - Group the rows by the book they belong to.
+    - "`SELECT \"book_id\", ROUND(AVG(\"rating\"), 2) AS \"average rating\" FROM \"ratings\" GROUP BY \"book_id\";`"
+  solution: |
+    SELECT "book_id", ROUND(AVG("rating"), 2) AS "average rating"
+    FROM "ratings"
+    GROUP BY "book_id";
+  explanation: |
+    As in the lecture, books 1, 2 and 3 come out at 3.77, 3.97 and 3.04 (L1737). The slide's tiny example (ratings 4, 3, 4 → 3.67) only illustrates the idea.
+  source:
+    - {file: lecture1, lines: "1716-1737", quote: "3.77, 3.97, 3.04-- for each book"}
+
+- id: M1-E20
+  title: Only the well-rated books (HAVING)
+  origin: source-demo
+  concepts: [C1.10]
+  difficulty: 3
+  skills: [HAVING, ORDER BY]
+  db: longlist
+  kind: query
+  ordered: true
+  prompt: |
+    Same per-book averages, but keep only books whose rounded average is **above 4.0**, and sort them from best to worst.
+  hints:
+    - WHERE filters rows before grouping. Which keyword filters groups?
+    - "`HAVING` comes after GROUP BY, and `ORDER BY` comes last."
+    - "`... GROUP BY \"book_id\" HAVING \"average rating\" > 4.0 ORDER BY \"average rating\" DESC;`"
+  solution: |
+    SELECT "book_id", ROUND(AVG("rating"), 2) AS "average rating"
+    FROM "ratings"
+    GROUP BY "book_id"
+    HAVING "average rating" > 4.0
+    ORDER BY "average rating" DESC, "book_id";
+  explanation: "`WHERE \"average rating\" > 4.0` is an error, because there is no such row-level column yet (L1755-1764, debugging D1-07). Books 5 (4.06) and 10 (4.04) qualify, as in the lecture."
+  source:
+    - {file: lecture1, lines: "1753-1770", quote: "SQL uses a different keyword for conditions on groups"}
+    - {file: lecture1, lines: "1811-1829", quote: "so great question here to re-implement much of what we did last time"}
+
+- id: M1-E21
+  title: How many ratings per book?
+  origin: source-question
+  concepts: [C1.10]
+  difficulty: 1
+  skills: [GROUP BY, COUNT]
+  db: longlist
+  kind: query
+  prompt: For each `book_id`, return how many ratings it received.
+  hints:
+    - Same grouping as before, with a different aggregate.
+    - "`COUNT(\"rating\")` counts the rows in each group."
+    - "`SELECT \"book_id\", COUNT(\"rating\") FROM \"ratings\" GROUP BY \"book_id\";`"
+  solution: |
+    SELECT "book_id", COUNT("rating") FROM "ratings" GROUP BY "book_id";
+  explanation: Book 1 has 2,779 ratings and book 2 has 176, as in the lecture (L1799-1800).
+  source:
+    - {file: lecture1, lines: "1777-1800", quote: "And I'll see book id 1 has 2,779 ratings."}
+
+- id: M1-E22
+  title: Tom Hanks's movies
+  origin: source-demo
+  concepts: [C1.4, C1.5]
+  difficulty: 2
+  skills: [subquery, IN]
+  db: movies
+  kind: query
+  prompt: |
+    Same many-to-many pattern on another dataset. Return the **titles** of all movies Tom Hanks starred in (people → stars → movies), using nested subqueries.
+  hints:
+    - "`stars` is the junction table between people and movies."
+    - Find his id, then his movie ids (several, so use IN), then the titles.
+    - "`SELECT \"title\" FROM \"movies\" WHERE \"id\" IN (SELECT \"movie_id\" FROM \"stars\" WHERE \"person_id\" = (SELECT ...));`"
+  solution: |
+    SELECT "title" FROM "movies" WHERE "id" IN (
+        SELECT "movie_id" FROM "stars" WHERE "person_id" = (
+            SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'
+        )
+    );
+  explanation: This exact query is the one Lecture 5 later speeds up with indexes (M5-E02, M5-E03).
+  source:
+    - {file: lecture1, lines: "736-782", quote: "We could also use subqueries with many-to-many relationships"}
+    - {file: lecture5, lines: "364-394", quote: "I get back all of Tom Hanks's movies"}
+
+- id: M1-E23
+  title: Tally raw votes
+  origin: source-demo
+  concepts: [C1.10]
+  difficulty: 2
+  skills: [GROUP BY, COUNT]
+  db: votes
+  kind: query
+  prompt: |
+    Count the votes for each `title` in the raw `votes` table from Lecture 3 (no cleaning yet). Why are there far more than four groups?
+  hints:
+    - You want one row per distinct title, with a count.
+    - "`GROUP BY \"title\"` with `COUNT(\"title\")`."
+    - "`SELECT \"title\", COUNT(\"title\") FROM \"votes\" GROUP BY \"title\";`"
+  solution: |
+    SELECT "title", COUNT("title") FROM "votes" GROUP BY "title";
+  explanation: GROUP BY compares text exactly, so typos, stray spaces and case variants become separate groups. Fixing this is exercise M3-E13.
+  source:
+    - {file: lecture1, lines: "1712-1714", quote: "using this GROUP BY keyword"}
+    - {file: lecture3, lines: "1229-1246", quote: "Why do I have so many?"}

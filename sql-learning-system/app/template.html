@@ -1,5 +1,5 @@
 <title>The SQL Line</title>
-<meta name="description" content="Interactive SQL trainer built from CS50 SQL lectures 2-6: lessons, auto-graded exercises, hints, debugging and spaced review.">
+<meta name="description" content="Interactive SQL trainer built from CS50 SQL lectures 0-6: lessons, auto-graded exercises, hints, debugging and spaced review.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -21,7 +21,7 @@
   --bad-bg: #fbe9e7;
   --warn: #8a5300;
   --code: #eef0ec;
-  --m0: #5b6670; --m1: #da291c; --m2: #e07d00; --m3: #00843d; --m4: #003da5; --m5: #7c878e;
+  --m0: #5b6670; --m1: #80276c; --m2: #da291c; --m3: #e07d00; --m4: #00843d; --m5: #003da5; --m6: #7c878e;
   --font-display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Barlow", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -32,7 +32,7 @@
     --bg: #0e141a; --surface: #151d25; --sunk: #0b1016; --ink: #e5eaee; --muted: #9aa6b1; --line: #2a3540;
     --accent: #6d9bff; --accent-ink: #0b1220; --ok: #45c46f; --ok-bg: #12301d; --bad: #ff7a6b; --bad-bg: #3a1714;
     --warn: #f0b35a; --code: #0b1117;
-    --m0: #93a0ab; --m1: #ff5a4e; --m2: #ffa23a; --m3: #2fc06e; --m4: #6d9bff; --m5: #aeb8bf;
+    --m0: #93a0ab; --m1: #d77ac2; --m2: #ff5a4e; --m3: #ffa23a; --m4: #2fc06e; --m5: #6d9bff; --m6: #aeb8bf;
     color-scheme: dark;
   }
 }
@@ -40,7 +40,7 @@
   --bg: #0e141a; --surface: #151d25; --sunk: #0b1016; --ink: #e5eaee; --muted: #9aa6b1; --line: #2a3540;
   --accent: #6d9bff; --accent-ink: #0b1220; --ok: #45c46f; --ok-bg: #12301d; --bad: #ff7a6b; --bad-bg: #3a1714;
   --warn: #f0b35a; --code: #0b1117;
-  --m0: #93a0ab; --m1: #ff5a4e; --m2: #ffa23a; --m3: #2fc06e; --m4: #6d9bff; --m5: #aeb8bf;
+  --m0: #93a0ab; --m1: #d77ac2; --m2: #ff5a4e; --m3: #ffa23a; --m4: #2fc06e; --m5: #6d9bff; --m6: #aeb8bf;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -69,7 +69,7 @@ h1 { font-size: 2.1rem; } h2 { font-size: 1.65rem; } h3 { font-size: 1.3rem; } h
 .rail h4 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); margin: 0 0 10px 6px; font-family: var(--font-body); font-weight: 600; }
 .line { position: relative; margin: 0 0 22px; padding: 0; list-style: none; }
 .line::before { content: ""; position: absolute; left: 17px; top: 14px; bottom: 14px; width: 6px; border-radius: 3px;
-  background: linear-gradient(var(--m0) 0 16%, var(--m1) 16% 33%, var(--m2) 33% 50%, var(--m3) 50% 67%, var(--m4) 67% 84%, var(--m5) 84% 100%); }
+  background: linear-gradient(var(--m0) 0 14%, var(--m1) 14% 29%, var(--m2) 29% 43%, var(--m3) 43% 57%, var(--m4) 57% 71%, var(--m5) 71% 86%, var(--m6) 86% 100%); }
 .stop { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; padding: 7px 8px; border: 0; border-radius: var(--radius); background: none; cursor: pointer; text-align: left; }
 .stop:hover, .stop[aria-current="true"] { background: var(--sunk); }
 .stop .dot { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--surface); border: 5px solid var(--c); position: relative; z-index: 1; }
@@ -168,7 +168,7 @@ textarea.backup { width: 100%; min-height: 120px; font-family: var(--font-mono);
   .rail h4 { display: none; }
   .line { display: flex; gap: 2px; margin: 0 0 6px; }
   .line::before { left: 14px; right: 14px; top: 19px; bottom: auto; width: auto; height: 6px;
-    background: linear-gradient(90deg, var(--m0) 0 16%, var(--m1) 16% 33%, var(--m2) 33% 50%, var(--m3) 50% 67%, var(--m4) 67% 84%, var(--m5) 84% 100%); }
+    background: linear-gradient(90deg, var(--m0) 0 14%, var(--m1) 14% 29%, var(--m2) 29% 43%, var(--m3) 43% 57%, var(--m4) 57% 71%, var(--m5) 71% 86%, var(--m6) 86% 100%); }
   .stop { flex-direction: column; gap: 4px; width: auto; min-width: 74px; text-align: center; }
   .stop .meta { display: none; }
   .stop .nm { font-size: 0.85rem; }
@@ -184,7 +184,7 @@ textarea.backup { width: 100%; min-height: 120px; font-family: var(--font-mono);
 </style>
 
 <header class="topbar">
-  <a class="brand" href="#home" id="brand"><span class="roundel">T</span><span><b>The SQL Line</b><small>CS50 SQL · lectures 2-6 · trainer</small></span></a>
+  <a class="brand" href="#home" id="brand"><span class="roundel">T</span><span><b>The SQL Line</b><small>CS50 SQL · lectures 0-6 · trainer</small></span></a>
   <span class="spacer"></span>
   <span class="pill" id="pill-progress">loading…</span>
   <span class="pill" id="pill-due"></span>
@@ -342,10 +342,9 @@ function renderHome() {
   const nSrc = ORDERED.filter(e => e.origin !== "generated").length;
   view.innerHTML = `
   <section class="hero">
-    <h1>Ride the line, M0 → M5</h1>
-    <p class="prose">Six stations built from your five CS50 SQL lecture transcripts (Designing, Writing, Viewing, Optimizing, Scaling),
-    plus a prerequisite query toolkit. Every exercise runs against a fresh copy of the lecture's own datasets inside your browser:
-    the MBTA subway, the Museum of Fine Arts, the International Booker longlist, IMDb, and a small bank.</p>
+    <h1>Ride the line, M0 → M6</h1>
+    <p class="prose">Seven stations built from your seven CS50 SQL lecture transcripts (Querying, Relating, Designing, Writing, Viewing, Optimizing, Scaling), one per week. Every exercise runs against a fresh copy of the lecture's own datasets inside your browser:
+    the MBTA subway, the Museum of Fine Arts, the International Booker longlist, the sea lions of lecture 1, IMDb, and a small bank.</p>
     <div class="route" aria-label="Your route">${route_}</div>
     <div class="tools">${nx ? `<button class="btn primary" data-go="${nx.id}">Continue: ${esc(nx.id)} · ${esc(nx.title)}</button>` : `<span class="pill">Every item done 🎉</span>`}
       <button class="btn" data-go="review">Review deck</button><button class="btn" data-go="sandbox">Open the sandbox</button></div>
@@ -575,7 +574,7 @@ function renderSandbox() {
   ed.addEventListener("keydown", ev => { if (ev.key === "Enter" && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); document.getElementById("srun").click(); } if (ev.key === "Tab") { ev.preventDefault(); ed.setRangeText("    ", ed.selectionStart, ed.selectionEnd, "end"); } });
 }
 function renderSources() {
-  const files = { lecture2: "Designing", lecture3: "Writing", lecture4: "Viewing", lecture5: "Optimizing", lecture6: "Scaling" };
+  const files = { lecture0: "Querying", lecture1: "Relating", lecture2: "Designing", lecture3: "Writing", lecture4: "Viewing", lecture5: "Optimizing", lecture6: "Scaling" };
   const byFile = {};
   for (const [cid, c] of Object.entries(DATA.concepts)) for (const r of c.refs) (byFile[r.file] = byFile[r.file] || []).push([+r.lines.split("-")[0], `<b>${cid}</b> ${esc(c.name)}`, r.lines, null]);
   for (const e of ORDERED) for (const r of e.source) (byFile[r.file] = byFile[r.file] || []).push([+r.lines.split("-")[0], `${esc(e.id)} ${esc(e.title)} ${originBadge(e)}`, r.lines, e.id]);

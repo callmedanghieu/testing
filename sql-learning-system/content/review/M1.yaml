@@ -1,82 +1,83 @@
+# Review deck M1 (lecture1).
 - id: R1-01
   type: quick
-  front: What does it mean to *normalize* a database?
-  back: Reduce redundancy by putting each entity (riders, stations, …) in its own table, so that every column of a table describes only that entity.
-  source: {file: lecture2, lines: "245-262", quote: "To normalize means to reduce redundancies"}
+  front: Name the three kinds of relationship between tables and give a longlist example of each.
+  back: One-to-one (each author writes exactly one book, an assumption the lecture rejects), one-to-many (a book has many ratings, a publisher many books), many-to-many (authors ↔ books, translators ↔ books).
+  source: {file: lecture1, lines: "119-146", quote: "one-to-one,"}
 - id: R1-02
   type: concept
-  question: Riders visit many stations and stations have many riders. What implements this relationship?
-  choices: ["A rider_ids column in stations", "A junction table such as visits(rider_id, station_id)", "A UNIQUE constraint", "A composite primary key on riders"]
+  question: In `ratings(book_id, rating)`, what is `book_id`?
+  choices: ["The primary key of ratings", "A foreign key: books' primary key stored in another table", "A composite key", "An ISBN"]
   answer: 1
-  why: Many-to-many relationships need an associative (junction) table holding pairs of ids.
-  source: {file: lecture2, lines: "425-438", quote: "a junction table, an associative entity, a join table"}
+  why: A foreign key is a primary key from one table placed in a column of another table, here linking each rating to its book.
+  source: {file: lecture1, lines: "317-324", quote: "Well, a foreign key is simply taking a primary key from one table"}
 - id: R1-03
-  type: quick
-  front: Name SQLite's 5 storage classes and its 5 type affinities.
-  back: "Storage classes (values): NULL, INTEGER, REAL, TEXT, BLOB. Affinities (columns): TEXT, NUMERIC, INTEGER, REAL, BLOB."
-  source: {file: lecture2, lines: "599-611", quote: "type affinities are now associated with individual columns"}
+  type: concept
+  question: A subquery returns several rows. Which outer operator compares against all of them?
+  choices: ["=", "IN", "LIKE", "IS"]
+  answer: 1
+  why: "`= (subquery)` uses only the first row in SQLite. `IN (subquery)` tests membership in the whole list."
+  source: {file: lecture1, lines: "975-984", quote: "if you're looking to see if some id is part of a list of ids"}
 - id: R1-04
   type: predict
-  db: null
-  setup: |
-    CREATE TABLE "t" ("amount" INTEGER);
-    INSERT INTO "t" VALUES ('25');
-  sql: SELECT typeof("amount") FROM "t";
-  choices: ["text", "integer", "real", "ERROR: datatype mismatch"]
-  answer: 1
-  why: The INTEGER affinity converts the text '25' to the integer 25.
-  source: {file: lecture2, lines: "632-634", quote: "Now I'll have 25 as an integer."}
+  db: sea_lions
+  sql: SELECT COUNT(*) FROM "sea_lions" JOIN "migrations" ON "migrations"."id" = "sea_lions"."id";
+  choices: ["5", "6", "7", "8"]
+  answer: 0
+  why: An INNER JOIN keeps only matching ids. Jolee has no migration, and two migrations have no sea lion, so 5 rows remain.
+  source: {file: lecture1, lines: "1149-1162", quote: "So, this is our example, then, of an INNER JOIN."}
 - id: R1-05
   type: predict
-  db: null
-  setup: |
-    CREATE TABLE "t" ("amount" INTEGER);
-    INSERT INTO "t" VALUES ('red line');
-  sql: SELECT typeof("amount") FROM "t";
-  choices: ["text", "integer", "null", "ERROR: datatype mismatch"]
-  answer: 0
-  why: An affinity is a preference, not a rule. Text that can't be converted is stored as TEXT. (MySQL would reject it, lecture6 L844-852.)
-  source: {file: lecture6, lines: "844-852", quote: "But if it couldn't, it would actually just store text."}
+  db: sea_lions
+  sql: SELECT COUNT(*) FROM "sea_lions" FULL JOIN "migrations" ON "migrations"."id" = "sea_lions"."id";
+  choices: ["5", "6", "7", "8"]
+  answer: 3
+  why: 5 matches + Jolee (left only) + 2 untracked migrations (right only) = 8 rows.
+  source: {file: lecture1, lines: "1274-1287", quote: "Well, we see both tables in their entirety."}
 - id: R1-06
-  type: concept
-  question: Why did the class favour INTEGER (cents) over REAL for fares?
-  choices: ["REAL uses more disk", "Integers are represented exactly, so sums stay exact", "REAL can't be negative", "SQLite has no REAL"]
+  type: predict
+  db: longlist
+  sql: SELECT ROUND(AVG("rating"), 2) FROM "ratings" WHERE "book_id" = 1;
+  choices: ["3.67", "3.77", "3.84", "4"]
   answer: 1
-  why: Floating-point values like 0.10 are stored approximately, and the errors add up over many fares.
-  source: {file: lecture2, lines: "563-571", quote: "you know you can precisely represent integers"}
+  why: Book 1 (Boulder) has 2,779 ratings averaging 3.774…, the real figure in lecture1 L1737 and lecture4 L409. The slides' 4, 3, 4 example (3.67) is only an illustration.
+  source: {file: lecture1, lines: "1733-1737", quote: "3.77, 3.97, 3.04-- for each book"}
 - id: R1-07
   type: concept
-  question: Which constraints does `PRIMARY KEY("id")` already imply (for an INTEGER id)?
-  choices: ["UNIQUE only", "NOT NULL only", "UNIQUE and NOT NULL", "CHECK and DEFAULT"]
-  answer: 2
-  why: A primary key must be unique and present, so adding them again is redundant.
-  source: {file: lecture2, lines: "1016-1022", quote: "A primary key, for instance, must not be null, it must be unique"}
+  question: Which clause filters *groups* (e.g. average > 4.0) rather than rows?
+  choices: ["WHERE", "HAVING", "ORDER BY", "LIMIT"]
+  answer: 1
+  why: WHERE runs before grouping, and HAVING runs after it. The order is GROUP BY → HAVING → ORDER BY → LIMIT.
+  source: {file: lecture1, lines: "1759-1764", quote: "SQL uses a different keyword for conditions on groups"}
 - id: R1-08
   type: predict
-  db: null
-  setup: |
-    CREATE TABLE "t" ("x");
-    INSERT INTO "t" VALUES ('10');
-  sql: SELECT typeof("x") FROM "t";
-  choices: ["integer", "text", "numeric", "blob"]
+  db: longlist
+  sql: SELECT "name" FROM "authors" INTERSECT SELECT "name" FROM "translators";
+  choices: ["(no rows)", "Ngũgĩ wa Thiong'o", "Sophie Hughes", "ERROR: no such column"]
   answer: 1
-  why: A column with no declared type has BLOB ("no") affinity, so nothing is converted. Lecture 2 says NUMERIC, which is errata #1.
-  source: {file: lecture2, lines: "1338-1347", quote: "the default type affinity is numeric in this case"}
+  why: INTERSECT keeps the names present in both sets. Ngũgĩ translated his own book.
+  source: {file: lecture1, lines: "1537-1542", quote: "His name is Ngugi"}
 - id: R1-09
-  type: predict
-  db: null
-  setup: |
-    CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));
-    CREATE TABLE "swipes" ("card_id" INTEGER, FOREIGN KEY("card_id") REFERENCES "cards"("id"));
-    INSERT INTO "swipes" VALUES (NULL);
-  sql: SELECT COUNT(*) FROM "swipes";
-  choices: ["0", "1", "ERROR: FOREIGN KEY constraint failed", "ERROR: NOT NULL constraint failed"]
+  type: concept
+  question: What do UNION, INTERSECT and EXCEPT require of the two queries?
+  choices: ["Same table", "Same number of columns (of compatible kinds)", "Same WHERE clause", "An ORDER BY"]
   answer: 1
-  why: A NULL foreign key references nothing and is accepted. Add NOT NULL if the link is mandatory (errata #3).
-  source: {file: lecture2, lines: "968-978", quote: "This would be in this case, redundant."}
+  why: Rows from both sides are stacked or compared, so they must have the same shape (debugging D1-09).
+  source: {file: lecture1, lines: "1652-1662", quote: "you always have to have the same number"}
 - id: R1-10
-  type: debug
-  ref: D1-02
+  type: quick
+  front: What does a NATURAL JOIN do, and what is its risk?
+  back: It joins on every column whose name appears in both tables and keeps one copy of it. If another shared name appears later, the join silently changes.
+  source: {file: lecture1, lines: "1380-1399", quote: "A NATURAL JOIN kind of allows me to omit the part of my previous JOINs"}
 - id: R1-11
+  type: debug
+  ref: D1-01
+- id: R1-12
+  type: debug
+  ref: D1-04
+- id: R1-13
   type: write
-  ref: M1-E12
+  ref: M1-E08
+- id: R1-14
+  type: write
+  ref: M1-E18

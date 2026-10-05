@@ -1,410 +1,345 @@
-# Module 5: Scaling (sources/lecture6.txt)
-# MySQL/PostgreSQL exercises are self-check in the trainer (SQLite cannot run them), but every reference
-# solution is EXECUTED by tests/test_servers.py on MariaDB 10.11 / PostgreSQL 16 (fields engine / verify_*).
+# Module 4: Optimizing (sources/lecture5.txt)
 - id: M5-E01
-  title: The cards table in MySQL
+  title: Index the title column
   origin: source-demo
   concepts: [C5.1, C5.2]
   difficulty: 1
-  skills: [MySQL, INT, AUTO_INCREMENT, backticks]
-  db: null
-  kind: selfcheck
-  engine: mysql
+  skills: [CREATE INDEX, EXPLAIN QUERY PLAN]
+  db: movies
+  kind: modify
   prompt: |
-    Translate the SQLite table `CREATE TABLE "cards" ("id" INTEGER, PRIMARY KEY("id"));` to MySQL.
-    Choose an integer type that comfortably fits one card per person on Earth, and make ids generate automatically.
+    First run `EXPLAIN QUERY PLAN SELECT * FROM "movies" WHERE "title" = 'Cars';` and note the word **SCAN**.
+    Then create an index named `title_index` so that the plan becomes a **SEARCH** using that index.
   hints:
-    - MySQL quotes identifiers with backticks, not double quotes.
-    - "INT holds about ±2.1 billion values, or about 4.2 billion if UNSIGNED."
-    - "SQLite generated keys for free. MySQL needs `AUTO_INCREMENT`."
+    - An index is built on the column(s) your WHERE clause filters on.
+    - "`CREATE INDEX name ON table (column);`"
+    - "`CREATE INDEX \"title_index\" ON \"movies\" (\"title\");`"
   solution: |
-    CREATE TABLE `cards` (
-        `id` INT AUTO_INCREMENT,
-        PRIMARY KEY(`id`)
-    );
-  verify_after: |
-    INSERT INTO `cards` () VALUES (), ();
-    SELECT `id` FROM `cards`;
-    DESCRIBE `cards`;
-  verify_expect: ["auto_increment", "PRI"]
+    CREATE INDEX "title_index" ON "movies" ("title");
+  check:
+    - plan: SELECT * FROM "movies" WHERE "title" = 'Cars'
+      contains: ["SEARCH movies USING INDEX title_index"]
   explanation: |
-    `INT UNSIGNED` (0 to about 4.29 billion) is an even better fit, as the audience suggested (L295-305).
-    Check your table with `SHOW TABLES;` and `DESCRIBE cards;`.
+    SCAN means reading every row top to bottom. SEARCH means using a structure to jump to matching rows.
+    On the full 400k-row IMDb file the lecture measured 0.084 s before the index and 0.01 s after.
   source:
-    - {file: lecture6, lines: "274-292", quote: "But in MySQL, I have to actually say auto increment."}
-    - {file: lecture6, lines: "264-273", quote: "So it seems like that's a pretty safe bet"}
+    - {file: lecture5, lines: "273-286", quote: "That's a savings of almost eight times."}
+    - {file: lecture5, lines: "297-316", quote: "using the index that we called title_index"}
 
 - id: M5-E02
-  title: Stations with VARCHAR and ENUM
+  title: Which columns should be indexed for the Tom Hanks query?
   origin: source-question
   concepts: [C5.2]
-  difficulty: 2
-  skills: [VARCHAR, ENUM, NOT NULL, UNIQUE]
-  db: null
-  kind: selfcheck
-  engine: mysql
+  difficulty: 3
+  skills: [EXPLAIN QUERY PLAN, choosing index columns]
+  db: movies
+  kind: modify
   prompt: |
-    Create the MySQL `stations` table: auto-increment `id`; `name` up to 32 characters, required and unique;
-    `line` limited to blue, green, orange or red, and required.
+    Run `EXPLAIN QUERY PLAN` on the Tom Hanks query (M1-E22). Two tables are **scanned**.
+    Create one index per scanned table (`name_index` on people, `person_index` on stars) so that **neither table is scanned**.
   hints:
-    - Variable-length short text is VARCHAR(M). Use CHAR only for fixed lengths like 'MA'.
-    - A column with a fixed list of allowed values is an ENUM.
-    - "`` `line` ENUM('blue', 'green', 'orange', 'red') NOT NULL ``"
+    - Read the plan from the innermost subquery outward. Which tables say SCAN?
+    - Index the column each WHERE clause filters on, `people.name` and `stars.person_id`.
+    - "`CREATE INDEX \"person_index\" ON \"stars\" (\"person_id\"); CREATE INDEX \"name_index\" ON \"people\" (\"name\");`"
   solution: |
-    CREATE TABLE `stations` (
-        `id` INT AUTO_INCREMENT,
-        `name` VARCHAR(32) NOT NULL UNIQUE,
-        `line` ENUM('blue', 'green', 'orange', 'red') NOT NULL,
-        PRIMARY KEY(`id`)
-    );
-  verify_after: |
-    INSERT INTO `stations` (`name`, `line`) VALUES ('Harvard', 'red');
-    DESCRIBE `stations`;
-  verify_expect: ["UNI", "enum('blue','green','orange','red')"]
-  verify_fail: |
-    INSERT INTO `stations` (`name`, `line`) VALUES ('Mystery', 'purple');
+    CREATE INDEX "person_index" ON "stars" ("person_id");
+    CREATE INDEX "name_index" ON "people" ("name");
+  check:
+    - plan: SELECT "title" FROM "movies" WHERE "id" IN (SELECT "movie_id" FROM "stars" WHERE "person_id" = (SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'))
+      contains: ["USING INDEX person_index", "COVERING INDEX name_index"]
+      not_contains: ["SCAN people", "SCAN stars"]
   explanation: |
-    SET would allow a station to be on several lines at once. ENUM allows exactly one (L485-493).
+    `movies` is searched by `id`, its INTEGER PRIMARY KEY, which is always indexed for free.
+    Note that `name_index` is reported as a *covering* index: the query needs only `people.id`, which every index entry already carries (rowid).
   source:
-    - {file: lecture6, lines: "442-456", quote: "So a varchar is good if we have some variable amount of characters"}
-    - {file: lecture6, lines: "499-521", quote: "So I'll say enum here."}
+    - {file: lecture5, lines: "405-447", quote: "Perhaps two separate indexes."}
+    - {file: lecture5, lines: "338-348", quote: "will automatically create an index via which I can search for a primary key"}
 
 - id: M5-E03
-  title: Swipes with DATETIME and DECIMAL
-  origin: source-demo
-  concepts: [C5.2]
-  difficulty: 3
-  skills: [ENUM, DATETIME, DEFAULT CURRENT_TIMESTAMP, DECIMAL, CHECK, FOREIGN KEY]
-  db: null
-  kind: selfcheck
-  engine: mysql
-  verify_setup: |
-    CREATE TABLE `cards` (`id` INT AUTO_INCREMENT, PRIMARY KEY(`id`));
-    CREATE TABLE `stations` (`id` INT AUTO_INCREMENT, `name` VARCHAR(32) NOT NULL UNIQUE,
-      `line` ENUM('blue', 'green', 'orange', 'red') NOT NULL, PRIMARY KEY(`id`));
-    INSERT INTO `cards` () VALUES ();
-    INSERT INTO `stations` (`name`, `line`) VALUES ('Harvard', 'red');
-  prompt: |
-    Create the MySQL `swipes` table: `id`, `card_id`, `station_id` (INT); `type` (enter/exit/deposit, required);
-    `datetime` (date and time, required, default now); `amount` (exact money with up to 5 digits, 2 after the point, required, never 0);
-    primary and foreign keys.
-  hints:
-    - Money must be exact, so avoid FLOAT and DOUBLE. Which type is *fixed precision*?
-    - "`DECIMAL(M, D)`: M total digits, D after the point. `DECIMAL(5,2)` stores −999.99 to 999.99."
-    - "`` `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, `amount` DECIMAL(5,2) NOT NULL CHECK(`amount` != 0) ``"
-  solution: |
-    CREATE TABLE `swipes` (
-        `id` INT AUTO_INCREMENT,
-        `card_id` INT,
-        `station_id` INT,
-        `type` ENUM('enter', 'exit', 'deposit') NOT NULL,
-        `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        `amount` DECIMAL(5,2) NOT NULL CHECK(`amount` != 0),
-        PRIMARY KEY(`id`),
-        FOREIGN KEY(`card_id`) REFERENCES `cards`(`id`),
-        FOREIGN KEY(`station_id`) REFERENCES `stations`(`id`)
-    );
-  verify_after: |
-    INSERT INTO `swipes` (`card_id`, `station_id`, `type`, `amount`) VALUES (1, 1, 'enter', -2.40);
-    SELECT `amount`, `datetime` IS NOT NULL FROM `swipes`;
-    DESCRIBE `swipes`;
-  verify_expect: ["-2.40", "MUL", "decimal(5,2)"]
-  verify_fail: |
-    INSERT INTO `swipes` (`card_id`, `station_id`, `type`, `amount`) VALUES (1, 1, 'enter', 0);
-  explanation: |
-    In `DESCRIBE`, `MUL` marks a non-unique index. InnoDB creates one for each foreign key (errata #10).
-    The lecture's spoken example "decimal 5 comma 1 … ±999.99" is a slip: that range belongs to DECIMAL(5,2) (errata #7).
-  source:
-    - {file: lecture6, lines: "723-777", quote: "I'll say I want five decimal digits with two after the decimal point."}
-    - {file: lecture6, lines: "653-668", quote: "fixed precision means I can specify I want to always have two places"}
-
-- id: M5-E04
-  title: Add the silver line with MODIFY
+  title: Make the stars index covering
   origin: source-demo
   concepts: [C5.3]
-  difficulty: 2
-  skills: [ALTER TABLE MODIFY]
-  db: null
-  kind: selfcheck
-  engine: mysql
-  verify_setup: |
-    CREATE TABLE `stations` (`id` INT AUTO_INCREMENT, `name` VARCHAR(32) NOT NULL UNIQUE,
-      `line` ENUM('blue', 'green', 'orange', 'red') NOT NULL, PRIMARY KEY(`id`));
-  prompt: The MBTA adds a **silver** line. Change `stations.line` so that `'silver'` is allowed, without losing NOT NULL.
-  hints:
-    - In MySQL, `ALTER TABLE ... MODIFY` replaces a column's whole definition.
-    - The new definition must repeat every old ENUM value and the NOT NULL.
-    - "`ALTER TABLE `stations` MODIFY `line` ENUM('blue', 'green', 'orange', 'red', 'silver') NOT NULL;`"
-  solution: |
-    ALTER TABLE `stations`
-    MODIFY `line` ENUM('blue', 'green', 'orange', 'red', 'silver') NOT NULL;
-  verify_after: |
-    INSERT INTO `stations` (`name`, `line`) VALUES ('South Station', 'silver');
-    DESCRIBE `stations`;
-  verify_expect: ["'silver'"]
-  explanation: |
-    SQLite's ALTER TABLE cannot change a column definition. In SQLite you would rebuild the table.
-    The same MODIFY can also widen a VARCHAR later (L577-580).
-  source:
-    - {file: lecture6, lines: "905-919", quote: "So this is one example of using alter table to adjust a column definition."}
-
-- id: M5-E05
-  title: A stored procedure for the current collection
-  origin: source-demo
-  concepts: [C5.4]
-  difficulty: 2
-  skills: [DELIMITER, CREATE PROCEDURE, CALL]
-  db: null
-  kind: selfcheck
-  engine: mysql
-  verify_setup: |
-    CREATE TABLE `collections` (`id` INT AUTO_INCREMENT, `title` VARCHAR(64) NOT NULL,
-      `accession_number` VARCHAR(16) NOT NULL UNIQUE, `acquired` DATE, PRIMARY KEY(`id`));
-    INSERT INTO `collections` (`title`, `accession_number`, `acquired`) VALUES
-      ('Farmers Working at Dawn', '11.6152', '1911-08-03'), ('Imaginative Landscape', '56.496', NULL),
-      ('Profusion of Flowers', '56.257', '1956-04-12'), ('Spring Outing', '14.76', '1914-01-08');
-    ALTER TABLE `collections` ADD COLUMN `deleted` TINYINT DEFAULT 0;
-    UPDATE `collections` SET `deleted` = 1 WHERE `title` = 'Farmers Working at Dawn';
+  difficulty: 3
+  skills: [multi-column index, covering index]
+  db: movies
+  kind: modify
+  setup: |
+    CREATE INDEX "person_index" ON "stars" ("person_id");
+    CREATE INDEX "name_index" ON "people" ("name");
   prompt: |
-    `collections` has a `deleted` TINYINT flag. Create a procedure `current_collection()` that returns
-    `title`, `accession_number`, `acquired` for items not deleted, then call it.
+    The plan still says `SEARCH stars USING INDEX person_index`, which means SQLite looks up each matching row in the table to get `movie_id`.
+    Replace `person_index` with a two-column index so that `stars` is searched with a **covering index**.
   hints:
-    - The body contains `;`, so first change the client's delimiter (e.g. to `//`).
-    - "`CREATE PROCEDURE name() BEGIN ...; END//`, then switch the delimiter back."
-    - "`DELIMITER //` … `SELECT ... FROM `collections` WHERE `deleted` = 0; END//` `DELIMITER ;` `CALL current_collection();`"
+    - A covering index contains every column the query reads from that table.
+    - "Drop the old index, then create it on (`person_id`, `movie_id`). The filter column comes first."
+    - "`DROP INDEX \"person_index\"; CREATE INDEX \"person_index\" ON \"stars\" (\"person_id\", \"movie_id\");`"
   solution: |
-    DELIMITER //
-    CREATE PROCEDURE `current_collection`()
-    BEGIN
-        SELECT `title`, `accession_number`, `acquired` FROM `collections`
-        WHERE `deleted` = 0;
-    END//
-    DELIMITER ;
-    CALL `current_collection`();
-  verify_expect: ["Imaginative Landscape"]
-  verify_absent: ["Farmers Working at Dawn"]
+    DROP INDEX "person_index";
+    CREATE INDEX "person_index" ON "stars" ("person_id", "movie_id");
+  check:
+    - plan: SELECT "title" FROM "movies" WHERE "id" IN (SELECT "movie_id" FROM "stars" WHERE "person_id" = (SELECT "id" FROM "people" WHERE "name" = 'Tom Hanks'))
+      contains: ["SEARCH stars USING COVERING INDEX person_index"]
   explanation: |
-    `TINYINT` is the smallest integer type, which is enough for 0/1 (L1027-1031). Compare with the SQLite *view* `current_collections` (M3-E10).
+    On the full data the lecture measured 0.197 s with no indexes and 0.004 s with two covering indexes.
   source:
-    - {file: lecture6, lines: "1056-1090", quote: "So using call, can I then call this procedure I've made and stored?"}
+    - {file: lecture5, lines: "499-542", quote: "Now I have two covering indexes."}
+    - {file: lecture5, lines: "482-496", quote: "It's one in which the query data can be found only by searching the index."}
 
-- id: M5-E06
-  title: "Assigned: a sell procedure that refuses double sales"
-  origin: source-assigned
-  concepts: [C5.4]
-  difficulty: 4
-  skills: [IN parameter, IF, procedures]
-  db: null
-  kind: selfcheck
-  engine: mysql
-  verify_setup: |
-    CREATE TABLE `collections` (`id` INT AUTO_INCREMENT, `title` VARCHAR(64) NOT NULL,
-      `accession_number` VARCHAR(16) NOT NULL UNIQUE, `acquired` DATE, `deleted` TINYINT DEFAULT 0, PRIMARY KEY(`id`));
-    INSERT INTO `collections` (`title`, `accession_number`, `acquired`) VALUES
-      ('Farmers Working at Dawn', '11.6152', '1911-08-03'), ('Imaginative Landscape', '56.496', NULL);
-    CREATE TABLE `transactions` (`id` INT AUTO_INCREMENT, `title` VARCHAR(64) NOT NULL,
-      `action` ENUM('bought', 'sold') NOT NULL, PRIMARY KEY(`id`));
-  prompt: |
-    The lecture builds `sell(IN sold_id INT)`: it marks the item deleted **and** logs `'sold'` in `transactions`.
-    It then warns: *"if I try to sell something that has already been sold, I might … mark something as being sold twice.
-    I'll actually leave this up to you as your own exercise."*
-    Write `sell` so that a second `CALL sell(2);` changes nothing.
-  hints:
-    - Stored procedures support `IF condition THEN ... END IF;`
-    - Only act when the item exists and `deleted = 0`.
-    - "`IF (SELECT `deleted` FROM `collections` WHERE `id` = sold_id) = 0 THEN UPDATE ...; INSERT ...; END IF;`"
-  solution: |
-    DELIMITER //
-    CREATE PROCEDURE `sell`(IN `sold_id` INT)
-    BEGIN
-        IF (SELECT `deleted` FROM `collections` WHERE `id` = `sold_id`) = 0 THEN
-            UPDATE `collections` SET `deleted` = 1 WHERE `id` = `sold_id`;
-            INSERT INTO `transactions` (`title`, `action`)
-            VALUES ((SELECT `title` FROM `collections` WHERE `id` = `sold_id`), 'sold');
-        END IF;
-    END//
-    DELIMITER ;
-    CALL `sell`(2);
-    CALL `sell`(2);
-  verify_after: |
-    SELECT COUNT(*) AS sold_rows FROM `transactions`;
-  verify_expect: ["sold_rows\n1"]
-  explanation: |
-    Without the IF, calling sell twice would log two sales of one painting.
-    A unique constraint or a transaction with a re-check are alternative guards.
-  source:
-    - {file: lecture6, lines: "1258-1277", quote: "I'll actually leave this up to you as your own exercise."}
-    - {file: lecture6, lines: "1169-1222", quote: "I'll say the input is something called sold ID"}
-
-- id: M5-E07
-  title: Swipes in PostgreSQL
+- id: M5-E04
+  title: A partial index for recent movies
   origin: source-demo
   concepts: [C5.5]
   difficulty: 3
-  skills: [CREATE TYPE ENUM, SERIAL, TIMESTAMP, now(), NUMERIC]
-  db: null
-  kind: selfcheck
-  engine: postgres
-  verify_setup: |
-    CREATE TABLE "cards" ("id" SERIAL, PRIMARY KEY("id"));
-    CREATE TABLE "stations" ("id" SERIAL, "name" VARCHAR(32) NOT NULL UNIQUE, "line" VARCHAR(32) NOT NULL, PRIMARY KEY("id"));
-    INSERT INTO "cards" DEFAULT VALUES;
-    INSERT INTO "stations" ("name", "line") VALUES ('Harvard', 'red');
+  skills: [partial index, WHERE in CREATE INDEX]
+  db: movies
+  kind: modify
   prompt: |
-    Write the PostgreSQL version of `swipes`. Define the allowed swipe types as **their own type**;
-    use an auto-incrementing id, a timestamp defaulting to now, and `NUMERIC(5,2)` for the amount.
+    Users mostly search this year's movies. Create a **partial** index named `recents` on `movies(title)` that only includes rows from **2023**.
+    The checker confirms it is used for `year = 2023` and **not** for `year = 1998`.
   hints:
-    - "In Postgres an enum is declared once as a type: `CREATE TYPE name AS ENUM (...);`"
-    - "`SERIAL` is an auto-incrementing integer. The timestamp default is the function `now()`."
-    - "`\"type\" \"swipe_type\" NOT NULL, \"datetime\" TIMESTAMP NOT NULL DEFAULT now(), \"amount\" NUMERIC(5,2) NOT NULL CHECK(\"amount\" != 0)`"
+    - A partial index is a normal CREATE INDEX with a WHERE clause at the end.
+    - Only rows matching that WHERE are stored in the index, so it is smaller.
+    - "`CREATE INDEX \"recents\" ON \"movies\" (\"title\") WHERE \"year\" = 2023;`"
   solution: |
-    CREATE TYPE "swipe_type" AS ENUM('enter', 'exit', 'deposit');
-    CREATE TABLE "swipes" (
-        "id" SERIAL,
-        "card_id" INT,
-        "station_id" INT,
-        "type" "swipe_type" NOT NULL,
-        "datetime" TIMESTAMP NOT NULL DEFAULT now(),
-        "amount" NUMERIC(5,2) NOT NULL CHECK("amount" != 0),
-        PRIMARY KEY("id"),
-        FOREIGN KEY("card_id") REFERENCES "cards"("id"),
-        FOREIGN KEY("station_id") REFERENCES "stations"("id")
-    );
-  verify_after: |
-    INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'deposit', 20);
-    SELECT "type", "amount" FROM "swipes";
-  verify_expect: ["deposit", "20.00"]
-  verify_fail: |
-    INSERT INTO "swipes" ("card_id", "station_id", "type", "amount") VALUES (1, 1, 'teleport', 20);
+    CREATE INDEX "recents" ON "movies" ("title") WHERE "year" = 2023;
+  check:
+    - plan: SELECT "title" FROM "movies" WHERE "year" = 2023
+      contains: ["recents"]
+    - plan: SELECT "title" FROM "movies" WHERE "year" = 1998
+      not_contains: ["recents"]
   explanation: |
-    Postgres uses double quotes like SQLite, not backticks. Its CLI commands are `\l` (list databases), `\c` (connect), `\dt` (list tables), `\d table`, `\q` (quit).
+    The trade-off is a smaller index (less space and cheaper writes) that helps only the queries its condition covers.
   source:
-    - {file: lecture6, lines: "1422-1476", quote: "Create a type and give it some name."}
+    - {file: lecture5, lines: "892-924", quote: "Now though I'm using 1998, which were rows that were not"}
+
+- id: M5-E05
+  title: Drop an index
+  origin: source-demo
+  concepts: [C5.2]
+  difficulty: 1
+  skills: [DROP INDEX]
+  db: movies
+  kind: modify
+  setup: |
+    CREATE INDEX "title_index" ON "movies" ("title");
+  prompt: Remove `title_index` and confirm that the 'Cars' lookup goes back to a SCAN.
+  hints:
+    - Indexes are dropped like tables and views.
+    - "`DROP INDEX name;`"
+    - "`DROP INDEX \"title_index\";`"
+  solution: |
+    DROP INDEX "title_index";
+  check:
+    - plan: SELECT * FROM "movies" WHERE "title" = 'Cars'
+      contains: ["SCAN movies"]
+    - SELECT COUNT(*) FROM sqlite_master WHERE "type" = 'index' AND "name" = 'title_index'
+  explanation: Dropping an index doesn't shrink the database file until you VACUUM (M5-E10).
+  source:
+    - {file: lecture5, lines: "322-332", quote: "I can say DROP INDEX \"title_index\" semicolon."}
+
+- id: M5-E06
+  title: Alice pays Bob $10, atomically
+  origin: source-demo
+  concepts: [C5.7]
+  difficulty: 2
+  skills: [BEGIN TRANSACTION, COMMIT]
+  db: bank
+  kind: modify
+  require: [BEGIN, COMMIT]
+  prompt: |
+    Move $10 from Alice (id 1) to Bob (id 2) inside a single transaction so that no other connection can ever see Bob credited before Alice is debited.
+  hints:
+    - Wrap both UPDATEs between `BEGIN TRANSACTION;` and `COMMIT;`
+    - "Update relative to the current value: `SET \"balance\" = \"balance\" + 10`."
+    - "`BEGIN TRANSACTION; UPDATE \"accounts\" SET \"balance\" = \"balance\" + 10 WHERE \"id\" = 2; UPDATE ... - 10 WHERE \"id\" = 1; COMMIT;`"
+  solution: |
+    BEGIN TRANSACTION;
+    UPDATE "accounts" SET "balance" = "balance" + 10 WHERE "id" = 2;
+    UPDATE "accounts" SET "balance" = "balance" - 10 WHERE "id" = 1;
+    COMMIT;
+  check:
+    - SELECT * FROM "accounts"
+  explanation: |
+    Atomicity: a second terminal sees the old balances until COMMIT, then both changes at once (L1201-1230).
+    The checker also fails your answer if you leave the transaction open.
+  source:
+    - {file: lecture5, lines: "1201-1230", quote: "So this is the atomicity part of transactions."}
+
+- id: M5-E07
+  title: Roll back a transfer that breaks a constraint
+  origin: source-demo
+  concepts: [C5.7]
+  difficulty: 3
+  skills: [ROLLBACK, CHECK constraint]
+  db: bank
+  kind: modify
+  continue_on_error: true
+  require: [BEGIN, ROLLBACK]
+  setup: |
+    UPDATE "accounts" SET "balance" = 0 WHERE "id" = 1;
+    UPDATE "accounts" SET "balance" = 30 WHERE "id" = 2;
+  prompt: |
+    Alice now has $0 and Bob has $30. Run the same transfer of $10 from Alice to Bob in a transaction.
+    The debit violates `CHECK("balance" >= 0)`, so undo the whole transaction so that nobody ever sees Bob at $40.
+    (In this exercise, statements keep running after an error, just like typing them one by one in the shell.)
+  hints:
+    - Credit Bob, then try to debit Alice. Which statement fails?
+    - After a failure inside a transaction, the earlier statements are *still pending*, not undone.
+    - "`BEGIN TRANSACTION; UPDATE ... + 10 WHERE \"id\" = 2; UPDATE ... - 10 WHERE \"id\" = 1; ROLLBACK;`"
+  solution: |
+    BEGIN TRANSACTION;
+    UPDATE "accounts" SET "balance" = "balance" + 10 WHERE "id" = 2;
+    UPDATE "accounts" SET "balance" = "balance" - 10 WHERE "id" = 1;
+    ROLLBACK;
+  check:
+    - SELECT * FROM "accounts"
+  explanation: |
+    ROLLBACK only works inside a transaction. Without BEGIN, the lecturer had to "undo" Bob's credit by hand with another UPDATE (L1289-1305).
+    This is Consistency in ACID: the database never ends in a state that violates its constraints.
+  source:
+    - {file: lecture5, lines: "1309-1325", quote: "ROLLBACK like this, hit Enter"}
+    - {file: lecture5, lines: "1292-1296", quote: "A rollback only works while we're inside of a transaction."}
 
 - id: M5-E08
-  title: Dump every account with SQL injection
-  origin: source-demo
-  concepts: [C5.8]
-  difficulty: 2
-  skills: [SQL injection, UNION]
-  db: bank
-  kind: injection
-  template: SELECT * FROM "accounts" WHERE "id" = {input};
-  prompt: |
-    A careless bank website pastes whatever you type into this query:
-
-    `SELECT * FROM "accounts" WHERE "id" = <your input>;`
-
-    You are Alice (id 1). Type an **input** (not a whole query) that makes the site show **every** account.
-  hints:
-    - Your text becomes part of the SQL. What could you append after the `1`?
-    - Either make the WHERE always true, or glue on a second query.
-    - "`1 UNION SELECT * FROM \"accounts\"` (or `1 OR 1 = 1`)"
-  solution: |
-    1 UNION SELECT * FROM "accounts"
-  explanation: |
-    The fix is a **prepared statement**: `PREPARE balance_check FROM 'SELECT * FROM accounts WHERE id = ?';` then `EXECUTE ... USING @id`.
-    The `?` value is bound as data and never parsed as SQL (see errata #8 for why MySQL still returned Alice).
-    `python3 tools/labs.py injection` shows the safe version in SQLite.
-  source:
-    - {file: lecture6, lines: "2020-2031", quote: "I see everyone's balances and their names too."}
-    - {file: lecture6, lines: "2050-2067", quote: "A prepared statement is a statement that we"}
-
-- id: M5-E09
-  title: Log in as Carter without the password
+  title: Defuse the race condition
   origin: source-question
   concepts: [C5.8]
-  difficulty: 3
-  skills: [SQL injection, comments, OR]
-  db: null
-  kind: injection
-  setup: |
-    CREATE TABLE "users" ("id" INTEGER, "username" TEXT, "password" TEXT, PRIMARY KEY("id"));
-    INSERT INTO "users" VALUES (1, 'carter', 'correct horse'), (2, 'alice', 'battery staple');
-  template: SELECT "id" FROM "users" WHERE "username" = 'carter' AND "password" = '{input}';
-  prompt: |
-    A login form builds:
-
-    `SELECT "id" FROM "users" WHERE "username" = 'carter' AND "password" = '<your input>';`
-
-    and logs you in if any id comes back. You don't know the password. Type a password input that returns Carter's id **1**.
-  hints:
-    - Your input lands *inside* a quoted string. How do you get out of it?
-    - Close the quote, add a condition that is always true, and neutralize the leftover `'` (for example with `--`, which starts a comment).
-    - "`' OR 1 = 1 --` would match every user. To return only Carter, keep his username: `' OR \"username\" = 'carter' --`"
-  solution: |
-    ' OR "username" = 'carter' --
-  explanation: |
-    The lecture's `' OR 1=1` makes the condition always true. With AND binding tighter than OR, `1 = 1` alone would return **every** user.
-    Parameterized queries defeat all of these, because the input can never close the quote.
-  source:
-    - {file: lecture6, lines: "1958-1966", quote: "But then I type in a single quote followed by or 1 equals 1."}
-
-- id: M5-E10
-  title: Give an analyst read access to one view only
-  origin: source-demo
-  concepts: [C5.7, C3.7]
-  difficulty: 2
-  skills: [CREATE USER, GRANT, REVOKE]
-  db: null
-  kind: selfcheck
-  engine: mysql
-  verify_setup: |
-    CREATE TABLE `rides` (`id` INT AUTO_INCREMENT, `origin` VARCHAR(32), `destination` VARCHAR(32), `rider` VARCHAR(32), PRIMARY KEY(`id`));
-    INSERT INTO `rides` (`origin`, `destination`, `rider`) VALUES ('Good Egg Galaxy', 'Honeyhive Galaxy', 'Peach');
-    CREATE VIEW `analysis` AS SELECT `id`, `origin`, `destination`, 'anonymous' AS `rider` FROM `rides`;
-  prompt: |
-    As root, create the user `carter` (password `password`, for the demo only) and give it permission to **read the `analysis` view** and nothing else.
-    Then write the statement that would take that permission away again.
-  hints:
-    - "`CREATE USER 'name' IDENTIFIED BY '...';`"
-    - "`GRANT privilege ON database.object TO 'user';`"
-    - "`GRANT SELECT ON <db>.`analysis` TO 'carter';` … `REVOKE SELECT ON <db>.`analysis` FROM 'carter';`"
-  solution: |
-    CREATE USER 'carter' IDENTIFIED BY 'password';
-    GRANT SELECT ON `analysis` TO 'carter';
-    -- later, to remove it:
-    -- REVOKE SELECT ON `analysis` FROM 'carter';
-  verify_after: |
-    SHOW GRANTS FOR 'carter';
-  verify_expect: ["GRANT SELECT ON", "`analysis`"]
-  verify_cleanup: |
-    DROP USER 'carter';
-  explanation: |
-    The lecture writes `rideshare.analysis` (database.table). Inside the current database, the bare name works too.
-    Unlike SQLite (M3-E09), carter now cannot `SELECT * FROM rides`. Avoid `GRANT ALL ON *.*` in production.
-  source:
-    - {file: lecture6, lines: "1796-1804", quote: "create a user whose name is Carter in single quotes"}
-    - {file: lecture6, lines: "1878-1899", quote: "I can't see the ride data"}
-
-- id: M5-E11
-  title: Choose a scaling plan
-  origin: source-question
-  concepts: [C5.6]
   difficulty: 4
-  skills: [replication, sharding, vertical vs horizontal scaling]
-  db: null
+  skills: [isolation, transaction design]
+  db: bank
   kind: selfcheck
   prompt: |
-    Your app grows from 100 to 100,000 reads and from 50 to 50,000 writes per minute (the lecture's scenario), and it slows down.
-    For (a) a bank ledger and (b) a social network's profile photos, decide:
-    1. Vertical or horizontal scaling first, and why.
-    2. Which replication model and whether it should be synchronous or asynchronous. Where do reads go, and where do writes go?
-    3. If the data no longer fits on one server, how would you shard it, and what two risks must you design against?
+    Charlie ($30) clicks "transfer $30 to Alice" on two laptops at the same moment, while Alice waits at an ATM to withdraw $60.
+    1. Using the lecture's timeline, explain how the bank loses $30.
+    2. Rewrite each transfer so the attack fails, and say which ACID property is at work.
   hints:
-    - Start with the cheapest fix (optimize queries), then a bigger single server, then more servers.
-    - "Single-leader: writes go to the leader and reads can go to followers (read replicas). Then ask: can you afford to lose an acknowledged write?"
-    - "Sharding risks: hotspots (uneven load) and a single point of failure (a shard without replicas)."
+    - The danger is checking the balance in one step and spending it in a later step that runs concurrently.
+    - Each transfer (check + credit + debit) must run as one isolated unit, one after another.
+    - Put the balance check and both updates in one transaction; the second transfer then sees $0 and rolls back.
   solution: |
     -- Model answer:
-    -- 1. Optimize queries, then scale vertically; when one machine is not enough, scale horizontally.
-    -- 2. Single-leader replication: all writes go to the leader, and reads are spread over read replicas.
-    --    (a) Bank: SYNCHRONOUS, because the client is told OK only once a follower also has the data (slower, but no lost money).
-    --    (b) Photos: ASYNCHRONOUS. It is faster, and losing a rare update is acceptable.
-    -- 3. Shard by a key that spreads load evenly (e.g. a hash of the user id rather than name ranges, which can create hotspots),
-    --    and replicate each shard so that no shard is a single point of failure.
-  explanation: There is no single right answer. The point is to state the trade-off (latency vs durability, evenness vs locality) explicitly.
+    -- 1. Both transfers read Charlie's balance (30) before either one subtracts. Both credit Alice $30,
+    --    so Alice sees $60 and withdraws it before the bank notices Charlie couldn't cover the second.
+    -- 2. Make each transfer one transaction and process transactions sequentially (isolated):
+    BEGIN TRANSACTION;
+    -- (application checks: SELECT "balance" FROM "accounts" WHERE "id" = 3;  -> must be >= 30)
+    UPDATE "accounts" SET "balance" = "balance" + 30 WHERE "id" = 1;
+    UPDATE "accounts" SET "balance" = "balance" - 30 WHERE "id" = 3;
+    COMMIT;
+    -- The second transfer starts after the first committed, sees Charlie at $0, and its debit violates
+    -- CHECK("balance" >= 0), so it is rolled back. Property: Isolation (with Consistency enforced by the CHECK).
+  explanation: The exclusive lock taken by a writing transaction is what makes the transactions happen one after another (see M5-E09).
   source:
-    - {file: lecture6, lines: "1498-1545", quote: "So vertical scaling is about increasing your application's capacity"}
-    - {file: lecture6, lines: "1676-1738", quote: "But it's up to you to decide which one might"}
-    - {file: lecture6, lines: "1763-1784", quote: "The goal is to really to avoid what we call a hotspot"}
+    - {file: lecture5, lines: "1337-1388", quote: "Charlie opened up his bank account"}
+    - {file: lecture5, lines: "1397-1430", quote: "and the word for this"}
+
+- id: M5-E09
+  title: "Lab: see an exclusive lock block a reader"
+  origin: source-demo
+  concepts: [C5.9]
+  difficulty: 2
+  skills: [BEGIN EXCLUSIVE, locks]
+  db: bank
+  kind: selfcheck
+  prompt: |
+    This needs two connections, so it runs as a lab: `python3 tools/labs.py locks`
+    (or open `database/bank.db` in two terminals with `sqlite3`).
+    In connection A run `BEGIN EXCLUSIVE TRANSACTION;`. In connection B run `SELECT * FROM "accounts";`.
+    What happens in B, and what happens after A runs `COMMIT;`?
+  hints:
+    - Which lock kinds exist in SQLite? Which one allows other readers?
+    - EXCLUSIVE means nobody else may read or write.
+    - B gets an error until A ends its transaction.
+  solution: |
+    -- connection A
+    BEGIN EXCLUSIVE TRANSACTION;
+    -- connection B
+    SELECT * FROM "accounts";   -- Runtime error: database is locked
+    -- connection A
+    COMMIT;
+    -- connection B
+    SELECT * FROM "accounts";   -- works again
+  explanation: |
+    SHARED locks let many readers in at once. An EXCLUSIVE lock blocks everyone else. In SQLite the lock covers the whole database file (the coarsest granularity).
+  source:
+    - {file: lecture5, lines: "1534-1546", quote: "Runtime error--"}
+    - {file: lecture5, lines: "1464-1494", quote: "unlocked, shared, and exclusive"}
+
+- id: M5-E10
+  title: "Lab: VACUUM gives space back"
+  origin: source-demo
+  concepts: [C5.6]
+  difficulty: 1
+  skills: [VACUUM]
+  db: movies
+  kind: selfcheck
+  prompt: |
+    Run `python3 tools/labs.py vacuum`. It builds a big movies file, creates indexes, drops them, and prints the file size after each step.
+    Before running it, predict: does the file shrink after `DROP INDEX`? After `VACUUM`?
+  hints:
+    - What does SQLite do with the pages an index used to occupy?
+    - It marks them free for reuse and keeps them in the file.
+    - Only VACUUM rebuilds the file and returns those pages to the operating system.
+  solution: |
+    DROP INDEX "title_index";   -- file size unchanged (pages only marked as free)
+    VACUUM;                     -- file shrinks
+  explanation: The lecture saw 158 MB → 158 MB after dropping three indexes, then 100 MB after VACUUM.
+  source:
+    - {file: lecture5, lines: "991-1010", quote: "We're down to in this case 100 million after dropping our indexes"}
+
+- id: M5-E11
+  title: "Lab: time a query before and after an index"
+  origin: source-demo
+  concepts: [C5.1, C5.2]
+  difficulty: 1
+  skills: [.timer]
+  db: movies
+  kind: selfcheck
+  prompt: |
+    Run `python3 tools/build_db.py --big`, then `sqlite3 database/movies_big.db`, then `.timer on`.
+    Time `SELECT * FROM "movies" WHERE "title" = 'Cars';` before and after `CREATE INDEX "title_index" ON "movies" ("title");`.
+    `python3 tools/labs.py timer` does the same automatically.
+  hints:
+    - "`.timer on` is a sqlite3 shell command (no semicolon)."
+    - Look at the "real" figure, the wall-clock time.
+    - Creating the index takes a while, but you pay that cost only once.
+  solution: |
+    .timer on
+    SELECT * FROM "movies" WHERE "title" = 'Cars';      -- e.g. Run Time: real 0.03x
+    CREATE INDEX "title_index" ON "movies" ("title");
+    SELECT * FROM "movies" WHERE "title" = 'Cars';      -- e.g. Run Time: real 0.000x
+  explanation: "real = stopwatch time, user = CPU time spent on the query, sys = time spent in the operating system (the lecture loosely calls it waiting for other processes)."
+  source:
+    - {file: lecture5, lines: "127-148", quote: "I'll say .timer on to make sure that I time my future queries."}
+
+- id: M5-E12
+  title: Walk the B-tree to find Turning Red
+  origin: source-question
+  concepts: [C5.4]
+  difficulty: 2
+  skills: [B-tree search, index trade-offs]
+  db: movies
+  kind: selfcheck
+  prompt: |
+    The lecture's index on `title` is a small B-tree: the root node holds **Frozen | Soul**,
+    and its three leaf nodes hold *Cars, Cars 3, Frozen* · *Luca, Ratatouille, Soul* · *Toy Story, Turning Red, WALL-E*.
+    1. List the comparisons SQLite makes to find **Turning Red**, and say what it gets back from the index.
+    2. Why can't SQLite simply sort the `title` column of the table itself?
+    3. Name the two costs you pay for this index.
+  hints:
+    - At each node, ask "does my value come before this key?" to pick the child to follow.
+    - Turning Red comes after Frozen and after Soul, so which child does that leave?
+    - "Costs: think about pages in a printed book, and about where a new title has to be inserted."
+  solution: |
+    -- Model answer:
+    -- 1. Root: is "Turning Red" before "Frozen"? No. Before "Soul"? No, so follow the third child.
+    --    Leaf: Toy Story, then Turning Red, found. The index returns the ROW NUMBER (pointer) of Turning Red in the table,
+    --    which SQLite then uses to fetch the other columns (unless the index is covering).
+    -- 2. Sorting the table would change which title sits next to which id. Other tables reference those ids, so the
+    --    primary key would no longer identify the same movie. The index is a sorted COPY instead.
+    -- 3. Space (the copy plus pointers) and slower writes (every INSERT/UPDATE/DELETE must also update the tree).
+  explanation: Each comparison discards most of the remaining candidates, which is why the search stays fast even with millions of rows.
+  source:
+    - {file: lecture5, lines: "782-809", quote: "How could I find Turning Red?"}
+    - {file: lecture5, lines: "624-648", quote: "I've broken that relationship"}
+    - {file: lecture5, lines: "848-861", quote: "So these trade-offs are something you should"}

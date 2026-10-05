@@ -1,14 +1,18 @@
 # Source materials
 
-Byte-identical copies of the five uploaded transcripts, renamed so that references stay short:
+Byte-identical copies of the seven uploaded transcripts (two upload batches), renamed so that references stay short:
 
 | File here | Uploaded as | Lecture |
 |---|---|---|
+| `lecture0.txt` | `cs50_sql_lecture0-720p-en.txt` | Week 0 · Querying |
+| `lecture1.txt` | `cs50_sql_lecture1-720p_resize-en.txt` | Week 1 · Relating |
 | `lecture2.txt` | `cs50_sql_lecture2-720p-en.txt` | Week 2 · Designing |
 | `lecture3.txt` | `cs50_sql_lecture3-720p-en.txt` | Week 3 · Writing |
 | `lecture4.txt` | `cs50_sql_lecture4-720p-en.txt` | Week 4 · Viewing |
 | `lecture5.txt` | `cs50_sql_lecture5-720p_MBR-en.txt` | Week 5 · Optimizing |
 | `lecture6.txt` | `cs50_sql_lecture6-720p_MBR-en.txt` | Week 6 · Scaling |
+
+The second batch also contained `lecture2` and `lecture4` again. They were byte-identical (same MD5) to the copies already here, so they were dropped.
 
 A reference like `lecture4 L280-304` means lines 280-304 of `lecture4.txt` (1-based, as shown in any editor).
 Content © CS50 / Harvard University (Carter Zenke). CS50 publishes its course materials under a Creative Commons

@@ -1,11 +1,11 @@
-# M5 · Scaling
+# M6 · Scaling
 *Source: lecture6 (Week 6 · Scaling). MySQL scripts: `database/scaling/mysql/`, PostgreSQL: `database/scaling/postgres/`. All executed on MariaDB 10.11 / PostgreSQL 16 by `tests/test_servers.py`.*
 
 Story: SQLite is an *embedded* database (a file). MySQL and PostgreSQL are *servers* with users, stricter types, procedures, replication and access control. The lecture re-implements MBTA (types), MFA (procedures), rideshare (permissions) and bank (injection) on them.
 
 ---
 
-## C5.1 Database servers and their command-line clients
+## C6.1 Database servers and their command-line clients
 *Source: lecture6 L40-156, L159-352, L1329-1490*
 
 **Level 1.** A server runs on its own machine. You connect over the network as a **user**, and one server holds many databases.
@@ -26,7 +26,7 @@ Story: SQLite is an *embedded* database (a file). MySQL and PostgreSQL are *serv
 
 ---
 
-## C5.2 MySQL types
+## C6.2 MySQL types
 *Source: lecture6 L183-852*
 
 **Integers** (signed range; `UNSIGNED` shifts the range to 0…):
@@ -65,7 +65,7 @@ CREATE TABLE `swipes` (
 
 ---
 
-## C5.3 ALTER TABLE … MODIFY (MySQL)
+## C6.3 ALTER TABLE … MODIFY (MySQL)
 *Source: lecture6 L853-923*
 
 ```sql
@@ -76,7 +76,7 @@ MODIFY replaces the whole column definition, so repeat every old ENUM value and 
 
 ---
 
-## C5.4 Stored procedures (MySQL)
+## C6.4 Stored procedures (MySQL)
 *Source: lecture6 L947-1278*
 
 **Level 1.** A named, saved sequence of statements on the server that you can `CALL` again and again, optionally with inputs.
@@ -93,15 +93,15 @@ END//
 DELIMITER ;
 CALL `sell`(2);
 ```
-* `DELIMITER //` lets the body contain `;` (D5-02).
+* `DELIMITER //` lets the body contain `;` (D6-02).
 * Several parameters are separated by commas, and procedures can call procedures (L1110-1118, L1250-1256).
-* Control flow exists (IF / ELSEIF / ELSE, loops). The lecture leaves using it to you (M5-E06).
+* Control flow exists (IF / ELSEIF / ELSE, loops). The lecture leaves using it to you (M6-E06).
 
 **Level 3.** Procedures vs triggers vs views: a view is a *read* abstraction, a trigger *reacts* automatically to writes, and a procedure is an *action* you invoke explicitly. Calling `sell(2)` twice logs two sales unless you guard against it.
 
 ---
 
-## C5.5 PostgreSQL types
+## C6.5 PostgreSQL types
 *Source: lecture6 L1293-1477*
 
 * Integers: `SMALLINT`, `INT`, `BIGINT`. Auto-increment: **`SERIAL`** (SMALLSERIAL, BIGSERIAL).
@@ -111,7 +111,7 @@ CALL `sell`(2);
 
 ---
 
-## C5.6 Scaling strategies
+## C6.6 Scaling strategies
 *Source: lecture6 L1494-1785*
 
 **Vertical scaling** means a more powerful single server. **Horizontal scaling** means more servers.
@@ -126,7 +126,7 @@ CALL `sell`(2);
 
 ---
 
-## C5.7 Access control
+## C6.7 Access control
 *Source: lecture6 L1786-1920*
 
 ```sql
@@ -134,11 +134,11 @@ CREATE USER 'carter' IDENTIFIED BY 'password';          -- demo password only!
 GRANT SELECT ON `rideshare`.`analysis` TO 'carter';     -- read the view only
 REVOKE SELECT ON `rideshare`.`analysis` FROM 'carter';
 ```
-This finally makes the M3 "secure view" real: carter can read `analysis` but gets a permission error on `rides`. Grant several privileges with commas (`SELECT, INSERT`). Avoid `GRANT ALL ON *.*` outside a sandbox.
+This finally makes the M4 "secure view" real: carter can read `analysis` but gets a permission error on `rides`. Grant several privileges with commas (`SELECT, INSERT`). Avoid `GRANT ALL ON *.*` outside a sandbox.
 
 ---
 
-## C5.8 SQL injection and prepared statements
+## C6.8 SQL injection and prepared statements
 *Source: lecture6 L1921-2148*
 
 **Level 1.** If an application pastes user input into SQL text, the user can write SQL.
@@ -158,4 +158,4 @@ EXECUTE `balance_check` USING @id;      -- returns only Alice
 
 **Level 3.** The bound value is **never parsed as SQL**. The lecture calls this escaping, but it is really binding (errata #8). MySQL returned Alice because it converted `'1 UNION …'` to the number 1 when comparing it with the INT column. SQLite returns no row for the same input. In application code, never build SQL with f-strings or concatenation. Use the driver's placeholders (`?`, `%s`). `python3 tools/labs.py injection` shows both versions.
 
-**Practice:** M5-E01 … M5-E10 · **Debug:** D5-01, D5-02 · **Review deck:** R5
+**Practice:** M6-E01 … M6-E10 · **Debug:** D6-01, D6-02 · **Review deck:** R6

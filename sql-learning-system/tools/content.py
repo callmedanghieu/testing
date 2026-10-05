@@ -17,19 +17,21 @@ ORIGINS = {
     "generated": "GENERATED · written for this system (reinforces a concept from the source)",
 }
 KINDS = {"query", "modify", "error", "injection", "selfcheck"}
-MODULES = ["M0", "M1", "M2", "M3", "M4", "M5"]
+MODULES = ["M0", "M1", "M2", "M3", "M4", "M5", "M6"]
 MODULE_TITLES = {
-    "M0": "Query toolkit (prerequisite)", "M1": "Designing", "M2": "Writing",
-    "M3": "Viewing", "M4": "Optimizing", "M5": "Scaling",
+    "M0": "Querying", "M1": "Relating", "M2": "Designing", "M3": "Writing",
+    "M4": "Viewing", "M5": "Optimizing", "M6": "Scaling",
 }
 SOURCE_FILES = {
+    "lecture0": "cs50_sql_lecture0-720p-en.txt",
+    "lecture1": "cs50_sql_lecture1-720p_resize-en.txt",
     "lecture2": "cs50_sql_lecture2-720p-en.txt",
     "lecture3": "cs50_sql_lecture3-720p-en.txt",
     "lecture4": "cs50_sql_lecture4-720p-en.txt",
     "lecture5": "cs50_sql_lecture5-720p_MBR-en.txt",
     "lecture6": "cs50_sql_lecture6-720p_MBR-en.txt",
 }
-LECTURE_TITLES = {"lecture2": "Designing", "lecture3": "Writing", "lecture4": "Viewing",
+LECTURE_TITLES = {"lecture0": "Querying", "lecture1": "Relating", "lecture2": "Designing", "lecture3": "Writing", "lecture4": "Viewing",
                   "lecture5": "Optimizing", "lecture6": "Scaling"}
 
 

@@ -4,7 +4,9 @@ Each dataset recreates one the lectures use. **Values the lecture states are pre
 
 | Dataset | Used in | Tables | Preserved from the lectures | Synthetic / reconstructed |
 |---|---|---|---|---|
-| `longlist` | lecture4 (and lecture2 glimpse) | authors, books, authored, ratings | Real International Booker longlist titles 2018-2023; Fernanda Melchor = author 24 (Paradais, Hurricane Season); Han Kang = 31 → book 74 *The White Book*; *Minor Detail* = book 34 (2021); 13 books in 2023; slide averages 3.67 / 2.5 for books 1 / 2 | Other ids, two years with 12 of 13 titles, all other ratings (seeded random) |
+| `longlist0` | lecture0 | longlist (one wide table: title, author, translator, format, pages, publisher, year, votes, rating) | Real International Booker longlist titles 2018-2023 (78 books); 2 books without translator; AVG rating 3.75, MAX 4.52 (*The Eighth Life*), MIN 3.05, > 600,000 votes; 4 books with rating > 4 and votes > 10,000; *Pyre*, *Tyll* | Format, pages, votes and ratings are engineered so the lecture's results come out; 30 distinct publishers, not the lecture's 33 |
+| `longlist` | lecture1, lecture4 (and lecture2 glimpse) | authors, publishers, translators, books, authored, translated, ratings | Same 78 books; Eva Baltasar = author 23 → book 1 *Boulder*; Fitzcarraldo Editions = publisher 5, MacLehose Press = 12; *The Birthday Party* = book 8 by Laurent Mauvignier (44); Fernanda Melchor = 24 (Paradais, Hurricane Season); Han Kang = 31 → book 74 *The White Book*; *Minor Detail* = 34 (2021); Ngũgĩ wa Thiong'o both author and translator; Hughes ∩ Jull Costa = one book; 13 books in 2023 | Other ids; 13,359 individual ratings, engineered so book 1 averages 3.77 (2,779 ratings), the HAVING > 4 query returns books 5 and 10, and lecture4's per-year averages match. The *slides'* toy values (3.67 / 2.5) are not reproduced, see errata #23 |
+| `sea_lions` | lecture1 L1022-1404 | sea_lions, migrations | Ayah, Spot, Tiger, Mabel, Rick, Jolee and their ids; Jolee has no migration, and two migrations (11735, 11736) have no sea lion | Distances and days |
 | `mbta` | lecture2, lecture6 | cards, stations, swipes | Final lecture-2 schema; fare 2.40; real station names | Card ids and every swipe |
 | `charlie` | lecture2 L147-199 | log | Every value of the first draft table (Charlie, Alice, Bob) | — |
 | `mfa` | lecture3, lecture4, lecture6 | collections, artists, created | Titles, accession numbers, dates; Farmers = 1, Imaginative Landscape = 2; Li Yin = 1, Unidentified artist = 3; ON DELETE CASCADE | Artist 2 ("Placeholder Artist") and the attributions of items 3-4 |
@@ -31,6 +33,9 @@ erDiagram
   authors ||--o{ authored : writes
   books ||--o{ authored : "written by"
   books ||--o{ ratings : receives
+  publishers ||--o{ books : publishes
+  translators ||--o{ translated : translates
+  books ||--o{ translated : "translated by"
   cards ||--o{ swipes : makes
   stations ||--o{ swipes : "happens at"
   artists ||--o{ created : creates

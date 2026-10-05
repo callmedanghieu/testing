@@ -1,55 +1,74 @@
-# Review deck M0. Types: quick (flashcard), concept (multiple choice), predict (multiple choice, answer verified by
-# executing `sql` in tests), debug / write (pointers to practice items). Output format for predict:
-# columns joined by " | ", rows joined by "; ", "(no rows)" when empty, "ERROR: <message start>" on error.
+# Review deck M0 (lecture0). Types: quick, concept, predict (answer verified by executing `sql` in tests), debug, write.
+# Predict output format: columns joined by " | ", rows by "; ", "(no rows)" when empty, "ERROR: <message start>" on error.
 - id: R0-01
   type: quick
   front: What does `LIMIT 5` do, and why use it on a big table?
-  back: It returns at most 5 rows. It lets you peek at the data without printing 400,000 rows (lecture5 L91-103).
-  source: {file: lecture5, lines: "93-103", quote: "I'm hearing LIMIT, so let's try that."}
+  back: It returns at most 5 rows. It lets you peek at the data without printing every row.
+  source: {file: lecture0, lines: "366-374", quote: "And for that, I could use this other SQL keyword, this one called LIMIT."}
 - id: R0-02
   type: predict
-  db: mfa
-  sql: SELECT COUNT(*) FROM "collections" WHERE "acquired" = NULL;
-  choices: ["1", "0", "4", "ERROR: no such column"]
+  db: longlist0
+  sql: SELECT COUNT(*) FROM "longlist" WHERE "translator" = NULL;
+  choices: ["2", "0", "78", "ERROR: no such column"]
   answer: 1
-  why: "`= NULL` is never true, so nothing is counted. Use IS NULL."
-  source: {file: lecture3, lines: "734-741", quote: "IS NULL semicolon"}
+  why: "`= NULL` is never true, so nothing is counted. `IS NULL` would find 2."
+  source: {file: lecture0, lines: "598-606", quote: "We could use IS NULL to figure out if a value is null."}
 - id: R0-03
   type: concept
-  question: A subquery returns several rows. Which outer operator compares against *all* of them?
-  choices: ["=", "IN", "LIKE", "IS"]
+  question: Which quotes go around what in SQLite?
+  choices: ["Double quotes for strings, single quotes for column names", "Double quotes for identifiers (tables, columns), single quotes for strings", "Either, interchangeably", "No quotes ever"]
   answer: 1
-  why: "`= (subquery)` uses only the first row in SQLite. `IN (subquery)` tests membership in the whole list."
-  source: {file: lecture4, lines: "171-174", quote: "the ID is in that list of books Fernanda has written"}
+  why: The lecture's style convention is `"title"` for identifiers and `'hardcover'` for strings. Mixing them up can silently change meaning (debugging D0-03).
+  source: {file: lecture0, lines: "306-315", quote: "double quotes for column names and single quotes for string names"}
 - id: R0-04
   type: predict
-  db: votes
-  sql: SELECT COUNT(DISTINCT "title") > 4 FROM "votes";
-  choices: ["0", "1"]
+  db: longlist0
+  sql: SELECT "title" FROM "longlist" WHERE "title" = 'pyre';
+  choices: ["Pyre", "(no rows)", "ERROR: no such column: pyre"]
   answer: 1
-  why: GROUP BY / DISTINCT on text is exact and case-sensitive, so the typos and case variants form extra groups.
-  source: {file: lecture3, lines: "1250-1256", quote: "GROUP BY"}
+  why: "`=` compares text exactly, including case. `LIKE 'pyre'` would match *Pyre* because LIKE ignores (ASCII) case."
+  source: {file: lecture0, lines: "963-971", quote: "So in this case, the equal is going to be case-sensitive."}
 - id: R0-05
   type: predict
-  db: longlist
-  sql: SELECT ROUND(AVG("rating"), 2) FROM "ratings" WHERE "book_id" = 1;
-  choices: ["3.67", "3.66", "3.6666", "4"]
-  answer: 0
-  why: Ratings 4, 3, 4 average 3.666…, and ROUND(…, 2) gives 3.67, the value on the lecture's slide.
-  source: {file: lecture4, lines: "383-384", quote: "3.67 book 1"}
+  db: longlist0
+  sql: SELECT COUNT(*), COUNT("translator") FROM "longlist";
+  choices: ["78 | 78", "78 | 76", "76 | 78", "76 | 76"]
+  answer: 1
+  why: COUNT(column) skips NULLs, and two books have no translator.
+  source: {file: lecture0, lines: "1336-1343", quote: "So COUNT, when given a column, counts only those that"}
 - id: R0-06
   type: concept
-  question: "In `JOIN \"authored\" ON \"authors\".\"id\" = \"authored\".\"author_id\"`, which side is the primary key?"
-  choices: ['"authors"."id"', '"authored"."author_id"', "both", "neither"]
-  answer: 0
-  why: authors.id is the primary key, and authored.author_id is the foreign key that references it.
-  source: {file: lecture4, lines: "63-67", quote: "take the primary key in one table"}
+  question: "`ORDER BY \"rating\" LIMIT 10` returns…"
+  choices: ["the 10 best-rated books", "the 10 worst-rated books", "10 random books", "an error: DESC is required"]
+  answer: 1
+  why: ORDER BY is ascending (smallest first) by default. The lecturer got 3.05 … 3.42 at first and fixed it with DESC.
+  source: {file: lecture0, lines: "1002-1017", quote: "So let me show you that ORDER BY does by default sort from least to greatest."}
 - id: R0-07
+  type: predict
+  db: longlist0
+  sql: SELECT MAX("title"), MIN("title") FROM "longlist";
+  choices: ["A New Name: Septology VI-VII | Wretchedness", "Wretchedness | A New Name: Septology VI-VII", "The Adventures of China Iron | Tyll"]
+  answer: 1
+  why: On text, MAX and MIN compare alphabetically, not by length. MAX is the alphabetically last title.
+  source: {file: lecture0, lines: "1305-1325", quote: "So MAX seems to give us the lowest alphabetically"}
+- id: R0-08
+  type: concept
+  question: "Which pattern matches exactly four-character titles beginning with T?"
+  choices: ["'T%'", "'T___'", "'T_%'", "'%T___%'"]
+  answer: 1
+  why: Each `_` is exactly one character, while `%` is any run of characters (including none).
+  source: {file: lecture0, lines: "805-814", quote: "This is the only title that has T and then three characters after it."}
+- id: R0-09
+  type: quick
+  front: "What does `BETWEEN 2019 AND 2022` include?"
+  back: Both ends, so it is the same as `>= 2019 AND <= 2022`.
+  source: {file: lecture0, lines: "878-883", quote: "This is inclusive."}
+- id: R0-10
   type: debug
   ref: D0-02
-- id: R0-08
+- id: R0-11
   type: debug
-  ref: D0-05
-- id: R0-09
+  ref: D0-03
+- id: R0-12
   type: write
-  ref: M0-E08
+  ref: M0-E13
