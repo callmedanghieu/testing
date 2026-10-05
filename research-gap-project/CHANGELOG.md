@@ -2,6 +2,20 @@
 
 Each batch is added without deleting earlier content. Superseded statements are kept and marked ("Batch 1 view", "v1", "preserved"). Batch 2 additions are marked **[B2]** or appear under "Batch 2" headings.
 
+## Final analysis (all batches complete)
+
+- Added `final_analysis/`:
+  - `FINAL_RESEARCH_GAP_REPORT.md`
+  - `final_gap_ranking.csv` (15 candidates scored, with verdicts)
+  - `corpus_coding.csv` (each paper coded on 22 design features)
+  - `tally.py` → `corpus_tallies.md`
+- All 15 candidate gaps re-evaluated against the 9-paper corpus:
+  - **5 kept:** F1 = G1+G14; F2 = G6+G13+G7; F3 = G4 re-framed; F4 = G3; F5 = G5.
+  - **4 merged:** G7, G13 → F2; G14 → F1; G2 → design standard.
+  - **6 rejected:** G8, G9, G10, G11, G12, G15.
+- **Change vs v2:** G4 is re-framed from "resolve the P3 contradiction" (weak, since P3 is low-grade) to a universal measurement gap: 0/5 CSR papers measure disclosure quality or control for general disclosure. It now ranks above the mechanism gap.
+- Earlier files are unchanged; `research_gaps/ranked_gaps.md` points to the final report.
+
 ## Batch 2: 4 new papers + 1 duplicate
 
 **Files received:** `c9acc018-thuy2022.pdf`, `0f2c53f6-IMFI_2019_03_Le.pdf`, `1b16cfff-12231-42481-1-SM.pdf`, `f57fe841-srivastava2019.pdf`, `a7eaed52-6_Zulfiqar_Shah2.pdf`

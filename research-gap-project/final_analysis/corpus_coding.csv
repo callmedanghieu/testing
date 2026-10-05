@@ -1,0 +1,10 @@
+paper,country,construct,coe_proxy,capm_coe,implied_or_exante_coe,negative_coe_values,firm_fe_estimate_reported,full_year_effects,dynamic_gmm,quasi_experiment,external_iv,mechanism_tested,moderator_tested,disclosure_binary_count,disclosure_quality_measured,controls_general_disclosure,studies_cod,reg_shock_inside_window_unused,headline_not_supported_by_preferred_estimate,explicit_limitations_section,grade,source_notes
+P1,Vietnam,CSR disclosure,CAPM,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,1,Low,"FE coef not reported (Tables 6-8 p.68-69); Circular 155 window p.64"
+P2,Vietnam,Sustainability disclosure,CAPM,1,0,1,1,0,0,0,0,0,0,1,0,0,1,1,0,1,Moderate,"COE min -0.057 Table 2 p.1265; COVID dummy only; Circular 96 p.1257"
+P3,Vietnam,Sustainability disclosure,CAPM,1,0,1,1,0,0,0,0,0,0,1,0,0,0,1,1,0,Low,"FE p=0.452 Table 3 p.143; Circular 96/155 p.139-141"
+P4,Vietnam,Governance,CAPM,1,0,1,1,1,0,0,0,0,0,NA,NA,NA,0,0,1,0,Low,"DUAL coding p.3086 vs p.3093; COE min -0.811 p.3089"
+P5,Vietnam,Environmental disclosure,Forward E/P,0,1,1,1,0,0,0,0,0,0,1,0,0,0,1,1,1,Low-moderate,"Significant only with DK-SE T=4 Table 7 p.94; COE min -414 p.92"
+P6,Vietnam,CSR disclosure,Implied (Easton+Harris-Wang),0,1,0,0,0,1,0,0,1,1,1,0,0,0,1,1,1,Moderate,"Moderation direction abstract p.1384 vs Table 5 p.1392; Circular 155 p.1385"
+P7,Vietnam,General disclosure,Implied (residual income),0,1,0,0,0,0,0,0,0,0,0,0,NA,0,0,0,0,Low-moderate,"Cross-section FY2015 p.67; Botosan weighted index"
+P8,India,Governance,Undefined,0,0,NA,0,0,0,0,0,0,0,NA,NA,NA,0,1,0,0,Low-moderate,"COE never defined; pooled OLS p.15; Clause 49/Companies Act 2013 p.4-6"
+P9,Pakistan,Governance,CAPM,1,0,1,0,1,0,0,0,0,0,NA,NA,NA,0,0,1,1,Low,"CGS n.s. Tables 9-10 vs conclusion p.163; Ke min -0.93 p.149"

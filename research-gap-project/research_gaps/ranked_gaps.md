@@ -243,3 +243,7 @@ Moderators embedded across ideas: G9 (state ownership; P6 baseline), **G7 (gover
 **Design standard (G2, strengthened):** CAPM + implied COE side by side; release-dated disclosure; firm + year FE; control for **general disclosure (P7 construct)** when estimating CSR effects.
 
 **Changes vs v1 final ordering:** none in the identity of the top 5. G1 feasibility ↑; G3 re-scoped around P6; G6 gains a governance parallel; the design standard is tightened.
+
+---
+
+> **Superseded by the final analysis.** See `../final_analysis/FINAL_RESEARCH_GAP_REPORT.md` and `../final_analysis/final_gap_ranking.csv`. The v1 and v2 rankings above are kept as the audit trail.

@@ -2,6 +2,31 @@
 
 A systematic review of the provided papers (Batch 1: 5 papers; Batch 2: 4 new papers + 1 duplicate; **9 unique papers**) to identify research gaps that are defensible and feasible. The PDFs are the only source of truth. Every load-bearing claim is page-referenced and machine-checked (`source_traceability/`).
 
+## ▶ Final analysis (all batches): start here
+
+**`final_analysis/FINAL_RESEARCH_GAP_REPORT.md`** is the definitive output. It covers the complete set of 9 unique papers (10 files).
+
+- **Corpus diagnosis (from `final_analysis/corpus_tallies.md`):**
+  - **0/9** quasi-experiments, while **6/9** papers have an unused regulatory shock inside their window.
+  - 5/9 use CAPM cost of equity; 5/8 report negative COE values.
+  - **0/5** CSR papers measure disclosure quality or control for general disclosure.
+  - 1/9 tests a mechanism; 1/9 studies the cost of debt.
+  - 5/9 headline claims are not supported by their own preferred estimate.
+- **Established:** the *direction* of disclosure → lower cost of equity in Vietnam (5 of 6 papers, across CAPM and implied proxies). Causality, magnitude, mechanism and what is priced remain unresolved. Governance → COE is not established in any of the three countries.
+- **Verdicts on 15 candidate gaps:** 5 kept, 4 merged, 6 rejected (`final_analysis/final_gap_ranking.csv`).
+
+| Rank | Final gap | Score /40 |
+|---|---|---|
+| 1 | **F1** Causal effect of mandated E&S disclosure (Circular 155 / 96), compliance-gap intensity DiD | 34 |
+| 2 | **F2** Beyond-compliance signalling: voluntary disclosure and substantive governance vs compliance | 32 |
+| 3 | **F3** What is priced: verifiable vs narrative disclosure, net of general transparency; sensitive industries | 29 |
+| 4 | **F4** Channel horse race: liquidity / adverse selection vs investor base vs crash risk | 29 |
+| 5 | **F5** Creditor channel with a valid cost-of-debt measure (conditional) | 27 |
+
+**Recommended flagship:** F1 + F2 in one paper, built on a single firm–year–item disclosure matrix. G2 (COE measurement) and G8 (time effects) become a mandatory design standard rather than standalone gaps.
+
+The sections below record the earlier batch-level syntheses (v2, v1) for traceability.
+
 ## Executive synthesis (v2, after Batch 2)
 
 **We have reviewed 9 unique papers from 10 files** (Batch 2's `IMFI_2019_03_Le.pdf` duplicates P5 and is not counted):
@@ -103,6 +128,7 @@ Design standard for all five (G2): multiple COE proxies, disclosure dated by rep
 ```
 research-gap-project/
 ├── CHANGELOG.md                 what each batch added or changed
+├── final_analysis/              FINAL report, ranking CSV, corpus coding + tallies (tally.py)
 ├── papers/                      5 source PDFs + text/ (page-tagged extractions) + README
 ├── literature_database/
 │   ├── literature_matrix.csv    Phase 2: one row per paper, 22 fields (incl. Batch)
@@ -137,6 +163,7 @@ research-gap-project/
 ```bash
 python3 literature_database/build_database.py      # regenerate CSV + JSON
 python3 source_traceability/verify_claims.py       # re-check every anchor against the PDF text (exit 1 on failure)
+python3 final_analysis/tally.py                    # recompute corpus-level counts used in the final report
 ```
 
 ## Conventions
