@@ -1,0 +1,148 @@
+claim_id,paper,pdf_page,printed_page,location,claim,verbatim_anchor,status,used_in
+P1-01,P1,4,62,Sec.1,Cites Breuer et al.: CSR lowers COE only where investor protection is strong,Breuer và cộng sự (1018),VERIFIED (anchor found on page),limitations E
+P1-02,P1,4,62,Sec.1,"Cites Feng et al. (2015): CSR disclosure lowers COE in North America/Europe, not Asia",Feng và cộng sự (2015),VERIFIED (anchor found on page),limitations E
+P1-03,P1,4,62,Sec.2.1,Cites Dhaliwal et al. (2011): CSR info raises institutional ownership,tăng tỷ lệ sở hữu cổ phần của các nhà đầu tư tổ,VERIFIED (anchor found on page),white_space M4; Idea 3
+P1-04,P1,5,63,Sec.2.2,Over-investment / agency-cost view of CSR (Bhandari & Javakhadze 2017),Bhandari và Javakhadze,VERIFIED (anchor found on page),comparison 4.1; limitations D
+P1-05,P1,5,63,Sec.2.3,Liquidity channel (Amihud & Mendelson 1986; Diamond & Verrecchia 1991),"Amihud và Mendelson, 1986",VERIFIED (anchor found on page),G3
+P1-06,P1,6,64,Sec.3.1,Window 2014-2021 chosen as before/after Circular 155,2014-2021 bởi đây là giai đoạn trước và sau,VERIFIED (anchor found on page),G1; Idea 1
+P1-07,P1,6,64,Sec.3.1,93 of 500 VNR500 firms; 744 obs,93 trong tổng số 500 doanh nghiệp,VERIFIED (anchor found on page),inventory
+P1-08,P1,6,64,Sec.3.2.1,Rf = 1-year government bond,trái phiếu Chính phủ Việt Nam kỳ hạn 1 năm,VERIFIED (anchor found on page),G2
+P1-09,P1,7,65,Sec.3.2.1,MRP = average over 2014-2021 (constant),kỳ hạn 1 năm trong giai đoạn 2014- 2021,VERIFIED (anchor found on page),G2; audit
+P1-10,P1,8,66,Sec.3.2.2,CSRI = score / 33 Circular-155 items,tổng số 33 điểm khoản mục thông tin,VERIFIED (anchor found on page),G6
+P1-11,P1,7,65,Table 1,"33 items: environment 18, labour 10, community 5",,"VISUAL (image table, checked on rendered page)",G6; Idea 1
+P1-12,P1,9,67,Table 3,SD of CSRI 4.172 (range 0.048-0.895); SD of LEV 2.194 (range 0.218-0.839),,"VISUAL (image table, checked on rendered page)",audit
+P1-13,P1,10,68,Tables 5-6,Mean VIF 1.25 in table; Hausman p=0.0002; F p=0.0001,,"VISUAL (image table, checked on rendered page)",audit
+P1-14,P1,10,68,Sec.4.1,Text reports mean VIF 1.29,"trung bình hệ số VIF là 1,29",VERIFIED (anchor found on page),audit
+P1-15,P1,11,69,Table 7,Heteroskedasticity p=0.2351; autocorrelation p=0.3065,,"VISUAL (image table, checked on rendered page)",audit
+P1-16,P1,11,69,Table 8,GLS: CSRI -6.012*** (-0.09); SIZE -2.230*; LEV 0.795***; BTM 2.134**; N=744,,"VISUAL (image table, checked on rendered page)",C2; G1
+P1-17,P1,12,70,Sec.5,Conclusion asserts information-asymmetry mechanism,bớt bất cân xứng thông tin từ đó giúp giảm chi phí,VERIFIED (anchor found on page),G3
+P1-18,P1,13,71,Sec.5,Limitation: only aggregate effect; future: specific CSR dimensions,động tổng thể của công bố CSR đến chi phí vốn,VERIFIED (anchor found on page),G10
+P2-01,P2,2,1257,Sec.1,Shad et al. (2020): environmental reporting lowers only COD,environmental sustainability reporting was shown to reduce only the COD,VERIFIED (anchor found on page),C7
+P2-02,P2,2,1257,Sec.1,Circular 96/2020 on sustainability reporting,Circular No. 96/2020/TT-BTC,VERIFIED (anchor found on page),G1
+P2-03,P2,3,1258,Sec.1,Green credit implementation faces challenges,the implementation of green credit faces considerable challenges,VERIFIED (anchor found on page),G5
+P2-04,P2,3,1258,Sec.1,RQ1 on cost of debt,RQ1. Does disclosing sustainable development information affect the cost of debt?,VERIFIED (anchor found on page),inventory
+P2-05,P2,5,1260,Sec.2.1.2,Signalling is the 'most foundational' theory,signalling theory is the most foundational and critical framework,VERIFIED (anchor found on page),G6; Idea 2
+P2-06,P2,5,1260,Sec.2.2,Li & Liu (2018): CSR disclosure lowers COE more in sensitive industries; SOEs benefit more,Li and Liu (2018) show that high-quality CSR disclosure negatively impacts the COE,VERIFIED (anchor found on page),G4; G9
+P2-07,P2,6,1261,Sec.2.3,Ye & Zhang (2011): U-shaped CSR-COD relation,U-shaped relationship between social performance and COD,VERIFIED (anchor found on page),G11; Idea 5
+P2-08,P2,6,1261,Sec.3.1,Sample = 100 largest by market cap at 31 Dec 2023,100 listed companies with the largest market capitalisation,VERIFIED (anchor found on page),audit
+P2-09,P2,7,1262,Sec.3.2.2,COD = interest expense / liabilities,COD refers to the effective cost of interest,VERIFIED (anchor found on page),G5
+P2-10,P2,8,1263,Sec.3.2.3,77 binary GRI items,The maximum number of SDG items a firm can disclose is 77,VERIFIED (anchor found on page),G6
+P2-11,P2,9,1264,Table 1,COVID dummy = 1 for 2021,if the year is 2021,VERIFIED (anchor found on page),audit
+P2-12,P2,10,1265,Table 2,COE min negative (0.057 in parentheses); SDG max 0.571,COE 300 0.154 0.063 (0.057) 0.334,VERIFIED (anchor found on page),G2; audit
+P2-13,P2,11,1266,Table 3,COE: FEM -0.138* (t=-2.52); GLS -0.070**,−0.138* (−2.52),VERIFIED (anchor found on page),C1; C2
+P2-14,P2,12,1267,Sec.4.2.1,SOEs have lower COE,owned enterprises have a lower COE compared to private enterprises,VERIFIED (anchor found on page),C3
+P2-15,P2,12,1267,Table 4,COD: GLS -0.029*,−0.029* (−2.46),VERIFIED (anchor found on page),G5
+P2-16,P2,13,1268,Table 5,WACC: FEM -0.038 (t=-1.34) n.s.,−0.038 (−1.34),VERIFIED (anchor found on page),C2
+P2-17,P2,14,1269,Sec.4.2.3,ESI firms have lower WACC,have a lower average cost of capital than their counterparts,VERIFIED (anchor found on page),G4
+P2-18,P2,15,1270,Table 6,Environment sub-index -0.090*** on COE,−0.090*** (−4.70),VERIFIED (anchor found on page),G4; C7
+P2-19,P2,16,1271,Sec.5,Greenwashing risk,Greenwashing describes organisations,VERIFIED (anchor found on page),G7
+P2-20,P2,16,1271,Sec.5,Limitation: no lagged effects,the study did not account for lagged effects,VERIFIED (anchor found on page),limitations A
+P2-21,P2,16,1271,Sec.5,Future research: endogeneity,Addressing endogeneity issues within the model,VERIFIED (anchor found on page),G1
+P2-22,P2,23,1278,Further reading,Cites Chinese quasi-natural experiment (Zhao & Huang 2024),quasi-natural experiment in China,VERIFIED (anchor found on page),G1
+P2-23,P2,24,1279,Appendix A1,Disclosure shares by GRI topic (e.g. GRI 305 Emissions),GRI 305 – Emissions,VERIFIED (anchor found on page),G4
+P3-01,P3,2,139,Sec.1,Market-upgrade goal (frontier to emerging),khoán Việt Nam đến năm 2030 là nâng hạng từ thị trường,VERIFIED (anchor found on page),Idea 3
+P3-02,P3,3,140,Sec.2.1,Effects may weaken in crises,giai đoạn khủng hoảng kinh tế khi nhà đầu tư ưu tiên,VERIFIED (anchor found on page),G8
+P3-03,P3,4,141,Sec.3.3,Rf from Damodaran,Aswath Damodaran,VERIFIED (anchor found on page),G2
+P3-04,P3,4,141,Sec.3.3,77 GRI items,dựa trên 77 chỉ tiêu theo,VERIFIED (anchor found on page),C1
+P3-05,P3,4,141,Sec.3.3,15 GRI items appear in Circular 155 appendix,15 chỉ tiêu của GRI được sử,VERIFIED (anchor found on page),G6
+P3-06,P3,5,142,Sec.3.5,F-test described as OLS vs REM,(giữa OLS và REM),VERIFIED (anchor found on page),audit
+P3-07,P3,5,142,Table 1,"Disclosure mean 2023 = 0.188, max 0.571","0,1880345",VERIFIED (anchor found on page),C1
+P3-08,P3,6,143,Table 2,Mean COE 2023 = 11.72%,"11,71744",VERIFIED (anchor found on page),C1
+P3-09,P3,6,143,Table 3,"FEM PTBVDN = 4.788, p = 0.452","4,788447 0,452",VERIFIED (anchor found on page),C1; C2
+P3-10,P3,6,143,Table 3,Hausman p = 0.0000,"Prob > chi2 = 0,0000",VERIFIED (anchor found on page),C1
+P3-11,P3,6,143,Sec.4.1,Text claims FEM shows positive effect,Kết quả hồi quy theo mô hình tác động cố định (FEM),VERIFIED (anchor found on page),audit
+P3-12,P3,7,144,Sec.4.1,Robust + GMM claimed (no results shown),chỉnh sai số vững (Robust) và hồi quy GMM,VERIFIED (anchor found on page),audit
+P3-13,P3,7,144,Sec.4.2,Compliance-cost explanation,tuân thủ cao mà doanh nghiệp phải gánh chịu khi thực,VERIFIED (anchor found on page),G4
+P3-14,P3,7,144,Sec.5.1,Disclosure quality not trusted by investors,"tin (tính xác thực, tính nhất quán về cách đo lường, ghi",VERIFIED (anchor found on page),G7
+P3-15,P3,8,145,Sec.5.2,Future: dividend growth model COE,tức (DGM) nhằm tính toán chi phí sử dụng VCSH,VERIFIED (anchor found on page),G2
+P3-16,P3,8,145,Sec.5.2,Future: cost of debt,PTBV đến chi phí nợ của doanh nghiệp,VERIFIED (anchor found on page),G5
+P4-01,P4,1,3085,Sec.1,Interviews cited without method,based on the interview results,VERIFIED (anchor found on page),audit
+P4-02,P4,2,3086,Sec.2.1,"DUAL = 0 if CEO is also chair, 1 if not",is assigned the value 0 if the CEO is,VERIFIED (anchor found on page),C5
+P4-03,P4,2,3086,Sec.2.2.1,"DUAL = 0 if concurrent, 1 if separate",assigned a value of 0 if the CEO is concurrent and 1 if,VERIFIED (anchor found on page),C5
+P4-04,P4,3,3087,Sec.2.2.2,Expected earnings unavailable in Vietnam,expected earnings are not available in the Vietnamese,VERIFIED (anchor found on page),G2
+P4-05,P4,5,3089,Table 2,"COE mean .38, SD .545, min -.811, max 1.308",COE 440 .38 .545 -.811 1.308,VERIFIED (anchor found on page),G2; audit
+P4-06,P4,7,3091,Table 5,"F test u_i=0: F(12,269)","F (12,269) = 5.67",VERIFIED (anchor found on page),audit
+P4-07,P4,8,3092,Sec.3.2.4,Hausman p = 0.0211,0.0211,VERIFIED (anchor found on page),inventory
+P4-08,P4,9,3093,Table 8,DUAL .215 (p=.077); N=341,.215 .119 1.80 .077,VERIFIED (anchor found on page),C5
+P4-09,P4,9,3093,Table 8,GROWTH CI excludes coefficient,.294 .125 2.34 .023 .542 .546,VERIFIED (anchor found on page),audit
+P4-10,P4,9,3093,Sec.3.2.5,Interprets positive DUAL as duality raising COE,CEO duality has a positive relationship with COE,VERIFIED (anchor found on page),C5
+P4-11,P4,9,3093,Sec.3.2.5,Stewardship ('management theory') as competing view,contrary to management theory,VERIFIED (anchor found on page),comparison 4.1
+P4-12,P4,10,3094,Sec.3.2.5,Text claims average board size 7,is 7 people,VERIFIED (anchor found on page),audit
+P5-01,P5,2,87,Introduction,Circular 155 mandated E&S disclosure,155/2015/TT-BTC guiding the listed companies,VERIFIED (anchor found on page),G1
+P5-02,P5,4,89,Sec.1,Explanations for positive disclosure-COE relation,three reasons can justify such an effect,VERIFIED (anchor found on page),G4; G7
+P5-03,P5,4,89,Sec.1,Effect varies by voluntary vs compulsory disclosure,the type of information disclosure (voluntary or,VERIFIED (anchor found on page),G6
+P5-04,P5,5,90,Sec.2.1,Only 48 firms had usable reports in 2014,were 48 companies in 2014,VERIFIED (anchor found on page),Idea 1 risk
+P5-05,P5,6,91,Sec.2.2.2,COE = forecast EPS(t+1) / price,predictive EPS (earnings per,VERIFIED (anchor found on page),G2
+P5-06,P5,6,91,Sec.2.2.2,Price measured after report publication,price of the company i after the date publishing,VERIFIED (anchor found on page),G2
+P5-07,P5,6,91,Sec.2.2.3.4,Xu et al. (2014): SOE CSR effect on COE inferior,Xu et al. (2014) argued that state-owned,VERIFIED (anchor found on page),C3; G9
+P5-08,P5,7,92,Table 4,"COE mean 135.46, min -414.1",135.4621,VERIFIED (anchor found on page),G2; audit
+P5-09,P5,8,93,Sec.3.1,38 firms disclosed in 2014; 115 in 2017,38 companies had environmental disclosure,VERIFIED (anchor found on page),G1
+P5-10,P5,8,93,Table 6,REM CED -62.49 (t=-1.66); FEM -45.17 (t=-1.16),62.48579,VERIFIED (anchor found on page),C2; audit
+P5-11,P5,8,93,Sec.3.3,Text says REM shows positive relation,model shows a positive and statistically significant,VERIFIED (anchor found on page),audit
+P5-12,P5,9,94,Table 7,XTSCC FEM CED t = -6.93,(–6.93),VERIFIED (anchor found on page),C2
+P5-13,P5,9,94,Table 7,SOE +43.31***,43.31329***,VERIFIED (anchor found on page),C3
+P5-14,P5,10,95,Conclusion,Limitation: small sample,"First, the sample size is small",VERIFIED (anchor found on page),limitations A
+P5-15,P5,10,95,Conclusion,Future: Circular-155-based index,environmental disclosure index based on Circular 155,VERIFIED (anchor found on page),G1
+P6-01,P6,1,1384,Abstract,Abstract: state ownership STRENGTHENS the negative CSR-COE effect,state ownership strengthens the negative impact of CSR disclosure on COE,VERIFIED (anchor found on page),C3; C10; audit
+P6-02,P6,1,1384,Abstract,Sample of 225 listed Vietnamese firms,research sample comprises 225 listed firms in Vietnam,VERIFIED (anchor found on page),inventory
+P6-03,P6,2,1385,Sec.1,Circular 155/2015 named as the key CSR regulation,Ministry of Finance Circular 155/2015,VERIFIED (anchor found on page),G1; Idea 1
+P6-04,P6,3,1386,Sec.2.3,H3 states moderation direction (stronger with more state ownership),State ownership moderates the relationship between,VERIFIED (anchor found on page),C10
+P6-05,P6,4,1387,Sec.2.3,H3 wording: negative relation stronger when state holds more,their negative relationship is stronger when the state holds,VERIFIED (anchor found on page),C10; audit
+P6-06,P6,4,1387,Sec.3.1,"225 firms with CSR disclosure data from 2014 (1,340 obs)",225 firms that have CSR disclosure information between 2014,VERIFIED (anchor found on page),G1 feasibility
+P6-07,P6,4,1387,Sec.3.2.1,Implied COE via Easton (2004),we apply the Easton (2004) to estimate implied cost of,VERIFIED (anchor found on page),G2
+P6-08,P6,4,1387,Sec.3.2.1,Refinitiv reports 1-2-year earnings forecasts for Vietnamese firms,normally reports 1- and 2-year ahead forecasts of earnings,VERIFIED (anchor found on page),C12; G2
+P6-09,P6,5,1388,Sec.3.2.3,CSRD = 33 GRI-2016 criteria,"33 criteria, including 6 economic criteria",VERIFIED (anchor found on page),inventory
+P6-10,P6,5,1388,Sec.3.2.2,Crash risk measured by DUVOL,metric to gauge the risk of a stock price crash,VERIFIED (anchor found on page),G3
+P6-11,P6,6,1389,Sec.3.3,GMM used to address endogeneity,regression analysis to address this issue,VERIFIED (anchor found on page),comparison 4.4
+P6-12,P6,7,1390,Table 2,"CSRD -0.065*** on implied COE (t=-5.27), N=816, 100 instruments",,"VISUAL (image table, checked on rendered page)",C1; findings
+P6-13,P6,7,1390,Table 2,100 instruments in the main GMM model,No. of instrument 100,VERIFIED (anchor found on page),audit
+P6-14,P6,8,1391,Table 3,CSRD -> CRASH -0.204***; CRASH -> COE +0.142***; direct -0.067*** with mediator,,"VISUAL (image table, checked on rendered page)",C11; G3
+P6-15,P6,8,1391,Table 4,Sobel: indirect/total = 0.006/0.033 = 0.185,(Indirect effect/total effect) (0.006/0.033) = 0.185,VERIFIED (anchor found on page),C11
+P6-16,P6,9,1392,Table 5,INTERACTION +0.000*** (t=3.20); CSRD -0.057***; SOE -0.000***,INTERACTION 0.000***,VERIFIED (anchor found on page),C3; C10
+P6-17,P6,9,1392,Sec.5.1,Conclusion: state ownership 'attenuates' the effect,and state ownership mediate and attenuate the impact of CSR disclo,VERIFIED (anchor found on page),C10; audit
+P6-18,P6,9,1392,Sec.5,Conclusion: 'mixed moderating role',ship plays a mixed moderating role,VERIFIED (anchor found on page),C10
+P6-19,P6,10,1393,Sec.5.3,"Limitation: one developing market, non-financial firms",The use of a sample of non-financial listed companies from a developing,VERIFIED (anchor found on page),limitations A
+P6-20,P6,10,1393,Sec.5.3,Future: SOEs in high-polluting industries,using a sample of state-owned firms in high-polluting industries,VERIFIED (anchor found on page),G4; Idea 4
+P6-21,P6,10,1393,Sec.5.2,CSR not yet fully mandated in Vietnam,not yet mandated full implementation of CSR activities,VERIFIED (anchor found on page),G6; Idea 2
+P7-01,P7,1,64,Abstract,Botosan score + residual-income implied COE,We use the Botosan (1997) scoring methodology and the residual income valuation model,VERIFIED (anchor found on page),inventory
+P7-02,P7,2,65,Sec.2,Estimation-risk channel theorised,Estimation risk: Barry and Brown (1985),VERIFIED (anchor found on page),G3
+P7-03,P7,3,66,Sec.3.2,CAPM cannot test a disclosure effect,"if the model’s factors contain no information risk, there’s no reason to link expected returns",VERIFIED (anchor found on page),G2; C6
+P7-04,P7,3,66,Sec.3.2,Analyst forecasts unavailable in Vietnam (2017),systematic service of providing earnings forecasts by financial analysts is still unavailable in Vietnam,VERIFIED (anchor found on page),C12
+P7-05,P7,4,67,Sec.4,Cross-sectional design,we use cross-section data to analyze the impact of,VERIFIED (anchor found on page),limitations B
+P7-06,P7,4,67,Sec.4,Final sample 225 firms,The final sample consists of 225 firms,VERIFIED (anchor found on page),inventory
+P7-07,P7,4,67,Table 1,"Implied COE mean 14.84%, range 5.12-45.00",IMPLIED (%) 225 14.84 6.05 5.12 45.00,VERIFIED (anchor found on page),G2
+P7-08,P7,5,68,Table 2,Beta-implied COE correlation -0.0266,Beta -0.0266 -0.0091 1,VERIFIED (anchor found on page),G2; C6
+P7-09,P7,5,68,Table 3,DSCORE -0.0016*** (t=-4.33),DSCORE -0.0016*** -4.33 0.000,VERIFIED (anchor found on page),C1; findings
+P7-10,P7,5,68,Table 3,Beta insignificant for implied COE,Beta -0.0045 -0.42 0.672,VERIFIED (anchor found on page),G2; C6
+P7-11,P7,6,69,Table 4,Rank regression confirms,rankDSCORE -0.2641***,VERIFIED (anchor found on page),robustness
+P7-12,P7,6,69,Sec.5.2,Positive size effect attributed to mispricing,phenomenon of mispricing that is relatively,VERIFIED (anchor found on page),C6
+P8-01,P8,2,n/a,Abstract,43 attributes in 7 equally weighted sub-indices,"comprises seven equally weighted sub-indices, comprising a total of 43",VERIFIED (anchor found on page),inventory
+P8-02,P8,2,n/a,Abstract,Claims a causal relationship,The causal relationship tested using this method is the ﬁrst one done in India,VERIFIED (anchor found on page),audit
+P8-03,P8,7,n/a,Hypothesis,H1: governance lowers COE,H1. Corporate governance has a negative impact on the cost of equity.,VERIFIED (anchor found on page),inventory
+P8-04,P8,8,n/a,Sample,Missing data interpolated or extrapolated,"For the missing data, we have interpolated or extrapolated them",VERIFIED (anchor found on page),audit
+P8-05,P8,9,n/a,Index,Items scored 1 only if above the mandatory level,if they are above that,VERIFIED (anchor found on page),G6; G13; Idea 2
+P8-06,P8,11,n/a,Model,COE regression on CGI,COE% ¼ a þ b 1 CGI,VERIFIED (anchor found on page),inventory
+P8-07,P8,11,n/a,Results,Only market-to-book significant among controls,of which only market,VERIFIED (anchor found on page),inventory
+P8-08,P8,15,n/a,Table III,CGI -0.089 (p=0.021); board comp. -0.068; audit -0.061; ownership -0.130,,"VISUAL (image table, checked on rendered page)",C8; C9
+P8-09,P8,15,n/a,Table III,CGI p-value 0.021,0.089 (0.021),VERIFIED (anchor found on page),C8
+P8-10,P8,15,n/a,Table III,Ownership structure p=0.049,0.130 (0.049),VERIFIED (anchor found on page),audit
+P8-11,P8,15,n/a,Robustness,Hausman p=0.0695,"Chi2 = 15.87, Prob> Chi2 = 0.0695",VERIFIED (anchor found on page),inventory
+P8-12,P8,16,n/a,Discussion,Text credits fixed-effects models,Using panel data and the ﬁxed effects regression models justiﬁes,VERIFIED (anchor found on page),audit
+P8-13,P8,18,n/a,Implications,Future research: other valuation measures,paves the way to analyze the relationship between various other,VERIFIED (anchor found on page),limitations A
+P9-01,P9,1,139,Abstract,CAPM-based expected cost of equity,expected cost of equity calculated using the capital asset,VERIFIED (anchor found on page),inventory
+P9-02,P9,1,139,Abstract,Results attributed to post-Code 'transition phase',transition phase through which Pakistani,VERIFIED (anchor found on page),G14
+P9-03,P9,6,144,Sec.2.2,Klapper & Love: governance valued more where protection is poor,firms with relatively good,VERIFIED (anchor found on page),G7; G15
+P9-04,P9,8,146,Sec.2.4,Chen et al. (2004): disclosure effect only where investors protected,this effect is observed only in countries that protect investors,VERIFIED (anchor found on page),G7
+P9-05,P9,8,146,Sec.2.4,Chen et al. (2004): governance effect only where protection is poor,significant only in countries that provide relatively,VERIFIED (anchor found on page),G7
+P9-06,P9,9,147,Sec.3.1,114 KSE firms,The sample comprised 114 listed companies,VERIFIED (anchor found on page),inventory
+P9-07,P9,11,149,Sec.3.4,Beta from 2 years of monthly returns,Beta (β) has been calculated on the basis of 2 years’ monthly returns,VERIFIED (anchor found on page),inventory
+P9-08,P9,11,149,Table 2,Descriptive rows swapped (Maximum -0.93),Maximum -0.93,VERIFIED (anchor found on page),audit
+P9-09,P9,13,151,Table 4,OLS R-squared 0.034,R Square 0.033687901,VERIFIED (anchor found on page),inventory
+P9-10,P9,17,155,Table 6,Board size -0.017 (p=0.088),BS -0.017244 0.010096 -1.708038 0.0882,VERIFIED (anchor found on page),findings
+P9-11,P9,17,155,Table 6,2007 year dummy -0.287,D18 -0.287148,VERIFIED (anchor found on page),G8; limitations E
+P9-12,P9,20,158,Table 9,CGS +0.0018 (p=0.913),CGS 0.001754 0.016120 0.108786 0.9134,VERIFIED (anchor found on page),C8
+P9-13,P9,22,160,Table 10,CGS +0.0028 (p=0.855),CGS 0.002789 0.015236 0.183075 0.8548,VERIFIED (anchor found on page),C8
+P9-14,P9,23,161,Sec.5,Independence labels uninformative in Pakistan,Pakistani companies thus invariably,VERIFIED (anchor found on page),C9; G13
+P9-15,P9,23,161,Sec.5,Self-contradictory managerial-ownership interpretation,higher number of shares (as a percentage of the,VERIFIED (anchor found on page),audit
+P9-16,P9,25,163,Conclusion,Concludes governance reduces COE (unsupported),We conclude that good corporate governance reduces a company’s,VERIFIED (anchor found on page),audit
+P9-17,P9,25,163,Conclusion,Future: other Ke models,calculating Ke using other available models,VERIFIED (anchor found on page),limitations A

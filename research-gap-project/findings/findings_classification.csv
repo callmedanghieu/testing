@@ -1,0 +1,48 @@
+relationship,paper,direction,preferred_model_result,source,note,batch
+Disclosure->COE,P1,Negative,GLS -6.012*** (FE not reported),"Table 8, PDF p.11 / p.69",Diagnostics contradict text (Table 7),1
+Disclosure->COE,P2,Negative,FE -0.138* ; GLS -0.070**,"Table 3, PDF p.11 / p.1266",Holds within firm,1
+Disclosure->COE,P3,Positive (claimed),FE +4.79 p=0.452 (n.s.); OLS +10.98***; RE +10.23**,"Table 3, PDF p.6 / p.143",Sign not supported by Hausman-preferred FE,1
+Disclosure->COE,P5,Negative,FE -45.17 t=-1.16 (n.s.); XTSCC t=-6.93***,"Tables 6-7, PDF p.8-9 / p.93-94",Significance from Driscoll-Kraay SE with T=4,1
+Disclosure->COD,P2,Negative,GLS -0.029* ; FE -0.025*,"Table 4, PDF p.12 / p.1267",FE and RE columns identical,1
+Disclosure->WACC,P2,Negative (GLS) / Insignificant (FE),GLS -0.033*** ; FE -0.038 n.s.,"Table 5, PDF p.13 / p.1268",,1
+Env disclosure->COE,P2,Negative,GLS -0.090***,"Table 6, PDF p.15 / p.1270",,1
+Env disclosure->COE,P5,Negative (fragile),see above,"Table 7, PDF p.9 / p.94",Environmental index only,1
+Social disclosure->COE,P2,Insignificant,GLS -0.030,"Table 6, PDF p.15 / p.1270",,1
+Social disclosure->COD,P2,Negative,GLS -0.009*,"Table 6, PDF p.15 / p.1270",,1
+Economic disclosure->CoC,P2,Insignificant,all n.s.,"Table 6, PDF p.15 / p.1270",,1
+State ownership->COE,P2,Negative,GLS GOV -0.014*,"Table 3, PDF p.11 / p.1266",Control variable,1
+State ownership->COE,P5,Positive,XTSCC SOE +43.31***,"Table 7, PDF p.9 / p.94",Control variable,1
+Foreign ownership->COE,P5,Positive,XTSCC FOR +116.84***,"Table 7, PDF p.9 / p.94",Control variable,1
+Board size->COE,P3,Positive (OLS) / Insignificant (FE),OLS +0.56 p=0.058; FE n.s.,"Table 3, PDF p.6 / p.143",Control variable,1
+Board size->COE,P4,Negative,FE-cluster -0.064 p=0.065,"Table 8, PDF p.9 / p.3093",,1
+Board independence->COE,P4,Insignificant,+0.114 p=0.621,"Table 8, PDF p.9 / p.3093",,1
+CEO duality->COE,P4,Uninterpretable,+0.215 p=0.077 (DUAL=1 means separate),"Table 8 + PDF p.2 / p.3086",Coding contradicts interpretation,1
+Remuneration/nomination committee->COE,P4,Negative,-0.455 p=0.083,"Table 8, PDF p.9 / p.3093",,1
+Big4 auditor->COE,P3,Negative (OLS/RE) / Insignificant (FE),OLS -1.50**; FE n.s.,"Table 3, PDF p.6 / p.143",Control variable,1
+Leverage->COE,P1,Positive,GLS +0.795***,"Table 8, PDF p.11 / p.69",,1
+Leverage->COE,P3,Negative,FE -1.217***,"Table 3, PDF p.6 / p.143",Contradicts levered-beta theory,1
+Leverage->COE,P4,Positive,+1.126**,"Table 8, PDF p.9 / p.3093",,1
+Leverage->COE,P5,Positive,XTSCC +562.17***,"Table 7, PDF p.9 / p.94",,1
+ROA->COE,P4,Positive,+2.27***,"Table 8, PDF p.9 / p.3093",Theoretically anomalous,1
+Disclosure->COE,P6,Negative,GMM CSRD -0.065*** (t=-5.27) implied COE,"Table 2, PDF p.7 / p.1390",Signs verified on rendered page,2
+Disclosure->COE,P7,Negative,OLS DSCORE -0.0016*** (t=-4.33) implied COE,"Table 3, PDF p.5 / p.68",General (not CSR) disclosure; cross-section,2
+CSR disclosure->crash risk,P6,Negative,GMM -0.204***,"Table 3, PDF p.8 / p.1391",Mediator path a,2
+Crash risk->COE,P6,Positive,GMM +0.142*** / +0.125***,"Table 3, PDF p.8 / p.1391",Mediator path b,2
+Mediation (CSRD->CRASH->COE),P6,Partial (complementary),Sobel indirect -0.006 p=0.029; 18.5% of total,"Table 4, PDF p.8 / p.1391",Arithmetic inconsistent with Table 3,2
+State ownership->COE,P6,Negative,GMM SOE -0.000***,"Table 5, PDF p.9 / p.1392",Magnitude unreported (rounded),2
+State ownership x CSRD->COE,P6,Attenuating (per table),INTERACTION +0.000*** (t=3.20),"Table 5, PDF p.9 / p.1392",Abstract claims strengthening,2
+Composite governance->COE,P8,Negative,Pooled OLS CGI -0.089 (p=0.021),"Table III, PDF p.15",COE measure undefined,2
+Board composition->COE,P8,Negative,-0.068 (p=0.036),"Table III, PDF p.15",Sub-index,2
+Audit committee->COE,P8,Negative,-0.061 (p=0.035),"Table III, PDF p.15",Sub-index,2
+Ownership structure->COE,P8,Negative,-0.130 (p=0.049),"Table III, PDF p.15",Not mentioned in text,2
+Size->COE,P8,Positive (10%),+0.082 (p=0.067),"Table III, PDF p.15",Control,2
+Composite governance->COE,P9,Positive (n.s.),CGS +0.0028 (p=0.855) ind+year dummies,"Table 10, PDF p.22 / p.160",Conclusion claims negative effect,2
+Board size->COE,P9,Negative (10%),-0.017 (p=0.088),"Table 6, PDF p.17 / p.155",,2
+Board independence->COE,P9,Positive (n.s.),+0.001 (p=0.939),"Table 6, PDF p.17 / p.155",INED labels uninformative (p.161),2
+Audit committee independence->COE,P9,Positive (n.s.),+0.0005 (p=0.817),"Table 6, PDF p.17 / p.155",,2
+Managerial ownership->COE,P9,Negative (n.s.),-0.020 (p=0.171),"Table 6, PDF p.17 / p.155",Abstract reports a negative relationship (insignificant in all tables),2
+Size->COE,P9,Negative,-0.0078 (p=0.018),"Table 6, PDF p.17 / p.155",CAPM COE,2
+Size->COE,P6,Positive,+0.013***,"Table 2, PDF p.7 / p.1390",Implied COE,2
+Size->COE,P7,Positive,LnMCAP +0.0067**,"Table 3, PDF p.5 / p.68",Implied COE; attributed to mispricing,2
+ROA->COE,P6,Positive,+0.084***,"Table 2, PDF p.7 / p.1390",,2
+Beta->implied COE,P7,Insignificant,-0.0045 (p=0.672),"Table 3, PDF p.5 / p.68",CAPM beta does not explain implied COE,2
